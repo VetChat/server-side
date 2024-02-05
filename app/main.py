@@ -44,7 +44,7 @@ async def shutdown():
         print("MySQL database connection is closed.")
 
 
-@app.get("/items", response_model=List[Dict[str, str]])
+@app.get("/items")
 async def read_items():
     if cursor:
         cursor.execute("SELECT * FROM items")
