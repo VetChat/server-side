@@ -1,0 +1,31 @@
+# docker-compose.yml
+version: '3.8'
+services:
+  web:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --reload --port 8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=mysql://vetchat:ske18@db/vetchat
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: vetchat
+      MYSQL_USER: vetchat
+      MYSQL_PASSWORD: ske18
+      MYSQL_ROOT_PASSWORD: ske18
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./mysql:/docker-entrypoint-initdb.d
+
+volumes:
+  db-data:
