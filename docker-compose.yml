@@ -21,14 +21,14 @@ services:
       MYSQL_DATABASE: vetchat
       MYSQL_USER: vetchat
       MYSQL_PASSWORD: ske18
-      MYSQL_ROOT_PASSWORD: ske18
+      MYSQL_ROOT_PASSWORD: rootSke18
     ports:
       - "3306:3306"
     volumes:
       - db-data:/var/lib/mysql
       - ./mysql:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" , "-uroot", "-pske18" ]
       interval: 10s
       timeout: 5s
       retries: 5
