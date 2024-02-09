@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS ticket
     sterilize        ENUM ('sterile', 'non-sterile'),
     breed            VARCHAR(255) NOT NULL,
     birth_when       DATETIME     NOT NULL,
-    rec_created_when DATETIME     NOT NULL DEFAULT CURRENT_DATE(),
+    rec_created_when DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (ticket_id),
     CONSTRAINT FK_TicketAnimal FOREIGN KEY (animal_id) REFERENCES animal (animal_id)
 );
@@ -16,5 +16,5 @@ CREATE TABLE IF NOT EXISTS ticket
 INSERT INTO ticket
 VALUES (1, 1, 'male', 'sterile', 'Husky', '2012-03-07 00:00:00', '2024-02-06 15:35:44'),
        (2, 1, 'male', 'sterile', 'Bull dog', '2024-11-24 00:00:00', '2024-02-07 08:12:35'),
-       (3, 1, 'female', 'non-sterile', 'Shiba', '2019-05-15 00:00:00', '2024-02-09 15:53:69');
+       (3, 1, 'female', 'non-sterile', 'Shiba', '2019-05-15 00:00:00', '2024-02-09 15:53:59');
 

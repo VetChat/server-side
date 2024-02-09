@@ -47,7 +47,7 @@ async def shutdown():
 @app.get("/items")
 async def read_items():
     if cursor:
-        cursor.execute("SELECT * FROM items")
+        cursor.execute("SELECT * FROM animal")
         items = cursor.fetchall()
         return items
     else:
