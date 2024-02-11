@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS symptom
 (
     symptom_id   INT          NOT NULL AUTO_INCREMENT,
     symptom_name varchar(255) NOT NULL,
-    PRIMARY KEY (symptom_id)
+    PRIMARY KEY (symptom_id),
+    CONSTRAINT UC_Symptom UNIQUE (symptom_name)
 );
 
 -- Insert mock data into the symptom table
