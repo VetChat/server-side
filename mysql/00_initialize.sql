@@ -10,3 +10,5 @@ SOURCE docker-entrypoint-initdb.d/04_question.sql;
 SOURCE docker-entrypoint-initdb.d/05_answer.sql;
 SOURCE docker-entrypoint-initdb.d/06_ticket.sql;
 SOURCE docker-entrypoint-initdb.d/07_response.sql;
+SOURCE docker-entrypoint-initdb.d/08_urgency.sql;
+SOURCE docker-entrypoint-initdb.d/09_urgent_case.sql;
