@@ -12,7 +12,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      - DATABASE_URL=mysql://vetchat:ske18@db/vetchat
+      - DATABASE_URL=mysql+mysqlconnector://vetchat:ske18@db/vetchat
 
   db:
     image: mysql:5.7
@@ -28,7 +28,7 @@ services:
       - db-data:/var/lib/mysql
       - ./mysql:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" , "-uroot", "-pske18" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" , "-uroot", "-prootSke18" ]
       interval: 10s
       timeout: 5s
       retries: 5
