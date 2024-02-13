@@ -16,7 +16,7 @@ def get_all_urgent_cases(db: Session = Depends(get_db)):
 
 
 @router.get("/urgent_cases/animal/{animal_id}", response_model=List[UrgentCaseResponse])
-def get_urgent_cases_by_animal(animal_id: int, db: Session = Depends(get_db)):
+def get_urgent_cases_by_animal_id(animal_id: int, db: Session = Depends(get_db)):
     animal_crud = AnimalCRUD(db)
     animal = animal_crud.fetch_animal_by_id(animal_id)
     if not animal:
