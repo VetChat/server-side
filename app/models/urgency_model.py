@@ -9,6 +9,7 @@ class Urgency(Base):
     urgency_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     urgency_detail = Column(String(255), nullable=False, unique=True)
     duration = Column(String(255), nullable=False, unique=True)
+    urgency_level = Column(Integer, nullable=False, unique=True)
 
     # Relationship to UrgentCase
     urgent_cases = relationship("UrgentCase", back_populates="urgency")

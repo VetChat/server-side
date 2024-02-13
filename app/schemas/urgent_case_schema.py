@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class UrgentRead(BaseModel):
+class UrgentCaseRead(BaseModel):
     urgent_id: int
     urgent_name: str
     urgency_detail: str
@@ -9,3 +9,9 @@ class UrgentRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UrgentCaseResponse(BaseModel):
+    urgent_id: int
+    urgent_name: str
+    urgency_id: int
