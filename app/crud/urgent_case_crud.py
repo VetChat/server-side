@@ -14,7 +14,7 @@ class UrgentCaseCRUD:
 
     def fetch_urgent_case_by_animal_id(self, animal_id: int):
         return (
-            self.db.query(UrgentCase.urgent_id, UrgentCase.urgent_name, UrgentCase.urgency_id, Urgency.urgency_level)
+            self.db.query(UrgentCase.urgent_id, UrgentCase.urgent_name, UrgentCase.urgency_id)
             .join(Urgency, UrgentCase.urgency_id == Urgency.urgency_id)
             .filter(UrgentCase.animal_id == animal_id)
             .order_by(Urgency.urgency_level)

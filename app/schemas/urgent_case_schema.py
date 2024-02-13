@@ -15,4 +15,3 @@ class UrgentCaseResponse(BaseModel):
     urgent_id: int
     urgent_name: str
     urgency_id: int
-    urgency_level: int
