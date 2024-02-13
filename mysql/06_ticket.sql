@@ -1,7 +1,7 @@
 -- CREATE the ticket table
 CREATE TABLE IF NOT EXISTS ticket
 (
-    ticket_id        INT          NOT NULL,
+    ticket_id        INT          NOT NULL AUTO_INCREMENT,
     animal_id        INT          NOT NULL,
     sex              ENUM ('male', 'female'),
     sterilize        ENUM ('sterile', 'non-sterile'),
