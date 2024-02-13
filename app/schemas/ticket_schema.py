@@ -10,6 +10,10 @@ class TicketCreate(BaseModel):
     birth_when: date
 
 
+class TicketId(BaseModel):
+    ticket_id: int
+
+
 class TicketResponse(BaseModel):
     symptom_id: int
     symptom_name: str
