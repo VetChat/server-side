@@ -9,14 +9,14 @@ class UrgentCRUD:
 
     def fetch_all_urgent_case(self):
         return (
-            self.db.query(UrgentCase)
+            self.db.query(UrgentCase.urgent_id, UrgentCase.urgent_name, Urgency.urgency_detail, Urgency.duration)
             .join(Urgency, UrgentCase.urgency_id == Urgency.urgency_id)
             .all()
         )
 
     def fetch_urgent_case_by_animal_id(self, animal_id: int):
         return (
-            self.db.query(UrgentCase)
+            self.db.query(UrgentCase.urgent_id, UrgentCase.urgent_name, Urgency.urgency_detail, Urgency.duration)
             .join(Urgency, UrgentCase.urgency_id == Urgency.urgency_id)
             .filter(UrgentCase.animal_id == animal_id)
             .all()
