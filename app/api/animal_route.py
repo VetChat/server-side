@@ -16,7 +16,7 @@ def fetch_animal(db: Session = Depends(get_db)) -> List[Type[Animal]]:
 
 
 @router.get("/animal/{animal_id}", response_model=AnimalRead)
-def fetch_animal_by_id(animal_id: int, db: Session = Depends(get_db)) -> Optional[Animal]:
+def fetch_animal_by_id(animal_id: int, db: Session = Depends(get_db)) -> AnimalRead:
     animal_crud = AnimalCRUD(db)
     animal = animal_crud.fetch_animal_by_id(animal_id)
     if animal is None:
