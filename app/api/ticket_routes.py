@@ -19,11 +19,19 @@ def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)) -> T
         raise HTTPException(status_code=500, detail="Failed to create a ticket")
 
     return TicketId(ticket_id=ticket.ticket_id)
-    # # Get list of symptoms by animal_id
-    # question_set_crud = QuestionSetCRUD(db)
-    # symptoms = question_set_crud.get_symptoms_by_animal_id(ticket_data.animal_id)
-    #
-    # if not symptoms:
-    #     raise HTTPException(status_code=404, detail="No symptoms found for the given animal ID")
-    #
-    # return symptoms
+
+
+@router.get("/tickets/{ticket_id}/symptoms", response_model=List[TicketResponse])
+def get_symptoms_by_ticket_id(ticket_id: int, db: Session = Depends(get_db)) -> List[TicketResponse]:
+    # Retrieve the ticket to get the animal_id
+    ticket_crud = TicketCRUD(db)
+    ticket = ticket_crud.get_ticket_by_id(ticket_id)
+
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    # Get list of symptoms by animal_id
+    question_set_crud = QuestionSetCRUD(db)
+    symptoms = question_set_crud.get_symptoms_by_animal_id(ticket.animal_id)
+
+    return symptoms

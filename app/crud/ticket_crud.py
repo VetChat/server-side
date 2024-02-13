@@ -13,3 +13,6 @@ class TicketCRUD:
         self.db.commit()
         self.db.refresh(new_ticket)
         return new_ticket
+
+    def get_ticket_by_id(self, ticket_id: int):
+        return self.db.query(Ticket).filter(Ticket.ticket_id == ticket_id).first()
