@@ -1,7 +1,7 @@
 # Dockerfile
 FROM python:3.9
 
-WORKDIR /app
+WORKDIR /anti-mage
 
 COPY requirements.txt .
 
