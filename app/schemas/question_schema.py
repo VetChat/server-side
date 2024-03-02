@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
+from .answer_schema import AnswerRead
 
 
 class QuestionResponse(BaseModel):
@@ -11,6 +12,7 @@ class QuestionResponse(BaseModel):
     pattern: str
     image_path: Optional[str] = None
     ordinal: int
+    list_answer: List[AnswerRead]
 
     class Config:
         from_attributes = True

@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..crud.question_crud import QuestionCRUD
-from ..schemas import QuestionSetRequest, QuestionResponse
+from ..schemas import QuestionSetRequest, QuestionResponse, AnswerRead
 
 router = APIRouter()
 
@@ -25,7 +25,15 @@ def get_questions_by_set_ids(request: QuestionSetRequest, db: Session = Depends(
             question=question.question,
             pattern=question.pattern,
             image_path=question.image_path,
-            ordinal=question.ordinal
+            ordinal=question.ordinal,
+            list_answer=[
+                AnswerRead(
+                    answer_id=answer.answer_id,
+                    answer=answer.answer,
+                    summary=answer.summary,
+                    skip_to_question_id=answer.skip_to_question_id
+                ) for answer in question.answers
+            ]
         )
         for question, symptom_id, symptom_name in questions_data
     ]

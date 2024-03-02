@@ -5,5 +5,6 @@ from .ticket_model import Ticket
 from .symptom_model import Symptom
 from .question_set_model import QuestionSet
 from .question_model import Question
+from .answer_model import Answer
 
-__all__ = ["Animal", "Urgency", "UrgentCase", "Ticket", "Symptom", "QuestionSet", "Question"]
+__all__ = ["Animal", "Urgency", "UrgentCase", "Ticket", "Symptom", "QuestionSet", "Question", "Answer"]

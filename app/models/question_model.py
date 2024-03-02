@@ -15,6 +15,8 @@ class Question(Base):
 
     # Relationship to QuestionSet
     question_set = relationship("QuestionSet", back_populates="questions")
+    # Relationship to Answer
+    answers = relationship("Answer", back_populates="question", order_by="Answer.answer_id")
 
     def __repr__(self):
         return f"<Question(question_id={self.question_id}, question_set_id={self.question_set_id}, " \
