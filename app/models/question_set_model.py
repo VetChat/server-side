@@ -14,5 +14,8 @@ class QuestionSet(Base):
     symptom = relationship("Symptom")
     animal = relationship("Animal")
 
+    # Relationship to Question
+    questions = relationship("Question", back_populates="question_set", order_by="Question.ordinal")
+
     def __repr__(self):
         return f"<QuestionSet(question_set_id={self.question_set_id}, symptom_id={self.symptom_id}, animal_id={self.animal_id})>"
