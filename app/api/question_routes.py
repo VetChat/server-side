@@ -8,7 +8,7 @@ from ..schemas import QuestionSetRequest, QuestionResponse
 router = APIRouter()
 
 
-@router.post("/questions/by_set_ids", response_model=List[QuestionResponse])
+@router.post("/questions/question_set_ids", response_model=List[QuestionResponse])
 def get_questions_by_set_ids(request: QuestionSetRequest, db: Session = Depends(get_db)) -> List[QuestionResponse]:
     question_crud = QuestionCRUD(db)
     questions_data = question_crud.get_questions_by_set_ids(request.question_set_ids)
