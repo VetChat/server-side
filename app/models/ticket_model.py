@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 from ..database.connection import Base
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Ticket(Base):
@@ -13,7 +13,8 @@ class Ticket(Base):
     sterilize = Column(Enum('sterile', 'non-sterile'), nullable=False)
     breed = Column(String(255), nullable=False)
     birth_when = Column(DateTime, nullable=False)
-    rec_created_when = Column(DateTime, default=datetime.utcnow, nullable=False)
+    rec_created_when = Column(DateTime, default=datetime.now(tz=timezone.utc), nullable=False)
+    is_answered = Column(Integer, default=0, nullable=False)
 
     # Relationship to Animal (assuming you have an Animal model defined)
     animal = relationship("Animal")
