@@ -8,7 +8,7 @@ for route in routers:
     app.include_router(route)
 
 origins = [
-    "http://localhost:3000",  # Local frontend development server
+    "http://localhost:5173",  # Local frontend development server
     "https://example.com",  # Production frontend
 ]
 

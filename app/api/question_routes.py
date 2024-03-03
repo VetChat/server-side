@@ -2,16 +2,17 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..crud.question_crud import QuestionCRUD
+from ..crud import QuestionCRUD
 from ..schemas import QuestionSetRequest, QuestionResponse, AnswerRead
 
 router = APIRouter()
 
 
 @router.post("/questions/question_set_ids", response_model=List[QuestionResponse])
-def get_questions_by_set_ids(request: QuestionSetRequest, db: Session = Depends(get_db)) -> List[QuestionResponse]:
+def get_questions_by_set_ids(request: List[QuestionSetRequest], db: Session = Depends(get_db)) \
+        -> List[QuestionResponse]:
     question_crud = QuestionCRUD(db)
-    questions_data = question_crud.get_questions_by_set_ids(request.question_set_ids)
+    questions_data = question_crud.fetch_questions_by_set_ids([rq.questionSetId for rq in request])
 
     if not questions_data:
         raise HTTPException(status_code=404, detail="No questions found for the provided question set IDs")
@@ -19,19 +20,19 @@ def get_questions_by_set_ids(request: QuestionSetRequest, db: Session = Depends(
     # Transform the data into the desired response format
     questions_response = [
         QuestionResponse(
-            symptom_id=symptom_id,
-            symptom_name=symptom_name,
-            question_id=question.question_id,
+            symptomId=symptom_id,
+            symptomName=symptom_name,
+            questionId=question.question_id,
             question=question.question,
             pattern=question.pattern,
-            image_path=question.image_path,
+            imagePath=question.image_path,
             ordinal=question.ordinal,
-            list_answer=[
+            listAnswer=[
                 AnswerRead(
-                    answer_id=answer.answer_id,
+                    answerId=answer.answer_id,
                     answer=answer.answer,
                     summary=answer.summary,
-                    skip_to_question_id=answer.skip_to_question_id
+                    skipToQuestion=answer.skip_to_question
                 ) for answer in question.answers
             ]
         )

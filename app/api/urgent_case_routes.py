@@ -12,7 +12,15 @@ router = APIRouter()
 def get_all_urgent_cases(db: Session = Depends(get_db)):
     urgent_crud = UrgentCaseCRUD(db)
     urgent_cases = urgent_crud.fetch_all_urgent_case()
-    return urgent_cases
+    urgent_cases_response = [
+        UrgentCaseResponse(
+            urgentId=urgent.urgent_id,
+            urgentName=urgent.urgent_name,
+            urgencyId=urgent.urgency_id
+        )
+        for urgent in urgent_cases
+    ]
+    return urgent_cases_response
 
 
 @router.get("/urgent_cases/animal/{animal_id}", response_model=List[UrgentCaseResponse])
@@ -24,4 +32,12 @@ def get_urgent_cases_by_animal_id(animal_id: int, db: Session = Depends(get_db))
 
     urgent_crud = UrgentCaseCRUD(db)
     urgent_cases = urgent_crud.fetch_urgent_case_by_animal_id(animal_id)
-    return urgent_cases
+    urgent_cases_response = [
+        UrgentCaseResponse(
+            urgentId=urgent.urgent_id,
+            urgentName=urgent.urgent_name,
+            urgencyId=urgent.urgency_id
+        )
+        for urgent in urgent_cases
+    ]
+    return urgent_cases_response

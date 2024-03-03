@@ -8,7 +8,7 @@ class QuestionCRUD:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_questions_by_set_ids(self, question_set_ids: List[int]):
+    def fetch_questions_by_set_ids(self, question_set_ids: List[int]):
         return (
             self.db.query(Question, Symptom.symptom_id, Symptom.symptom_name)
             .join(Question.question_set)

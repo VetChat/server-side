@@ -3,18 +3,18 @@ from datetime import date
 
 
 class TicketCreate(BaseModel):
-    animal_id: int
+    animalId: int
     sex: str
     sterilize: str
     breed: str
-    birth_when: date
+    birthWhen: date
 
 
 class TicketId(BaseModel):
-    ticket_id: int
+    ticketId: int
 
 
 class TicketResponse(BaseModel):
-    symptom_id: int
-    symptom_name: str
-    question_set_id: int
+    symptomId: int
+    symptomName: str
+    questionSetId: int

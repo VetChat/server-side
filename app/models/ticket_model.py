@@ -18,6 +18,8 @@ class Ticket(Base):
 
     # Relationship to Animal (assuming you have an Animal model defined)
     animal = relationship("Animal")
+    # Relationship to AnswerRecord
+    answer_records = relationship("AnswerRecord", back_populates="ticket")
 
     def __repr__(self):
         return f"<Ticket(ticket_id={self.ticket_id}, animal_id={self.animal_id}, sex='{self.sex}', " \

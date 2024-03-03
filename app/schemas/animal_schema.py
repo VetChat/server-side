@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class AnimalRead(BaseModel):
-    animal_id: int
+    animalId: int
     name: str
 
     class Config:
