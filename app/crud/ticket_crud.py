@@ -8,7 +8,13 @@ class TicketCRUD:
 
     def create_ticket(self, ticket_data):
         # Create a new Ticket instance
-        new_ticket = Ticket(**ticket_data.dict())
+        new_ticket = Ticket(
+            animal_id=ticket_data.animalId,
+            sex=ticket_data.sex,
+            sterilize=ticket_data.sterilize,
+            breed=ticket_data.breed,
+            birth_when=ticket_data.birthWhen
+        )
         self.db.add(new_ticket)
         self.db.commit()
         self.db.refresh(new_ticket)

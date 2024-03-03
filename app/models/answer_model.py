@@ -10,7 +10,7 @@ class Answer(Base):
     question_id = Column(Integer, ForeignKey('question.question_id'), nullable=False)
     answer = Column(String(255), nullable=False)
     summary = Column(String(255))
-    skip_to_question_id = Column(Integer)
+    skip_to_question = Column(Integer)
 
     # Relationship to Question
     question = relationship("Question", back_populates="answers")

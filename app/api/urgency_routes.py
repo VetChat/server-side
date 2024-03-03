@@ -3,15 +3,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..crud import UrgencyCRUD
-from ..schemas import UrgencyResponse, UrgencyId
+from ..schemas import UrgencyResponse, UrgencyIdRequest
 
 router = APIRouter()
 
 
 @router.post("/urgency/most_urgent", response_model=UrgencyResponse)
-def get_most_urgent_case(urgent_cases: List[UrgencyId], db: Session = Depends(get_db)) -> UrgencyResponse:
+def get_most_urgent_case(urgent_cases: UrgencyIdRequest, db: Session = Depends(get_db)) -> UrgencyResponse:
     urgency_crud = UrgencyCRUD(db)
-    urgency_levels = urgency_crud.fetch_urgency_levels_by_ids([uc.urgencyId for uc in urgent_cases])
+    urgency_levels = urgency_crud.fetch_urgency_levels_by_ids(urgent_cases.urgencyId)
 
     if not urgency_levels:
         raise HTTPException(status_code=404, detail="No urgency records found for the provided IDs")

@@ -19,19 +19,19 @@ def get_questions_by_set_ids(request: QuestionSetRequest, db: Session = Depends(
     # Transform the data into the desired response format
     questions_response = [
         QuestionResponse(
-            symptom_id=symptom_id,
-            symptom_name=symptom_name,
-            question_id=question.question_id,
+            symptomId=symptom_id,
+            symptomName=symptom_name,
+            questionId=question.question_id,
             question=question.question,
             pattern=question.pattern,
-            image_path=question.image_path,
+            imagePath=question.image_path,
             ordinal=question.ordinal,
-            list_answer=[
+            listAnswer=[
                 AnswerRead(
-                    answer_id=answer.answer_id,
+                    answerId=answer.answer_id,
                     answer=answer.answer,
                     summary=answer.summary,
-                    skip_to_question_id=answer.skip_to_question_id
+                    skipToQuestion=answer.skip_to_question
                 ) for answer in question.answers
             ]
         )

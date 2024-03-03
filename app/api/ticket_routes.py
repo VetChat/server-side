@@ -32,6 +32,14 @@ def get_symptoms_by_ticket_id(ticket_id: int, db: Session = Depends(get_db)) -> 
 
     # Get list of symptoms by animal_id
     question_set_crud = QuestionSetCRUD(db)
-    symptoms = question_set_crud.fetch_symptoms_by_animal_id(ticket.animal_id)
+    symptoms_data = question_set_crud.fetch_symptoms_by_animal_id(ticket.animal_id)
+    symptoms_response: List[TicketResponse] = [
+        TicketResponse(
+            symptomId=symptoms.symptom_id,
+            symptomName=symptoms.symptom_name,
+            questionSetId=symptoms.question_set_id
+        )
+        for symptoms in symptoms_data
+    ]
 
-    return symptoms
+    return symptoms_response

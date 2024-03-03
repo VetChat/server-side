@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import BaseModel
 
 
@@ -16,5 +18,5 @@ class UrgencyResponse(BaseModel):
     duration: str
 
 
-class UrgencyId(BaseModel):
-    urgencyId: int
+class UrgencyIdRequest(BaseModel):
+    urgencyId: List[int]
