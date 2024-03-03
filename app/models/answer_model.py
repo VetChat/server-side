@@ -14,7 +14,9 @@ class Answer(Base):
 
     # Relationship to Question
     question = relationship("Question", back_populates="answers")
+    # Relationship to AnswerRecord
+    answer_records = relationship("AnswerRecord", back_populates="answers")
 
     def __repr__(self):
         return f"<Answer(answer_id={self.answer_id}, question_id={self.question_id}, " \
-               f"answer='{self.answer}', summary='{self.summary}', skip_to_question={self.skip_to_question})>"
+               f"answers='{self.answer}', summary='{self.summary}', skip_to_question={self.skip_to_question})>"

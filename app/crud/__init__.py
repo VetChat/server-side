@@ -4,5 +4,8 @@ from .urgency_crud import UrgencyCRUD
 from .ticket_crud import TicketCRUD
 from .question_set_crud import QuestionSetCRUD
 from .question_crud import QuestionCRUD
+from .answer_record_crud import AnswerRecordCRUD
+from .answer_crud import AnswerCRUD
 
-__all__ = ["AnimalCRUD", "UrgentCaseCRUD", "UrgencyCRUD", "TicketCRUD", "QuestionSetCRUD", "QuestionCRUD"]
+__all__ = ["AnimalCRUD", "UrgentCaseCRUD", "UrgencyCRUD", "TicketCRUD", "QuestionSetCRUD", "QuestionCRUD",
+           "AnswerRecordCRUD", "AnswerCRUD"]
