@@ -2,6 +2,10 @@ from pydantic import BaseModel
 from typing import List
 
 
+class AnswerRecordId(BaseModel):
+    answerId: int
+
+
 class AnswerRecordCreate(BaseModel):
     ticketId: int
-    answerIds: List[int]
+    listAnswer: List[AnswerRecordId]

@@ -15,7 +15,7 @@ def create_answer_records_and_return_summary(
     answer_record_crud = AnswerRecordCRUD(db)
     try:
         answer_record_crud.create_answer_records(
-            ticket_id=answer_record_data.ticketId, answer_ids=answer_record_data.answerIds
+            ticket_id=answer_record_data.ticketId, answer_ids=[ar.answerId for ar in answer_record_data.listAnswer]
         )
     except HTTPException as e:
         # If an error is raised, return the error response
