@@ -9,3 +9,8 @@ class AnswerRecordId(BaseModel):
 class AnswerRecordCreate(BaseModel):
     ticketId: int
     listAnswer: List[AnswerRecordId]
+
+
+class AnswerRecordResponse(BaseModel):
+    ticketId: int
+    message: str
