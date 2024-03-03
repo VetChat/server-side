@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 
 class AnswerSummary(BaseModel):
+    answerRecordId: int
     questionId: int
     question: str
     ordinal: int

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..crud import AnswerRecordCRUD
-from ..schemas import AnswerRecordCreate, TicketSummaryResponse
+from ..schemas import AnswerRecordCreate, TicketSummaryResponse, SymptomSummary, AnswerSummary
 
 router = APIRouter()
 
@@ -31,28 +31,30 @@ def create_answer_records_and_return_summary(
     # Transform the raw data into the desired summary format
     summary = []
     for answer_record in answer_records:
-        answer = answer_record.answers
-        question = answer.question
-        symptom = question.symptom
+        # Create an instance of AnswerSummary with the details from answer_record
+        list_answer = AnswerSummary(
+            answerRecordId=answer_record.answer_record_id,
+            questionId=answer_record.question_id,
+            question=answer_record.question,
+            ordinal=answer_record.ordinal,
+            answer_id=answer_record.answer_id,
+            answer=answer_record.answer,
+            summary=answer_record.summary
+        )
 
-        # Find or create the symptom summary
-        symptom_summary = next((s for s in summary if s['symptom_id'] == symptom.symptom_id), None)
+        # Find the existing symptom summary in the list or create a new one
+        symptom_summary = next((s for s in summary if s.symptomId == answer_record.symptom_id), None)
         if not symptom_summary:
-            symptom_summary = {
-                'symptom_id': symptom.symptom_id,
-                'symptom_name': symptom.symptom_name,
-                'list_answer': []
-            }
+            # If a symptom summary does not exist, create a new one
+            symptom_summary = SymptomSummary(
+                symptomId=answer_record.symptom_id,
+                symptomName=answer_record.symptom_name,
+                listAnswer=[]  # Initialize an empty list for listAnswer
+            )
+            # Append the new symptom summary to the main summary list
             summary.append(symptom_summary)
 
-        # Append the answer to the symptom summary
-        symptom_summary['list_answer'].append({
-            'question_id': question.question_id,
-            'question': question.question,
-            'ordinal': question.ordinal,
-            'answer_id': answer.answer_id,
-            'answer': answer.answer,
-            'summary': answer.summary
-        })
+        # Append the list_answer to the listAnswer list of the symptom_summary
+        symptom_summary.listAnswer.append(list_answer)
 
-    return TicketSummaryResponse(ticket_id=answer_record_data.ticketId, summary=summary)
+    return TicketSummaryResponse(ticketId=answer_record_data.ticketId, summary=summary)
