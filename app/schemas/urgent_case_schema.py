@@ -2,9 +2,9 @@ from pydantic import BaseModel
 
 
 class UrgentCaseRead(BaseModel):
-    urgent_id: int
-    urgent_name: str
-    urgency_detail: str
+    urgentId: int
+    urgentName: str
+    urgencyDetail: str
     duration: str
 
     class Config:
@@ -12,6 +12,6 @@ class UrgentCaseRead(BaseModel):
 
 
 class UrgentCaseResponse(BaseModel):
-    urgent_id: int
-    urgent_name: str
-    urgency_id: int
+    urgentId: int
+    urgentName: str
+    urgencyId: int

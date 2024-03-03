@@ -4,9 +4,9 @@ from pydantic import BaseModel
 
 
 class AnswerRead(BaseModel):
-    answer_id: int
+    answerId: int
     answer: str
-    skip_to_question: Optional[int] = None
+    skipToQuestion: Optional[int] = None
 
     class Config:
         from_attributes = True

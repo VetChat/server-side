@@ -11,7 +11,7 @@ router = APIRouter()
 @router.post("/questions/question_set_ids", response_model=List[QuestionResponse])
 def get_questions_by_set_ids(request: QuestionSetRequest, db: Session = Depends(get_db)) -> List[QuestionResponse]:
     question_crud = QuestionCRUD(db)
-    questions_data = question_crud.fetch_questions_by_set_ids(request.question_set_ids)
+    questions_data = question_crud.fetch_questions_by_set_ids(request.questionSetIds)
 
     if not questions_data:
         raise HTTPException(status_code=404, detail="No questions found for the provided question set IDs")

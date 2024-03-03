@@ -18,7 +18,7 @@ def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)) -> T
     if not ticket:
         raise HTTPException(status_code=500, detail="Failed to create a ticket")
 
-    return TicketId(ticket_id=ticket.ticket_id)
+    return TicketId(ticketId=ticket.ticket_id)
 
 
 @router.get("/tickets/{ticket_id}/symptoms", response_model=List[TicketResponse])

@@ -15,7 +15,7 @@ def create_answer_records_and_return_summary(
     answer_record_crud = AnswerRecordCRUD(db)
     try:
         answer_record_crud.create_answer_records(
-            ticket_id=answer_record_data.ticket_id, answer_ids=answer_record_data.answer_ids
+            ticket_id=answer_record_data.ticketId, answer_ids=answer_record_data.answerIds
         )
     except HTTPException as e:
         # If an error is raised, return the error response
@@ -23,7 +23,7 @@ def create_answer_records_and_return_summary(
 
     # Get the raw data of answers for the ticket
     answer_record_crud = AnswerRecordCRUD(db)
-    answer_records = answer_record_crud.fetch_summary_by_ticket_id(answer_record_data.ticket_id)
+    answer_records = answer_record_crud.fetch_summary_by_ticket_id(answer_record_data.ticketId)
 
     if not answer_records:
         raise HTTPException(status_code=404, detail="No answers found for the given ticket ID")
@@ -55,4 +55,4 @@ def create_answer_records_and_return_summary(
             'summary': answer.summary
         })
 
-    return TicketSummaryResponse(ticket_id=answer_record_data.ticket_id, summary=summary)
+    return TicketSummaryResponse(ticket_id=answer_record_data.ticketId, summary=summary)

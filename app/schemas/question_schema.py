@@ -5,14 +5,14 @@ from .answer_schema import AnswerRead
 
 
 class QuestionResponse(BaseModel):
-    symptom_id: int
-    symptom_name: str
-    question_id: int
+    symptomId: int
+    symptomName: str
+    questionId: int
     question: str
     pattern: str
-    image_path: Optional[str] = None
+    imagePath: Optional[str] = None
     ordinal: int
-    list_answer: List[AnswerRead]
+    listAnswer: List[AnswerRead]
 
     class Config:
         from_attributes = True

@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class AnswerSummary(BaseModel):
-    question_id: int
+    questionId: int
     question: str
     ordinal: int
     answer_id: int
@@ -13,11 +13,11 @@ class AnswerSummary(BaseModel):
 
 
 class SymptomSummary(BaseModel):
-    symptom_id: int
-    symptom_name: str
-    list_answer: List[AnswerSummary]
+    symptomId: int
+    symptomName: str
+    listAnswer: List[AnswerSummary]
 
 
 class TicketSummaryResponse(BaseModel):
-    ticket_id: int
+    ticketId: int
     summary: List[SymptomSummary]
