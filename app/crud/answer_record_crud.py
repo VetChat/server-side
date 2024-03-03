@@ -11,15 +11,11 @@ class AnswerRecordCRUD:
         self.db = db
 
     def create_answer_records(self, ticket_id: int, answer_ids: List[int]):
-        try:
-            # Create answer records
-            for answer_id in answer_ids:
-                answer_record = AnswerRecord(ticket_id=ticket_id, answer_id=answer_id)
-                self.db.add(answer_record)
-            self.db.commit()
-        except IntegrityError:
-            self.db.rollback()  # Roll back the transaction on error
-            raise HTTPException(status_code=400, detail="Invalid ticket ID or answer ID")
+        # Create answer records
+        for answer_id in answer_ids:
+            answer_record = AnswerRecord(ticket_id=ticket_id, answer_id=answer_id)
+            self.db.add(answer_record)
+        self.db.commit()
 
     def fetch_summary_by_ticket_id(self, ticket_id: int):
         # Retrieve the summary of answers for the ticket
