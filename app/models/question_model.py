@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, Enum, ForeignKey
 from sqlalchemy.orm import relationship
-from ..database.connection import Base
+from ..database import Base
 
 
 class Question(Base):
@@ -8,7 +8,7 @@ class Question(Base):
 
     question_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     question_set_id = Column(Integer, ForeignKey('question_set.question_set_id'), nullable=False)
-    question = Column(Text, nullable=False)
+    question = Column(String(255), nullable=False)
     pattern = Column(Enum('choice', 'yes/no', 'duration'), nullable=False)
     image_path = Column(String(255))
     ordinal = Column(Integer, nullable=False)

@@ -2,11 +2,11 @@
 CREATE TABLE IF NOT EXISTS question
 (
     question_id     INT AUTO_INCREMENT,
-    question_set_id INT  NOT NULL,
-    question        TEXT NOT NULL,
+    question_set_id INT          NOT NULL,
+    question        VARCHAR(255) NOT NULL,
     pattern         ENUM ('choice', 'yes/no', 'duration'),
     image_path      VARCHAR(255),
-    ordinal         INT  NOT NULL,
+    ordinal         INT          NOT NULL,
     PRIMARY KEY (question_id),
     INDEX idx_question_set_id (question_set_id),
     CONSTRAINT FK_QuestionSet FOREIGN KEY (question_set_id) REFERENCES question_set (question_set_id)

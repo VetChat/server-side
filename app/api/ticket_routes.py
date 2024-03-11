@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..schemas import TicketCreate, TicketId, TicketResponse
-from ..crud import TicketCRUD, QuestionSetCRUD
+from ..crud import TicketCRUD, QuestionSetCRUD, TicketAnswerRecordCRUD
 
 router = APIRouter()
 
@@ -17,6 +17,15 @@ def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)) -> T
 
     if not ticket:
         raise HTTPException(status_code=500, detail="Failed to create a ticket")
+
+    # Store the list of answers in ticket_answer_record for this ticket_id
+    ticket_answer_record_crud = TicketAnswerRecordCRUD(db)
+    for answer_data in ticket_data.listAnswer:
+        ticket_answer_record_crud.create_ticket_answer_record(
+            ticket_id=ticket.ticket_id,
+            question_id=answer_data.questionId,
+            answer=answer_data.answer
+        )
 
     return TicketId(ticketId=ticket.ticket_id)
 
