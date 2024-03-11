@@ -15,6 +15,7 @@ class TicketQuestion(Base):
 
     # Relationship to TicketAnswer
     ticket_answers = relationship("TicketAnswer", back_populates="ticket_question")
+    ticket_answer_records = relationship("TicketAnswerRecord", back_populates="ticket_question")
 
     def __repr__(self):
         return f"<TicketQuestion(ticket_question_id={self.ticket_question_id}, " \

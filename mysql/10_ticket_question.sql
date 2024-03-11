@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS ticket_question
     pattern            ENUM ('text', 'choice', 'birthDate'),
     ordinal            INT          NOT NULL,
     is_required        BOOLEAN      NOT NULL DEFAULT TRUE,
-    PRIMARY KEY (ticekt_question_id)
+    PRIMARY KEY (ticket_question_id)
 );
 
 -- Insert mock data into the ticket question table
