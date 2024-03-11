@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from ..database import Base
 from datetime import datetime, timezone
@@ -14,7 +14,7 @@ class Ticket(Base):
     breed = Column(String(255), nullable=False)
     birth_when = Column(DateTime, nullable=False)
     rec_created_when = Column(DateTime, default=datetime.now(tz=timezone.utc), nullable=False)
-    is_answered = Column(Integer, default=0, nullable=False)
+    is_answered = Column(Boolean, default=False, nullable=False)
 
     # Relationship to Animal (assuming you have an Animal model defined)
     animal = relationship("Animal")
