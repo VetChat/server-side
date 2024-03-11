@@ -9,10 +9,6 @@ class Ticket(Base):
 
     ticket_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     animal_id = Column(Integer, ForeignKey('animal.animal_id'), nullable=False)
-    sex = Column(Enum('male', 'female'), nullable=False)
-    sterilize = Column(Enum('sterile', 'non-sterile'), nullable=False)
-    breed = Column(String(255), nullable=False)
-    birth_when = Column(DateTime, nullable=False)
     rec_created_when = Column(DateTime, default=datetime.now(tz=timezone.utc), nullable=False)
     is_answered = Column(Boolean, default=False, nullable=False)
 
@@ -24,6 +20,5 @@ class Ticket(Base):
     ticket_answer_records = relationship("TicketAnswerRecord", back_populates="ticket")
 
     def __repr__(self):
-        return f"<Ticket(ticket_id={self.ticket_id}, animal_id={self.animal_id}, sex='{self.sex}', " \
-               f"sterilize='{self.sterilize}', breed='{self.breed}', birth_when='{self.birth_when}', " \
-               f"rec_created_when='{self.rec_created_when}')>"
+        return f"<Ticket(ticket_id={self.ticket_id}, animal_id={self.animal_id}, " \
+               f"rec_created_when='{self.rec_created_when}', is_answered={self.is_answered})>"
