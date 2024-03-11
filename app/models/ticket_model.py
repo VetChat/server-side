@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
 from sqlalchemy.orm import relationship
-from ..database.connection import Base
+from ..database import Base
 from datetime import datetime, timezone
 
 
@@ -20,6 +20,8 @@ class Ticket(Base):
     animal = relationship("Animal")
     # Relationship to AnswerRecord
     answer_records = relationship("AnswerRecord", back_populates="ticket")
+    # Relationship to TicketAnswerRecord
+    ticket_answer_records = relationship("TicketAnswerRecord", back_populates="ticket")
 
     def __repr__(self):
         return f"<Ticket(ticket_id={self.ticket_id}, animal_id={self.animal_id}, sex='{self.sex}', " \

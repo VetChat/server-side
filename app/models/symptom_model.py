@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, UniqueConstraint
-from ..database.connection import Base
+from ..database import Base
 
 
 class Symptom(Base):
