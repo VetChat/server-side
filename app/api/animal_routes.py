@@ -1,16 +1,17 @@
-from typing import List, Type, Optional
-from fastapi import APIRouter, Depends, HTTPException
+from typing import List
+from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from ..utils import limiter
 from ..database import get_db
 from ..crud import AnimalCRUD
-from ..models import Animal
 from ..schemas import AnimalRead
 
 router = APIRouter()
 
 
-@router.get("/animals", response_model=List[AnimalRead])
-def fetch_animal(db: Session = Depends(get_db)) -> List[AnimalRead]:
+@router.get("/animals", response_model=List[AnimalRead], tags=["Animals"])
+@limiter.limit("20/minute")
+async def fetch_animal(request: Request, db: Session = Depends(get_db)) -> List[AnimalRead]:
     animal_crud = AnimalCRUD(db)
     animal_data = animal_crud.fetch_all_animal()
     animal_response = [
@@ -23,8 +24,9 @@ def fetch_animal(db: Session = Depends(get_db)) -> List[AnimalRead]:
     return animal_response
 
 
-@router.get("/animal/{animal_id}", response_model=AnimalRead)
-def fetch_animal_by_id(animal_id: int, db: Session = Depends(get_db)) -> AnimalRead:
+@router.get("/animal/{animal_id}", response_model=AnimalRead, tags=["Animals"])
+@limiter.limit("5/minute")
+async def fetch_animal_by_id(request: Request, animal_id: int, db: Session = Depends(get_db)) -> AnimalRead:
     animal_crud = AnimalCRUD(db)
     animal_data = animal_crud.fetch_animal_by_id(animal_id)
     if animal_data is None:

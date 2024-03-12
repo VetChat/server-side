@@ -1,6 +1,7 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from ..utils import limiter
 from ..database import get_db
 from ..crud import UrgencyCRUD
 from ..schemas import UrgencyResponse, UrgencyMostRequest
@@ -8,8 +9,10 @@ from ..schemas import UrgencyResponse, UrgencyMostRequest
 router = APIRouter()
 
 
-@router.post("/urgency/most_urgent", response_model=UrgencyResponse)
-def get_most_urgent_case(urgent_cases: List[UrgencyMostRequest], db: Session = Depends(get_db)) -> UrgencyResponse:
+@router.post("/urgency/most_urgent", response_model=UrgencyResponse, tags=["Urgency"])
+@limiter.limit("10/minute")
+async def get_most_urgent_case(request: Request, urgent_cases: List[UrgencyMostRequest],
+                               db: Session = Depends(get_db)) -> UrgencyResponse:
     urgency_crud = UrgencyCRUD(db)
     urgency_levels = urgency_crud.fetch_urgency_levels_by_ids([uc.urgencyId for uc in urgent_cases])
 

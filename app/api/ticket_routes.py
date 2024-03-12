@@ -1,7 +1,7 @@
 from typing import List
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from ..utils import limiter
 from ..database import get_db
 from ..schemas import TicketCreate, TicketId, TicketResponse
 from ..crud import TicketCRUD, QuestionSetCRUD, TicketAnswerRecordCRUD
@@ -9,8 +9,9 @@ from ..crud import TicketCRUD, QuestionSetCRUD, TicketAnswerRecordCRUD
 router = APIRouter()
 
 
-@router.post("/tickets", response_model=TicketId)
-def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)) -> TicketId:
+@router.post("/tickets", response_model=TicketId, tags=["Tickets"])
+@limiter.limit("5/minute")
+async def create_ticket(request: Request, ticket_data: TicketCreate, db: Session = Depends(get_db)) -> TicketId:
     # Generate a ticket_id (this could be an auto-incremented ID in the database)
     ticket_crud = TicketCRUD(db)
     ticket = ticket_crud.create_ticket(ticket_data)
@@ -30,8 +31,10 @@ def create_ticket(ticket_data: TicketCreate, db: Session = Depends(get_db)) -> T
     return TicketId(ticketId=ticket.ticket_id)
 
 
-@router.get("/tickets/{ticket_id}/symptoms", response_model=List[TicketResponse])
-def get_symptoms_by_ticket_id(ticket_id: int, db: Session = Depends(get_db)) -> List[TicketResponse]:
+@router.get("/tickets/{ticket_id}/symptoms", response_model=List[TicketResponse], tags=["Tickets"])
+@limiter.limit("10/minute")
+async def get_symptoms_by_ticket_id(request: Request, ticket_id: int, db: Session = Depends(get_db)) -> List[
+    TicketResponse]:
     # Retrieve the ticket to get the animal_id
     ticket_crud = TicketCRUD(db)
     ticket = ticket_crud.fetch_ticket_by_id(ticket_id)
