@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import Request, APIRouter, Depends
 from sqlalchemy.orm import Session
+from ..utils import limiter
 from ..database import get_db
 from ..crud import AnswerRecordCRUD
 from ..schemas import AnswerRecordCreate, AnswerRecordResponse
@@ -7,9 +8,10 @@ from ..schemas import AnswerRecordCreate, AnswerRecordResponse
 router = APIRouter()
 
 
-@router.post("/answer_records", response_model=AnswerRecordResponse)
-def create_answer_records_and_return_summary(
-        answer_record_data: AnswerRecordCreate, db: Session = Depends(get_db)
+@router.post("/answer_records", response_model=AnswerRecordResponse, tags=["Answer_records"])
+@limiter.limit("5/minute")
+async def create_answer_records_and_return_summary(
+        request: Request, answer_record_data: AnswerRecordCreate, db: Session = Depends(get_db)
 ) -> AnswerRecordResponse:
     # Create answer records
     answer_record_crud = AnswerRecordCRUD(db)

@@ -1,6 +1,7 @@
 from typing import List
-from fastapi import APIRouter, Depends
+from fastapi import Request, APIRouter, Depends
 from sqlalchemy.orm import Session
+from ..utils import limiter
 from ..database import get_db
 from ..crud import TicketQuestionCRUD
 from ..schemas import TicketQuestionRead, TicketAnswerRead
@@ -8,8 +9,9 @@ from ..schemas import TicketQuestionRead, TicketAnswerRead
 router = APIRouter()
 
 
-@router.get("/ticket_questions", response_model=List[TicketQuestionRead])
-def get_ticket_questions(db: Session = Depends(get_db)) -> List[TicketQuestionRead]:
+@router.get("/ticket_questions", response_model=List[TicketQuestionRead], tags=["Ticket Questions"])
+@limiter.limit("10/minute")
+async def get_ticket_questions(request: Request, db: Session = Depends(get_db)) -> List[TicketQuestionRead]:
     ticket_question_crud = TicketQuestionCRUD(db)
     questions = ticket_question_crud.fetch_ticket_questions_with_answers()
 
