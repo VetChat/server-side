@@ -3,7 +3,7 @@ from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..utils import limiter
 from ..database import get_db
-from ..schemas import TicketResponse, SymptomRead
+from ..schemas import TicketResponse, SymptomRead, SymptomCreateBody, SymptomCreateResponse
 from ..crud import QuestionSetCRUD, AnimalCRUD, SymptomCRUD
 
 router = APIRouter()
@@ -48,3 +48,21 @@ async def get_symptoms_by_animal_id(request: Request, animal_id: int, db: Sessio
     ]
 
     return symptoms_response
+
+
+@router.post("/symptom", response_model=SymptomCreateResponse, tags=["Symptoms"])
+@limiter.limit("5/minute")
+async def add_symptom(request: Request, symptom: SymptomCreateBody,
+                      db: Session = Depends(get_db)) -> SymptomCreateResponse:
+    symptom_crud = SymptomCRUD(db)
+    existing_symptom = symptom_crud.fetch_symptom_by_name(symptom.symptomName)
+    if existing_symptom:
+        raise HTTPException(status_code=409, detail=f"Symptom with name {symptom.symptomName} already exists")
+
+    symptom_data = symptom_crud.add_symptom(symptom.symptomName)
+
+    return SymptomCreateResponse(
+        symptomId=symptom_data.symptom_id,
+        symptomName=symptom_data.symptom_name,
+        message=f"Symptom {symptom_data.symptom_name} added successfully"
+    )
