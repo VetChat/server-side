@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS answer_record
     ticket_id        INT NOT NULL,
     answer_id        INT NOT NULL,
     PRIMARY KEY (answer_record_id),
-    CONSTRAINT FK_AnswerRecordTicket FOREIGN KEY (ticket_id) REFERENCES ticket (ticket_id),
-    CONSTRAINT FK_AnswerRecordAnswer FOREIGN KEY (answer_id) REFERENCES answer (answer_id),
+    CONSTRAINT FK_AnswerRecordTicket FOREIGN KEY (ticket_id) REFERENCES ticket (ticket_id) ON DELETE CASCADE,
+    CONSTRAINT FK_AnswerRecordAnswer FOREIGN KEY (answer_id) REFERENCES answer (answer_id) ON DELETE CASCADE,
     CONSTRAINT UC_AnswerTicket UNIQUE (ticket_id, answer_id)
 );
 

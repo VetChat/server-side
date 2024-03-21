@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS answer
     summary          VARCHAR(255),
     skip_to_question INT,
     PRIMARY KEY (answer_id),
-    CONSTRAINT FK_QuestionAnswer FOREIGN KEY (question_id) REFERENCES question (question_id)
+    CONSTRAINT FK_QuestionAnswer FOREIGN KEY (question_id) REFERENCES question (question_id) ON DELETE CASCADE
 );
 
 -- Insert mock data to the answer table

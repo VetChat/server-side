@@ -14,3 +14,9 @@ class AnimalCreate(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class AnimalRemoveResponse(BaseModel):
+    animalId: int
+    name: str
+    message: str

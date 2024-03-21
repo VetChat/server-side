@@ -25,3 +25,7 @@ class AnimalCRUD:
         self.db.commit()
         self.db.refresh(new_animal)
         return new_animal
+
+    def remove_animal(self, animal_id: int) -> None:
+        self.db.query(Animal).filter(Animal.animal_id == animal_id).delete()
+        self.db.commit()

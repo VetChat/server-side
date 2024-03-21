@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS question
     ordinal         INT          NOT NULL,
     PRIMARY KEY (question_id),
     INDEX idx_question_set_id (question_set_id),
-    CONSTRAINT FK_QuestionSet FOREIGN KEY (question_set_id) REFERENCES question_set (question_set_id)
+    CONSTRAINT FK_QuestionSet FOREIGN KEY (question_set_id) REFERENCES question_set (question_set_id) ON DELETE CASCADE
 );
 
 -- Insert mock data into the question table

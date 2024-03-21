@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS question_set
     symptom_id      INT NOT NULL,
     animal_id       INT NOT NULL,
     PRIMARY KEY (question_set_id),
-    CONSTRAINT FK_SymptomQuestion FOREIGN KEY (symptom_id) REFERENCES symptom (symptom_id),
-    CONSTRAINT FK_AnimalQuestion FOREIGN KEY (animal_id) REFERENCES animal (animal_id)
+    CONSTRAINT FK_SymptomQuestion FOREIGN KEY (symptom_id) REFERENCES symptom (symptom_id) ON DELETE CASCADE,
+    CONSTRAINT FK_AnimalQuestion FOREIGN KEY (animal_id) REFERENCES animal (animal_id) ON DELETE CASCADE
 );
 
 -- Insert mock data into the question_set table
