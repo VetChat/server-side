@@ -3,10 +3,25 @@ from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..utils import limiter
 from ..database import get_db
-from ..schemas import TicketResponse
-from ..crud import QuestionSetCRUD, AnimalCRUD
+from ..schemas import TicketResponse, SymptomRead
+from ..crud import QuestionSetCRUD, AnimalCRUD, SymptomCRUD
 
 router = APIRouter()
+
+
+@router.get("/symptoms", response_model=List[SymptomRead], tags=["Symptoms"])
+@limiter.limit("20/minute")
+async def get_symptoms(request: Request, db: Session = Depends(get_db)) -> List[SymptomRead]:
+    symptom_crud = SymptomCRUD(db)
+    symptom_data = symptom_crud.fetch_symptoms()
+    symptom_response = [
+        SymptomRead(
+            symptomId=symptom.symptom_id,
+            symptomName=symptom.symptom_name
+        )
+        for symptom in symptom_data
+    ]
+    return symptom_response
 
 
 @router.get("/symptoms/animal/{animal_id}", response_model=List[TicketResponse], tags=["Symptoms"])

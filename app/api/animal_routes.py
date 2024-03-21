@@ -56,7 +56,7 @@ async def add_animal(request: Request, animal: AnimalCreate, db: Session = Depen
 
 @router.delete("/animal/{animal_id}", response_model=AnimalRemoveResponse, tags=["Animals"])
 @limiter.limit("5/minute")
-async def remove_animal(request: Request, animal_id: int, db: Session = Depends(get_db)) -> AnimalRemoveResponse:
+async def remove_animal_id(request: Request, animal_id: int, db: Session = Depends(get_db)) -> AnimalRemoveResponse:
     animal_crud = AnimalCRUD(db)
     animal_data = animal_crud.fetch_animal_by_id(animal_id)
     if animal_data is None:
