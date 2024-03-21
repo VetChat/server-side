@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from ..models import Ticket
+from ..models import Ticket, Animal
 
 
 class TicketCRUD:
@@ -7,9 +7,10 @@ class TicketCRUD:
         self.db = db
 
     def create_ticket(self, ticket_data):
+        animal = self.db.query(Animal).filter(Animal.animal_id == ticket_data.animalId).first()
         # Create a new Ticket instance
         new_ticket = Ticket(
-            animal_id=ticket_data.animalId,
+            animal=animal.name,
         )
         self.db.add(new_ticket)
         self.db.commit()

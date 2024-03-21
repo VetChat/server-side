@@ -29,29 +29,3 @@ async def create_ticket(request: Request, ticket_data: TicketCreate, db: Session
         )
 
     return TicketId(ticketId=ticket.ticket_id)
-
-
-@router.get("/tickets/{ticket_id}/symptoms", response_model=List[TicketResponse], tags=["Tickets"])
-@limiter.limit("10/minute")
-async def get_symptoms_by_ticket_id(request: Request, ticket_id: int, db: Session = Depends(get_db)) -> List[
-    TicketResponse]:
-    # Retrieve the ticket to get the animal_id
-    ticket_crud = TicketCRUD(db)
-    ticket = ticket_crud.fetch_ticket_by_id(ticket_id)
-
-    if not ticket:
-        raise HTTPException(status_code=404, detail="Ticket not found")
-
-    # Get list of symptoms by animal_id
-    question_set_crud = QuestionSetCRUD(db)
-    symptoms_data = question_set_crud.fetch_symptoms_by_animal_id(ticket.animal_id)
-    symptoms_response: List[TicketResponse] = [
-        TicketResponse(
-            symptomId=symptoms.symptom_id,
-            symptomName=symptoms.symptom_name,
-            questionSetId=symptoms.question_set_id
-        )
-        for symptoms in symptoms_data
-    ]
-
-    return symptoms_response

@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS ticket_answer_record
     ticket_question_id      INT          NOT NULL,
     ticket_answer           VARCHAR(255) NOT NULL,
     PRIMARY KEY (ticket_answer_record_id),
-    CONSTRAINT FK_TicketAnswerRecordTicket FOREIGN KEY (ticket_id) REFERENCES ticket (ticket_id),
-    CONSTRAINT FK_TicketAnswerRecordQuestion FOREIGN KEY (ticket_question_id) REFERENCES ticket_question (ticket_question_id),
+    CONSTRAINT FK_TicketAnswerRecordTicket FOREIGN KEY (ticket_id) REFERENCES ticket (ticket_id) ON DELETE CASCADE,
+    CONSTRAINT FK_TicketAnswerRecordQuestion FOREIGN KEY (ticket_question_id) REFERENCES ticket_question (ticket_question_id) ON DELETE CASCADE,
     CONSTRAINT UC_TicketAnswerTicket UNIQUE (ticket_id, ticket_answer)
 );
 
