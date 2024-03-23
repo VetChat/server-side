@@ -8,6 +8,7 @@ from .answer_record_crud import AnswerRecordCRUD
 from .answer_crud import AnswerCRUD
 from .ticket_question_crud import TicketQuestionCRUD
 from .ticker_answer_record_crud import TicketAnswerRecordCRUD
+from .symptom_crud import SymptomCRUD
 
 __all__ = ["AnimalCRUD", "UrgentCaseCRUD", "UrgencyCRUD", "TicketCRUD", "QuestionSetCRUD", "QuestionCRUD",
-           "AnswerRecordCRUD", "AnswerCRUD", "TicketQuestionCRUD", "TicketAnswerRecordCRUD"]
+           "AnswerRecordCRUD", "AnswerCRUD", "TicketQuestionCRUD", "TicketAnswerRecordCRUD", "SymptomCRUD"]

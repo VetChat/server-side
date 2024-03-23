@@ -10,7 +10,7 @@ class TicketCRUD:
         animal = self.db.query(Animal).filter(Animal.animal_id == ticket_data.animalId).first()
         # Create a new Ticket instance
         new_ticket = Ticket(
-            animal=animal.name,
+            animal=animal.animal_name,
         )
         self.db.add(new_ticket)
         self.db.commit()
