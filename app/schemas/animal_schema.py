@@ -16,7 +16,7 @@ class AnimalCreate(BaseModel):
         from_attributes = True
 
 
-class AnimalRemoveResponse(BaseModel):
+class AnimalResponse(BaseModel):
     animalId: int
     name: str
     message: str

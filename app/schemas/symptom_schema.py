@@ -10,7 +10,7 @@ class SymptomCreateBody(BaseModel):
     symptomName: str
 
 
-class SymptomCreateResponse(BaseModel):
+class SymptomResponse(BaseModel):
     symptomId: int
     symptomName: str
     message: str

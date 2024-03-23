@@ -3,7 +3,7 @@ from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..utils import limiter
 from ..database import get_db
-from ..schemas import TicketResponse, SymptomRead, SymptomCreateBody, SymptomCreateResponse
+from ..schemas import TicketResponse, SymptomRead, SymptomCreateBody, SymptomResponse
 from ..crud import QuestionSetCRUD, AnimalCRUD, SymptomCRUD
 
 router = APIRouter()
@@ -50,10 +50,10 @@ async def get_symptoms_by_animal_id(request: Request, animal_id: int, db: Sessio
     return symptoms_response
 
 
-@router.post("/symptom", response_model=SymptomCreateResponse, tags=["Symptoms"])
+@router.post("/symptom", response_model=SymptomResponse, tags=["Symptoms"])
 @limiter.limit("5/minute")
 async def add_symptom(request: Request, symptom: SymptomCreateBody,
-                      db: Session = Depends(get_db)) -> SymptomCreateResponse:
+                      db: Session = Depends(get_db)) -> SymptomResponse:
     symptom_crud = SymptomCRUD(db)
     existing_symptom = symptom_crud.fetch_symptom_by_name(symptom.symptomName)
     if existing_symptom:
@@ -61,8 +61,27 @@ async def add_symptom(request: Request, symptom: SymptomCreateBody,
 
     symptom_data = symptom_crud.add_symptom(symptom.symptomName)
 
-    return SymptomCreateResponse(
+    return SymptomResponse(
         symptomId=symptom_data.symptom_id,
         symptomName=symptom_data.symptom_name,
         message=f"Symptom {symptom_data.symptom_name} added successfully"
+    )
+
+
+@router.delete("/symptom/{symptom_id}", response_model=SymptomResponse, tags=["Symptoms"])
+@limiter.limit("5/minute")
+async def remove_symptom(request: Request, symptom_id: int, db: Session = Depends(get_db)) -> SymptomResponse:
+    symptom_crud = SymptomCRUD(db)
+    symptom_data = symptom_crud.fetch_symptom_by_id(symptom_id)
+    if symptom_data is None:
+        raise HTTPException(status_code=404, detail=f"Symptom with id {symptom_id} not found")
+
+    is_success = symptom_crud.remove_symptom(symptom_id)
+    if not is_success:
+        raise HTTPException(status_code=500, detail=f"Failed to remove the symptom id: {symptom_id}")
+
+    return SymptomResponse(
+        symptomId=symptom_data.symptom_id,
+        symptomName=symptom_data.symptom_name,
+        message="The symptom has been successfully removed."
     )

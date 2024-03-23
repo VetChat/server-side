@@ -11,6 +11,9 @@ class SymptomCRUD:
     def fetch_symptoms(self) -> List[Type[Symptom]]:
         return self.db.query(Symptom).all()
 
+    def fetch_symptom_by_id(self, symptom_id) -> Type[Symptom]:
+        return self.db.query(Symptom).filter(Symptom.symptom_id == symptom_id).first()
+
     def fetch_symptom_by_name(self, symptom_name: str) -> Type[Symptom]:
         return self.db.query(Symptom).filter(Symptom.symptom_name == symptom_name).first()
 
@@ -20,3 +23,11 @@ class SymptomCRUD:
         self.db.commit()
         self.db.refresh(new_symptom)
         return new_symptom
+
+    def remove_symptom(self, symptom_id) -> bool:
+        symptom = self.fetch_symptom_by_id(symptom_id)
+        if symptom:
+            self.db.delete(symptom)
+            self.db.commit()
+            return True
+        return False
