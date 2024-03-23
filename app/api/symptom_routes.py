@@ -3,7 +3,7 @@ from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..utils import limiter
 from ..database import get_db
-from ..schemas import TicketResponse, SymptomRead, SymptomCreateBody, SymptomResponse
+from ..schemas import TicketResponse, SymptomRead, SymptomCreateBody, SymptomResponse, SymptomUpdate
 from ..crud import QuestionSetCRUD, AnimalCRUD, SymptomCRUD
 
 router = APIRouter()
@@ -65,6 +65,27 @@ async def add_symptom(request: Request, symptom: SymptomCreateBody,
         symptomId=symptom_data.symptom_id,
         symptomName=symptom_data.symptom_name,
         message=f"Symptom {symptom_data.symptom_name} added successfully"
+    )
+
+
+@router.put("/symptom/", response_model=SymptomUpdate, tags=["Symptoms"])
+@limiter.limit("5/minute")
+async def update_symptom(request: Request, symptom: SymptomRead,
+                         db: Session = Depends(get_db)) -> SymptomUpdate:
+    symptom_crud = SymptomCRUD(db)
+    existing_symptom = symptom_crud.fetch_symptom_by_id(symptom.symptomId)
+    if existing_symptom is None:
+        raise HTTPException(status_code=404, detail=f"Symptom with name {symptom.symptomId} not found")
+
+    symptom_data = symptom_crud.update_symptom(symptom.symptomId, symptom.symptomName)
+    if symptom_data is None:
+        raise HTTPException(status_code=500, detail=f"Failed to update the symptom id: {symptom.symptomId}")
+
+    return SymptomUpdate(
+        symptomId=symptom_data.symptom_id,
+        oldSymptomName=existing_symptom.symptom_name,
+        newSymptomName=symptom_data.symptom_name,
+        message="The symptom has been successfully updated."
     )
 
 

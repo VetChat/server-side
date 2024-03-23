@@ -1,4 +1,4 @@
-from typing import List, Type
+from typing import List, Type, Optional
 
 from sqlalchemy.orm import Session
 from ..models import Symptom
@@ -11,10 +11,10 @@ class SymptomCRUD:
     def fetch_symptoms(self) -> List[Type[Symptom]]:
         return self.db.query(Symptom).all()
 
-    def fetch_symptom_by_id(self, symptom_id) -> Type[Symptom]:
+    def fetch_symptom_by_id(self, symptom_id: int) -> Optional[Type[Symptom]]:
         return self.db.query(Symptom).filter(Symptom.symptom_id == symptom_id).first()
 
-    def fetch_symptom_by_name(self, symptom_name: str) -> Type[Symptom]:
+    def fetch_symptom_by_name(self, symptom_name: str) -> Optional[Type[Symptom]]:
         return self.db.query(Symptom).filter(Symptom.symptom_name == symptom_name).first()
 
     def add_symptom(self, symptom_name: str) -> Symptom:
@@ -24,7 +24,16 @@ class SymptomCRUD:
         self.db.refresh(new_symptom)
         return new_symptom
 
-    def remove_symptom(self, symptom_id) -> bool:
+    def update_symptom(self, symptom_id: int, symptom_name: str) -> Optional[Type[Symptom]]:
+        symptom = self.fetch_symptom_by_id(symptom_id)
+        if symptom:
+            symptom.symptom_name = symptom_name
+            self.db.commit()
+            self.db.refresh(symptom)
+            return symptom
+        return None
+
+    def remove_symptom(self, symptom_id: int) -> bool:
         symptom = self.fetch_symptom_by_id(symptom_id)
         if symptom:
             self.db.delete(symptom)
