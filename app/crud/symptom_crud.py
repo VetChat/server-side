@@ -1,5 +1,4 @@
 from typing import List, Type, Optional
-
 from sqlalchemy.orm import Session
 from ..models import Symptom
 
