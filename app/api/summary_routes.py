@@ -13,10 +13,10 @@ router = APIRouter()
 
 @router.get("/summary/", response_model=List[TicketSummaryResponse], tags=["Summary"])
 @limiter.limit("20/minute")
-async def get_summary(request: Request, limit: Optional[int] = 50, offset: Optional[int] = 0,
+async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Optional[int] = 0,
                       db: Session = Depends(get_db)) -> List[TicketSummaryResponse]:
     ticket_crud = TicketCRUD(db)
-    tickets_id = ticket_crud.fetch_tickets_id(limit, offset)
+    tickets_id = ticket_crud.fetch_tickets_id(limit, start_at)
     list_ticket_id = [ticket_id[0] for ticket_id in tickets_id]
 
     summary_crud = SummaryCRUD(db)
