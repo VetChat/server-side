@@ -3,7 +3,7 @@ from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..utils import limiter
 from ..database import get_db
-from ..schemas import TicketResponse, SymptomRead, SymptomCreateBody, SymptomResponse, SymptomUpdate
+from ..schemas import SymptomWithQuestions, SymptomRead, SymptomCreateBody, SymptomResponse, SymptomUpdate
 from ..crud import QuestionSetCRUD, AnimalCRUD, SymptomCRUD
 
 router = APIRouter()
@@ -24,10 +24,10 @@ async def get_symptoms(request: Request, db: Session = Depends(get_db)) -> List[
     return symptom_response
 
 
-@router.get("/symptoms/animal/{animal_id}", response_model=List[TicketResponse], tags=["Symptoms"])
+@router.get("/symptoms/animal/{animal_id}", response_model=List[SymptomWithQuestions], tags=["Symptoms"])
 @limiter.limit("10/minute")
 async def get_symptoms_by_animal_id(request: Request, animal_id: int, db: Session = Depends(get_db)) -> (
-        List)[TicketResponse]:
+        List)[SymptomWithQuestions]:
     # Retrieve the ticket to get the animal_id
     animal_crud = AnimalCRUD(db)
     animal = animal_crud.fetch_animal_by_id(animal_id)
@@ -38,8 +38,8 @@ async def get_symptoms_by_animal_id(request: Request, animal_id: int, db: Sessio
     # Get list of symptoms by animal_id
     question_set_crud = QuestionSetCRUD(db)
     symptoms_data = question_set_crud.fetch_symptoms_by_animal_id(animal.animal_id)
-    symptoms_response: List[TicketResponse] = [
-        TicketResponse(
+    symptoms_response: List[SymptomWithQuestions] = [
+        SymptomWithQuestions(
             symptomId=symptoms.symptom_id,
             symptomName=symptoms.symptom_name,
             questionSetId=symptoms.question_set_id
