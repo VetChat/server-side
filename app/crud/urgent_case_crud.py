@@ -1,3 +1,4 @@
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from ..models import UrgentCase, Urgency
 
@@ -21,9 +22,26 @@ class UrgentCaseCRUD:
             .all()
         )
 
+    def fetch_urgent_case_by_name(self, animal_id: int, urgent_name: str):
+        return (
+            self.db.query(UrgentCase)
+            .filter(and_(UrgentCase.animal_id == animal_id, UrgentCase.urgent_name == urgent_name))
+            .first()
+        )
+
     def fetch_urgent_case_with_urgency_detail(self):
         return (
             self.db.query(UrgentCase.urgent_id, UrgentCase.urgent_name, Urgency.urgency_detail, Urgency.duration)
             .join(UrgentCase.urgency)
             .all()
         )
+
+    def add_urgent_case(self, urgent_name: str, urgency_id: int):
+        new_urgent_case = UrgentCase(
+            urgent_name=urgent_name,
+            urgency_id=urgency_id
+        )
+        self.db.add(new_urgent_case)
+        self.db.commit()
+        self.db.refresh(new_urgent_case)
+        return new_urgent_case
