@@ -16,29 +16,21 @@ router = APIRouter()
 async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Optional[int] = 0,
                       db: Session = Depends(get_db)) -> List[TicketSummaryResponse]:
     ticket_crud = TicketCRUD(db)
-    tickets_id = ticket_crud.fetch_tickets_id(limit, start_at)
-    list_ticket_id = [ticket_id[0] for ticket_id in tickets_id]
+    tickets_id = [ticket_id[0] for ticket_id in ticket_crud.fetch_tickets_id(limit, start_at)]
 
     summary_crud = SummaryCRUD(db)
 
-    ticket_info = summary_crud.fetch_ticket_info_by_ticket_ids(list_ticket_id)
-    summary = summary_crud.fetch_summary_by_ticket_ids(list_ticket_id)
+    ticket_info = summary_crud.fetch_ticket_info_by_ticket_ids(tickets_id)
+    summary = summary_crud.fetch_summary_by_ticket_ids(tickets_id)
 
-    dict_ticket_info = {}
-    dict_summary = {}
-    for ticket_id in list_ticket_id:
-        dict_ticket_info[ticket_id] = []
-        dict_summary[ticket_id] = {}
+    dict_ticket_info = {ticket_id: [] for ticket_id in tickets_id}
+    dict_summary = {ticket_id: {} for ticket_id in tickets_id}
 
     for each in ticket_info:
-        info = dict_ticket_info[each.ticket_id]
-        info.append(each)
+        dict_ticket_info[each.ticket_id].append(each)
 
     for each in summary:
-        if not dict_summary[each.ticket_id].get(each.symptom_id):
-            dict_summary[each.ticket_id][each.symptom_id] = []
-        answer = dict_summary[each.ticket_id][each.symptom_id]
-        answer.append(each)
+        dict_summary[each.ticket_id].setdefault(each.symptom_id, []).append(each)
 
     response = [
         TicketSummaryResponse(
@@ -70,7 +62,7 @@ async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Opt
                     ]
                 ) for symptom_id in dict_summary[ticket_id]
             ]
-        ) for ticket_id in list_ticket_id
+        ) for ticket_id in tickets_id
     ]
 
     return response
