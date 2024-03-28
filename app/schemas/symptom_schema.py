@@ -24,3 +24,9 @@ class SymptomUpdate(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class SymptomWithQuestions(BaseModel):
+    symptomId: int
+    symptomName: str
+    questionSetId: int

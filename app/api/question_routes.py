@@ -1,10 +1,11 @@
 from typing import List
 from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from collections import defaultdict
 from ..utils import limiter
 from ..database import get_db
 from ..crud import QuestionCRUD
-from ..schemas import QuestionSetRequest, QuestionResponse, AnswerRead
+from ..schemas import QuestionSetRequest, QuestionResponse, AnswerRead, QuestionList
 
 router = APIRouter()
 
@@ -19,26 +20,37 @@ async def get_questions_by_set_ids(request: Request, question: List[QuestionSetR
     if not questions_data:
         raise HTTPException(status_code=404, detail="No questions found for the provided question set IDs")
 
+    # Group questions by symptom
+    symptom_groups = defaultdict(list)
+
+    for item in questions_data:
+        symptom_groups[(item.symptom_id, item.symptom_name)].append(item)
+
     # Transform the data into the desired response format
     questions_response = [
         QuestionResponse(
             symptomId=symptom_id,
             symptomName=symptom_name,
-            questionId=question.question_id,
-            question=question.question,
-            pattern=question.pattern,
-            imagePath=question.image_path,
-            ordinal=question.ordinal,
-            listAnswer=[
-                AnswerRead(
-                    answerId=answer.answer_id,
-                    answer=answer.answer,
-                    summary=answer.summary,
-                    skipToQuestion=answer.skip_to_question
-                ) for answer in question.answers
+            listQuestion=[
+                QuestionList(
+                    questionId=question.Question.question_id,
+                    question=question.Question.question,
+                    pattern=question.Question.pattern,
+                    imagePath=question.Question.image_path,
+                    ordinal=question.Question.ordinal,
+                    listAnswer=[
+                        AnswerRead(
+                            answerId=answer.answer_id,
+                            answer=answer.answer,
+                            summary=answer.summary,
+                            skipToQuestion=answer.skip_to_question
+                        ) for answer in question.Question.answers
+                    ]
+                )
+                for question in questions
             ]
         )
-        for question, symptom_id, symptom_name in questions_data
+        for (symptom_id, symptom_name), questions in symptom_groups.items()
     ]
 
     return questions_response

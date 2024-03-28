@@ -16,9 +16,3 @@ class TicketCreate(BaseModel):
 
 class TicketId(BaseModel):
     ticketId: int
-
-
-class TicketResponse(BaseModel):
-    symptomId: int
-    symptomName: str
-    questionSetId: int

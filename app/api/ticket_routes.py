@@ -1,10 +1,9 @@
-from typing import List
 from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..utils import limiter
 from ..database import get_db
-from ..schemas import TicketCreate, TicketId, TicketResponse
-from ..crud import TicketCRUD, QuestionSetCRUD, TicketAnswerRecordCRUD
+from ..schemas import TicketCreate, TicketId
+from ..crud import TicketCRUD, TicketAnswerRecordCRUD
 
 router = APIRouter()
 

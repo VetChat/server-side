@@ -19,6 +19,16 @@ class SymptomSummary(BaseModel):
     listAnswer: List[AnswerSummary]
 
 
+class TicketInfo(BaseModel):
+    ticketAnswerRecordId: int
+    ticketQuestionId: int
+    ticketQuestion: str
+    ticketAnswer: str
+    pattern: str
+    ordinal: int
+
+
 class TicketSummaryResponse(BaseModel):
     ticketId: int
+    info: List[TicketInfo]
     summary: List[SymptomSummary]
