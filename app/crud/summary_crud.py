@@ -1,7 +1,6 @@
-from typing import Type, List, Optional
-from sqlalchemy.orm import Session, joinedload
-from ..models import Ticket, TicketQuestion, TicketAnswerRecord, AnswerRecord, Answer, Question, QuestionSet, Symptom
-from ..schemas import AnimalCreate
+from typing import List
+from sqlalchemy.orm import Session
+from ..models import TicketQuestion, TicketAnswerRecord, AnswerRecord, Answer, Question, QuestionSet, Symptom
 
 
 class SummaryCRUD:
@@ -9,19 +8,33 @@ class SummaryCRUD:
         self.db = db
 
     def fetch_ticket_info_by_ticket_ids(self, ticket_ids: List[int]):
-        return (self.db.query(TicketAnswerRecord.ticket_answer_record_id,
-                              TicketAnswerRecord.ticket_id,
-                              TicketAnswerRecord.ticket_question_id,
-                              TicketAnswerRecord.ticket_answer,
-                              TicketQuestion.ticket_question,
-                              TicketQuestion.pattern,
-                              TicketQuestion.ordinal)
-                .join(TicketAnswerRecord.ticket_question)
-                .filter(TicketAnswerRecord.ticket_id.in_(ticket_ids))
-                .order_by(TicketAnswerRecord.ticket_id, TicketQuestion.ordinal)
-                .all())
+        return self._fetch_ticket_info(TicketAnswerRecord.ticket_id.in_(ticket_ids))
 
     def fetch_summary_by_ticket_ids(self, ticket_ids: List[int]):
+        return self._fetch_summary(AnswerRecord.ticket_id.in_(ticket_ids))
+
+    def fetch_ticket_info_by_ticket_id(self, ticket_id: int):
+        return self._fetch_ticket_info(TicketAnswerRecord.ticket_id == ticket_id)
+
+    def fetch_summary_by_ticket_id(self, ticket_id: int):
+        return self._fetch_summary(AnswerRecord.ticket_id == ticket_id)
+
+    def _fetch_ticket_info(self, condition):
+        return (
+            self.db.query(TicketAnswerRecord.ticket_answer_record_id,
+                          TicketAnswerRecord.ticket_id,
+                          TicketAnswerRecord.ticket_question_id,
+                          TicketAnswerRecord.ticket_answer,
+                          TicketQuestion.ticket_question,
+                          TicketQuestion.pattern,
+                          TicketQuestion.ordinal)
+            .join(TicketAnswerRecord.ticket_question)
+            .filter(condition)
+            .order_by(TicketAnswerRecord.ticket_id, TicketQuestion.ordinal)
+            .all()
+        )
+
+    def _fetch_summary(self, condition):
         return (
             self.db.query(AnswerRecord.answer_record_id,
                           AnswerRecord.ticket_id,
@@ -38,19 +51,7 @@ class SummaryCRUD:
             .join(Answer.question)
             .join(Question.question_set)
             .join(QuestionSet.symptom)
-            .filter(AnswerRecord.ticket_id.in_(ticket_ids))
+            .filter(condition)
             .order_by(Symptom.symptom_id, Question.ordinal)
             .all()
         )
-
-    def fetch_summary(self):
-        result = (self.db.query(Ticket)
-                  .options(joinedload(Ticket.ticket_answer_records))
-                  .options(joinedload(Ticket.answer_records))
-                  .options(joinedload(TicketAnswerRecord.ticket_question))
-                  .options(joinedload(AnswerRecord.answers))
-                  .options(joinedload(AnswerRecord.answers))
-                  .options(joinedload(Question.question_set))
-                  .options(joinedload(QuestionSet.symptom))
-                  .all())
-        return result

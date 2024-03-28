@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Optional, List
 
 from fastapi import Request, APIRouter, Depends
@@ -66,3 +67,50 @@ async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Opt
     ]
 
     return response
+
+
+@router.get("/summary/{ticket_id}", response_model=TicketSummaryResponse, tags=["Summary"])
+@limiter.limit("20/minute")
+async def get_summary_by_ticket_id(request: Request, ticket_id: int,
+                                   db: Session = Depends(get_db)) -> TicketSummaryResponse:
+    summary_crud = SummaryCRUD(db)
+
+    ticket_info = summary_crud.fetch_ticket_info_by_ticket_id(ticket_id)
+    summary = summary_crud.fetch_summary_by_ticket_id(ticket_id)
+
+    # Group questions by symptom
+    symptom_groups = defaultdict(list)
+
+    for item in summary:
+        symptom_groups[(item.symptom_id, item.symptom_name)].append(item)
+
+    return TicketSummaryResponse(
+        ticketId=ticket_id,
+        info=[
+            TicketInfo(
+                ticketAnswerRecordId=info.ticket_answer_record_id,
+                ticketQuestionId=info.ticket_question_id,
+                ticketAnswer=info.ticket_answer,
+                ticketQuestion=info.ticket_question,
+                pattern=info.pattern,
+                ordinal=info.ordinal
+            ) for info in ticket_info
+        ],
+        summary=[
+            SymptomSummary(
+                symptomId=symptom_id,
+                symptomName=symptom_name,
+                listAnswer=[
+                    AnswerSummary(
+                        answerRecordId=answer.answer_record_id,
+                        questionId=answer.question_id,
+                        question=answer.question,
+                        ordinal=answer.ordinal,
+                        answer_id=answer.answer_id,
+                        answer=answer.answer,
+                        summary=answer.summary
+                    ) for answer in summary
+                ]
+            ) for (symptom_id, symptom_name), summary in symptom_groups.items()
+        ]
+    )
