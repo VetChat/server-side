@@ -93,3 +93,11 @@ class UrgentCaseCRUD:
             self.db.refresh(urgent_case)
 
         return urgent_cases
+
+    def remove_urgent_case(self, urgent_id: int):
+        urgent_case = self.fetch_urgent_case_by_id(urgent_id)
+        if not urgent_case:
+            return None
+        self.db.delete(urgent_case)
+        self.db.commit()
+        return urgent_case
