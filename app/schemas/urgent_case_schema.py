@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from pydantic import BaseModel
 
 
@@ -26,3 +28,32 @@ class UrgentCaseResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UrgentCaseCreate(BaseModel):
+    urgentName: str
+    urgencyId: int
+    animalId: int
+
+    class Config:
+        from_attributes = True
+
+
+class UrgentCaseUpdate(BaseModel):
+    urgentId: int
+    urgentName: str
+    urgencyId: int
+    message: str
+
+    class Config:
+        from_attributes = True
+
+
+class UrgentCaseUpdateFailed(BaseModel):
+    urgentId: int
+    message: str
+
+
+class UrgentCaseBulkResponse(BaseModel):
+    success: Optional[List[UrgentCaseResponse]]
+    failed: Optional[List[UrgentCaseUpdateFailed]]
