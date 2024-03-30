@@ -70,6 +70,39 @@ async def add_urgent_case(request: Request, urgent_case: UrgentCaseCreate,
     )
 
 
+@router.post("/animal/urgent_cases/bulk", response_model=UrgentCaseBulkResponse, tags=["Urgent Cases"])
+@limiter.limit("2/minute")
+async def add_urgent_cases(request: Request, urgent_cases: List[UrgentCaseCreate],
+                           db: Session = Depends(get_db)) -> UrgentCaseBulkResponse:
+    urgent_crud = UrgentCaseCRUD(db)
+    existing_urgent_case = urgent_crud.fetch_urgent_case_by_name(urgent_cases[0].animalId, urgent_cases)
+    if existing_urgent_case:
+        raise HTTPException(status_code=409, detail="One or more urgent cases already exists")
+
+    urgent_cases_data = UrgentCaseBulkResponse(success=[], failed=[])
+    for urgent_case in urgent_cases:
+        urgent_case_data = urgent_crud.add_urgent_case(urgent_case.urgentName, urgent_case.urgencyId)
+        if urgent_case_data is not None:
+            urgent_cases_data.success.append(
+                UrgentCaseResponse(
+                    urgentId=urgent_case_data.urgent_id,
+                    urgentName=urgent_case_data.urgent_name,
+                    urgencyId=urgent_case_data.urgency_id,
+                    animalId=urgent_case_data.animal_id,
+                    message="The urgent case has been successfully added."
+                )
+            )
+        else:
+            urgent_cases_data.failed.append(
+                UrgentCaseUpdateFailed(
+                    urgentId=urgent_case.urgentId,
+                    message="Failed to add the urgent case."
+                )
+            )
+
+    return urgent_cases_data
+
+
 @router.put("/urgent_cases", response_model=UrgentCaseResponse, tags=["Urgent Cases"])
 @limiter.limit("5/minute")
 async def update_urgent_case(request: Request, urgent_case: UrgentCaseUpdate,
