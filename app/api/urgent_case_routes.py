@@ -6,7 +6,7 @@ from app.utils import limiter
 from app.database import get_db
 from app.crud import UrgentCaseCRUD, AnimalCRUD
 from app.schemas import UrgentCaseByAnimalResponse, UrgentCaseResponse, UrgentCaseCreate, UrgentCaseUpdate, \
-    UrgentCaseBulkResponse, UrgentCaseUpdateFailed
+    UrgentCaseBulkResponse, UrgentCaseUpdateFailed, UrgentCaseId
 
 router = APIRouter()
 
@@ -152,10 +152,10 @@ async def remove_urgent_case(request: Request, urgent_id: int, db: Session = Dep
 
 @router.delete("/urgent_cases/bulk", response_model=UrgentCaseBulkResponse, tags=["Urgent Cases"])
 @limiter.limit("2/minute")
-async def remove_urgent_cases(request: Request, urgent_ids: List[int],
+async def remove_urgent_cases(request: Request, urgent_ids: List[UrgentCaseId],
                               db: Session = Depends(get_db)) -> UrgentCaseBulkResponse:
     urgent_crud = UrgentCaseCRUD(db)
-    urgent_cases = urgent_crud.fetch_urgent_case_by_ids(urgent_ids)
+    urgent_cases = urgent_crud.fetch_urgent_case_by_ids([urgent_id.urgentId for urgent_id in urgent_ids])
     if urgent_cases is None:
         raise HTTPException(status_code=404, detail="One or more urgent cases not found")
 

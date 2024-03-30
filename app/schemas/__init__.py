@@ -1,6 +1,6 @@
 from .animal_schema import AnimalRead, AnimalCreate, AnimalResponse, AnimalUpdate
 from .urgent_case_schema import UrgentCaseByAnimalResponse, UrgentCaseRead, UrgentCaseResponse, UrgentCaseCreate, \
-    UrgentCaseUpdate, UrgentCaseBulkResponse, UrgentCaseUpdateFailed
+    UrgentCaseUpdate, UrgentCaseBulkResponse, UrgentCaseUpdateFailed, UrgentCaseId
 from .urgency_schema import UrgencyRead, UrgencyResponse, UrgencyMostRequest
 from .ticket_schema import TicketCreate, TicketAnswer, TicketId
 from .symptom_schema import SymptomRead, SymptomCreateBody, SymptomResponse, SymptomUpdate, SymptomWithQuestions
@@ -17,4 +17,4 @@ __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseByAnimalRe
            "SymptomRead", "QuestionSetRequest", "QuestionResponse", "AnswerRead", "AnswerRecordCreate",
            "AnswerRecordResponse", "TicketSummaryResponse", "TicketQuestionRead", "TicketAnswerRead",
            "SymptomCreateBody", "SymptomResponse", "AnimalUpdate", "SymptomUpdate", "TicketInfo", "SymptomSummary",
-           "AnswerSummary", "QuestionList", "UrgentCaseUpdateFailed"]
+           "AnswerSummary", "QuestionList", "UrgentCaseUpdateFailed", "UrgentCaseId"]

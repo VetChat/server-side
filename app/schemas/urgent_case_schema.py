@@ -57,3 +57,10 @@ class UrgentCaseUpdateFailed(BaseModel):
 class UrgentCaseBulkResponse(BaseModel):
     success: Optional[List[UrgentCaseResponse]]
     failed: Optional[List[UrgentCaseUpdateFailed]]
+
+
+class UrgentCaseId(BaseModel):
+    urgentId: int
+
+    class Config:
+        from_attributes = True
