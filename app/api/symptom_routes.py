@@ -68,7 +68,7 @@ async def add_symptom(request: Request, symptom: SymptomCreateBody,
     )
 
 
-@router.put("/symptom/", response_model=SymptomUpdate, tags=["Symptoms"])
+@router.put("/symptom", response_model=SymptomUpdate, tags=["Symptoms"])
 @limiter.limit("5/minute")
 async def update_symptom(request: Request, symptom: SymptomRead,
                          db: Session = Depends(get_db)) -> SymptomUpdate:

@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS urgent_case
     PRIMARY KEY (urgent_id),
     CONSTRAINT UC_Urgent UNIQUE (urgent_name, animal_id),
     CONSTRAINT FK_UrgencyUrgent FOREIGN KEY (urgency_id) REFERENCES urgency (urgency_id) ON DELETE CASCADE,
-    CONSTRAINT FK_AnimalUrgent FOREIGN KEY (animal_id) REFERENCES animal (animal_id) ON DELETE CASCADE
+    CONSTRAINT FK_AnimalUrgent FOREIGN KEY (animal_id) REFERENCES animal (animal_id) ON DELETE CASCADE,
+    INDEX idx_urgent_name (urgent_name)
 );
 
 -- Insert mock data into the urgent_case table
