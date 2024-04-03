@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import Request, APIRouter, Depends, HTTPException
+from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 
 from app.utils import limiter
@@ -8,7 +9,12 @@ from app.crud import UrgentCaseCRUD, AnimalCRUD
 from app.schemas import UrgentCaseByAnimalResponse, UrgentCaseResponse, UrgentCaseCreate, UrgentCaseUpdate, \
     UrgentCaseBulkResponse, UrgentCaseUpdateFailed, UrgentCaseId
 
-router = APIRouter()
+
+def custom_generate_unique_id(route: APIRoute):
+    return f"{route.tags[0]}-{route.name}"
+
+
+router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 
 
 @router.get("/urgent_cases/", response_model=List[UrgentCaseByAnimalResponse], tags=["Urgent Cases"])

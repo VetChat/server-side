@@ -1,12 +1,18 @@
 from typing import List
 from fastapi import Request, APIRouter, Depends, HTTPException
+from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from ..utils import limiter
 from ..database import get_db
 from ..schemas import SymptomWithQuestions, SymptomRead, SymptomCreateBody, SymptomResponse, SymptomUpdate
 from ..crud import QuestionSetCRUD, AnimalCRUD, SymptomCRUD
 
-router = APIRouter()
+
+def custom_generate_unique_id(route: APIRoute):
+    return f"{route.tags[0]}-{route.name}"
+
+
+router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 
 
 @router.get("/symptoms", response_model=List[SymptomRead], tags=["Symptoms"])
