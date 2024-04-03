@@ -5,10 +5,9 @@ from pydantic import BaseModel
 
 class AnswerSummary(BaseModel):
     answerRecordId: int
-    questionId: int
     question: str
+    imagePath: Optional[str]
     ordinal: int
-    answer_id: int
     answer: str
     summary: Optional[str]
 
@@ -21,14 +20,24 @@ class SymptomSummary(BaseModel):
 
 class TicketInfo(BaseModel):
     ticketAnswerRecordId: int
-    ticketQuestionId: int
     ticketQuestion: str
     ticketAnswer: str
-    pattern: str
+    ordinal: int
+
+
+class TicketLabel(BaseModel):
+    ticketQuestion: str
     ordinal: int
 
 
 class TicketSummaryResponse(BaseModel):
+    ticketId: int
+    label: List[TicketLabel]
+    info: List[TicketInfo]
+    summary: List[SymptomSummary]
+
+
+class TicketEachSummaryResponse(BaseModel):
     ticketId: int
     info: List[TicketInfo]
     summary: List[SymptomSummary]
