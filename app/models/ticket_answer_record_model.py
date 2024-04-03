@@ -12,7 +12,7 @@ class TicketAnswerRecord(Base):
     ordinal = Column(Integer, nullable=False)
     ticket_answer = Column(String(255), nullable=False)
 
-    # Relationships to Ticket and TicketQuestion
+    # Relationships to Ticket
     ticket = relationship("Ticket", back_populates="ticket_answer_records")
 
     __table_args__ = (UniqueConstraint('ticket_id', 'ticket_question', name='UC_TicketAnswerTicket'),)

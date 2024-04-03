@@ -5,8 +5,7 @@ from datetime import date
 
 
 class TicketAnswer(BaseModel):
-    question: str
-    ordinal: int
+    questionId: int
     answer: str
 
 

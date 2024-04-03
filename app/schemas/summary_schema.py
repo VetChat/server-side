@@ -30,14 +30,18 @@ class TicketLabel(BaseModel):
     ordinal: int
 
 
-class TicketSummaryResponse(BaseModel):
-    ticketId: int
-    label: List[TicketLabel]
-    info: List[TicketInfo]
-    summary: List[SymptomSummary]
-
-
 class TicketEachSummaryResponse(BaseModel):
     ticketId: int
     info: List[TicketInfo]
     summary: List[SymptomSummary]
+
+
+class TicketDataResponse(BaseModel):
+    ticketId: int
+    info: List[TicketInfo]
+    summary: List[SymptomSummary]
+
+
+class TicketSummaryResponse(BaseModel):
+    label: List[TicketLabel]
+    listTicket: List[TicketDataResponse]

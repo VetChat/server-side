@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.crud import TicketCRUD, SummaryCRUD
 from app.database import get_db
 from app.schemas import TicketSummaryResponse, TicketInfo, SymptomSummary, AnswerSummary, TicketLabel, \
-    TicketEachSummaryResponse
+    TicketEachSummaryResponse, TicketDataResponse
 from app.utils import limiter
 
 router = APIRouter()
@@ -23,7 +23,7 @@ async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Opt
     summary_crud = SummaryCRUD(db)
 
     ticket_info = summary_crud.fetch_ticket_info_by_ticket_ids(tickets_id)
-    fifth_question = summary_crud.fetch_first_fifth_ticket_question()
+    fifth_question = summary_crud.fetch_ticket_questions_by_range(5)
     summary = summary_crud.fetch_summary_by_ticket_ids(tickets_id)
 
     dict_ticket_info = {ticket_id: [] for ticket_id in tickets_id}
@@ -37,38 +37,42 @@ async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Opt
 
     response = [
         TicketSummaryResponse(
-            ticketId=ticket_id,
             label=[
                 TicketLabel(
-                    ticketQuestion=ticket_label.ticket_question,
-                    ordinal=ticket_label.ordinal
-                ) for ticket_label in fifth_question
+                    ticketQuestion=label.ticket_question,
+                    ordinal=label.ordinal
+                ) for label in fifth_question
             ],
-            info=[
-                TicketInfo(
-                    ticketAnswerRecordId=info.ticket_answer_record_id,
-                    ticketAnswer=info.ticket_answer,
-                    ticketQuestion=info.ticket_question,
-                    ordinal=info.ordinal
-                ) for info in dict_ticket_info[ticket_id]
-            ],
-            summary=[
-                SymptomSummary(
-                    symptomId=dict_summary[ticket_id][symptom_id][0].symptom_id,
-                    symptomName=dict_summary[ticket_id][symptom_id][0].symptom_name,
-                    listAnswer=[
-                        AnswerSummary(
-                            answerRecordId=answer.answer_record_id,
-                            question=answer.question,
-                            imagePath=answer.image_path,
-                            ordinal=i,
-                            answer=answer.answer,
-                            summary=answer.summary
-                        ) for i, answer in enumerate(dict_summary[ticket_id][symptom_id], start=1)
+            listTicket=[
+                TicketDataResponse(
+                    ticketId=ticket_id,
+                    info=[
+                        TicketInfo(
+                            ticketAnswerRecordId=info.ticket_answer_record_id,
+                            ticketAnswer=info.ticket_answer,
+                            ticketQuestion=info.ticket_question,
+                            ordinal=info.ordinal
+                        ) for info in dict_ticket_info[ticket_id]
+                    ],
+                    summary=[
+                        SymptomSummary(
+                            symptomId=dict_summary[ticket_id][symptom_id][0].symptom_id,
+                            symptomName=dict_summary[ticket_id][symptom_id][0].symptom_name,
+                            listAnswer=[
+                                AnswerSummary(
+                                    answerRecordId=answer.answer_record_id,
+                                    question=answer.question,
+                                    imagePath=answer.image_path,
+                                    ordinal=i,
+                                    answer=answer.answer,
+                                    summary=answer.summary
+                                ) for i, answer in enumerate(dict_summary[ticket_id][symptom_id], start=1)
+                            ]
+                        ) for symptom_id in dict_summary[ticket_id]
                     ]
-                ) for symptom_id in dict_summary[ticket_id]
+                ) for ticket_id in tickets_id
             ]
-        ) for ticket_id in tickets_id
+        )
     ]
 
     return response

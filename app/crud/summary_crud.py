@@ -16,13 +16,12 @@ class SummaryCRUD:
     def fetch_ticket_info_by_ticket_id(self, ticket_id: int):
         return self._fetch_ticket_info(TicketAnswerRecord.ticket_id == ticket_id)
 
-    def fetch_first_fifth_ticket_question(self):
+    def fetch_ticket_questions_by_range(self, end_range: int):
         return (
             self.db.query(TicketQuestion.ticket_question,
                           TicketQuestion.ordinal)
-            .join(TicketAnswerRecord.ticket_question)
-            .filter(TicketQuestion.ordinal.in_([1, 5]))
-            .order_by(TicketAnswerRecord.ticket_id, TicketQuestion.ordinal)
+            .filter(TicketQuestion.ordinal.in_(range(1, end_range + 1)))
+            .order_by(TicketQuestion.ordinal)
             .all()
         )
 
