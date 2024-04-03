@@ -24,3 +24,11 @@ class QuestionSetCRUD:
         self.db.commit()
         self.db.refresh(new_question_set)
         return new_question_set
+
+    def remove_question_set(self, question_set_id: int):
+        question_set = self.fetch_question_set_id_by_id(question_set_id)
+        if question_set:
+            self.db.delete(question_set)
+            self.db.commit()
+            return True
+        return False

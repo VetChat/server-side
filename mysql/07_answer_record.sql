@@ -2,23 +2,24 @@
 CREATE TABLE IF NOT EXISTS answer_record
 (
     answer_record_id INT AUTO_INCREMENT,
-    ticket_id        INT NOT NULL,
-    answer_id        INT NOT NULL,
+    ticket_id        INT          NOT NULL,
+    question         VARCHAR(255) NOT NULL,
+    answer           VARCHAR(255) NOT NULL,
+    summary          VARCHAR(255),
     PRIMARY KEY (answer_record_id),
     CONSTRAINT FK_AnswerRecordTicket FOREIGN KEY (ticket_id) REFERENCES ticket (ticket_id) ON DELETE CASCADE,
-    CONSTRAINT FK_AnswerRecordAnswer FOREIGN KEY (answer_id) REFERENCES answer (answer_id) ON DELETE CASCADE,
-    CONSTRAINT UC_AnswerTicket UNIQUE (ticket_id, answer_id)
+    CONSTRAINT UC_AnswerTicket UNIQUE (ticket_id, question)
 );
 
 -- Insert mock data to the answer record table
 INSERT INTO answer_record
-VALUES (1, 1, 2),
-       (2, 1, 5),
-       (3, 1, 7),
-       (4, 2, 10),
-       (5, 2, 14),
-       (6, 2, 16),
-       (7, 3, 22),
-       (8, 3, 23),
-       (9, 3, 26),
-       (10, 3, 28);
+VALUES (1, 1, 'First Question', 'no', NULL),
+       (2, 1, 'Third Question', '<14', 'advance diarrhea'),
+       (3, 1, 'Fourth Question', 'yes', NULL),
+       (4, 2, 'First Question', 'liquid', NULL),
+       (5, 2, 'Third Question', 'yes', NULL),
+       (6, 2, 'Fourth Question', 'Mage', NULL),
+       (7, 3, 'First Question', 'no', NULL),
+       (8, 3, 'Second Question', 'yes', NULL),
+       (9, 3, 'Third Question', 'no', NULL),
+       (10, 3, 'Fourth Question', 'no', NULL);

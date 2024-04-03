@@ -12,7 +12,7 @@ from app.utils import limiter
 router = APIRouter()
 
 
-@router.get("/summary/", response_model=List[TicketSummaryResponse], tags=["Summary"])
+@router.get("/summary", response_model=List[TicketSummaryResponse], tags=["Summary"])
 @limiter.limit("20/minute")
 async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Optional[int] = 0,
                       db: Session = Depends(get_db)) -> List[TicketSummaryResponse]:

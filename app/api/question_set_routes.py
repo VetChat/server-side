@@ -65,3 +65,23 @@ async def add_question_set(request: Request, create_body: QuestionSetCreateBody,
         animalId=question_set_data.animal_id,
         message="The question set has been successfully added."
     )
+
+
+@router.delete("/question_set/{question_set_id}", response_model=QuestionSetResponse, tags=["Question Set"])
+@limiter.limit("5/minute")
+async def delete_question_set(request: Request, question_set_id: int,
+                              db: Session = Depends(get_db)) -> QuestionSetResponse:
+    question_set_crud = QuestionSetCRUD(db)
+    question_set_data = question_set_crud.fetch_question_set_id_by_id(question_set_id)
+
+    if not question_set_data:
+        raise HTTPException(status_code=404, detail=f"Question set with id {question_set_id} not found")
+
+    question_set_crud.remove_question_set(question_set_id)
+
+    return QuestionSetResponse(
+        questionSetId=question_set_data.question_set_id,
+        symptomId=question_set_data.symptom_id,
+        animalId=question_set_data.animal_id,
+        message="The question set has been successfully deleted."
+    )
