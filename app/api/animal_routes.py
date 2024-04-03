@@ -55,7 +55,7 @@ async def add_animal(request: Request, animal: AnimalCreate, db: Session = Depen
     )
 
 
-@router.put("/animal/", response_model=AnimalUpdate, tags=["Animals"])
+@router.put("/animal", response_model=AnimalUpdate, tags=["Animals"])
 @limiter.limit("5/minute")
 async def update_animal(request: Request, animal: AnimalRead,
                         db: Session = Depends(get_db)) -> AnimalUpdate:
