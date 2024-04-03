@@ -23,7 +23,8 @@ async def create_ticket(request: Request, ticket_data: TicketCreate, db: Session
     for answer_data in ticket_data.listAnswer:
         ticket_answer_record_crud.create_ticket_answer_record(
             ticket_id=ticket.ticket_id,
-            question_id=answer_data.questionId,
+            question=answer_data.question,
+            ordinal=answer_data.ordinal,
             answer=answer_data.answer
         )
 

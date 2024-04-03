@@ -8,7 +8,8 @@ from .question_set_schema import QuestionSetRequest, QuestionSetCreateBody, Ques
 from .question_schema import QuestionResponse, QuestionList
 from .answer_schema import AnswerRead
 from .answer_record_schema import AnswerRecordCreate, AnswerRecordResponse
-from .summary_schema import TicketSummaryResponse, TicketInfo, SymptomSummary, AnswerSummary
+from .summary_schema import TicketSummaryResponse, TicketInfo, SymptomSummary, AnswerSummary, TicketLabel, \
+    TicketEachSummaryResponse
 from .ticket_question_schema import TicketQuestionRead, TicketAnswerRead
 
 __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseByAnimalResponse", "UrgentCaseRead",
@@ -18,4 +19,4 @@ __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseByAnimalRe
            "AnswerRecordResponse", "TicketSummaryResponse", "TicketQuestionRead", "TicketAnswerRead",
            "SymptomCreateBody", "SymptomResponse", "AnimalUpdate", "SymptomUpdate", "TicketInfo", "SymptomSummary",
            "AnswerSummary", "QuestionList", "UrgentCaseUpdateFailed", "UrgentCaseId", "QuestionSetCreateBody",
-           "QuestionSetResponse"]
+           "QuestionSetResponse", "TicketLabel", "TicketEachSummaryResponse"]
