@@ -43,3 +43,6 @@ async def get_question_set_by_question_set_id(request: Request, question_set_id:
     ]
 
     return question_response
+
+
+@router.post("/question_set/question_set_ids", response_model=List[QuestionList], tags=["Question Set"])
