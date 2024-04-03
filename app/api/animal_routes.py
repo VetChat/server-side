@@ -1,12 +1,18 @@
 from typing import List
 from fastapi import Request, APIRouter, Depends, HTTPException
+from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from ..utils import limiter
 from ..database import get_db
 from ..crud import AnimalCRUD
 from ..schemas import AnimalRead, AnimalCreate, AnimalResponse, AnimalUpdate
 
-router = APIRouter()
+
+def custom_generate_unique_id(route: APIRoute):
+    return f"{route.tags[0]}-{route.name}"
+
+
+router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 
 
 @router.get("/animals", response_model=List[AnimalRead], tags=["Animals"])

@@ -2,6 +2,7 @@ from collections import defaultdict
 from typing import Optional, List
 
 from fastapi import Request, APIRouter, Depends
+from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 
 from app.crud import TicketCRUD, SummaryCRUD
@@ -9,7 +10,12 @@ from app.database import get_db
 from app.schemas import TicketSummaryResponse, TicketInfo, SymptomSummary, AnswerSummary
 from app.utils import limiter
 
-router = APIRouter()
+
+def custom_generate_unique_id(route: APIRoute):
+    return f"{route.tags[0]}-{route.name}"
+
+
+router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 
 
 @router.get("/summary/", response_model=List[TicketSummaryResponse], tags=["Summary"])
