@@ -1,10 +1,10 @@
 from typing import List
 from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..utils import limiter
-from ..database import get_db
-from ..schemas import SymptomWithQuestions, SymptomRead, SymptomCreateBody, SymptomResponse, SymptomUpdate
-from ..crud import QuestionSetCRUD, AnimalCRUD, SymptomCRUD
+from app.utils import limiter
+from app.database import get_db
+from app.schemas import SymptomWithQuestions, SymptomRead, SymptomCreateBody, SymptomResponse, SymptomUpdate
+from app.crud import AnimalCRUD, SymptomCRUD
 
 router = APIRouter()
 
@@ -36,8 +36,8 @@ async def get_symptoms_by_animal_id(request: Request, animal_id: int, db: Sessio
         raise HTTPException(status_code=404, detail="Animal not found")
 
     # Get list of symptoms by animal_id
-    question_set_crud = QuestionSetCRUD(db)
-    symptoms_data = question_set_crud.fetch_symptoms_by_animal_id(animal.animal_id)
+    symptom_crud = SymptomCRUD(db)
+    symptoms_data = symptom_crud.fetch_symptoms_by_animal_id(animal.animal_id)
     symptoms_response: List[SymptomWithQuestions] = [
         SymptomWithQuestions(
             symptomId=symptoms.symptom_id,

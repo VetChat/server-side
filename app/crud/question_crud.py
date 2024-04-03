@@ -8,6 +8,15 @@ class QuestionCRUD:
     def __init__(self, db: Session):
         self.db = db
 
+    def fetch_questions_by_question_set_id(self, question_set_id: int):
+        return (
+            self.db.query(Question)
+            .filter(Question.question_set_id == question_set_id)
+            .options(joinedload(Question.answers))
+            .order_by(Question.ordinal)
+            .all()
+        )
+
     def fetch_questions_by_set_ids(self, question_set_ids: List[int]):
         return (
             self.db.query(Question, Symptom.symptom_id, Symptom.symptom_name)
