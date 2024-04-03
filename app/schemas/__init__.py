@@ -4,7 +4,7 @@ from .urgent_case_schema import UrgentCaseByAnimalResponse, UrgentCaseRead, Urge
 from .urgency_schema import UrgencyRead, UrgencyResponse, UrgencyMostRequest
 from .ticket_schema import TicketCreate, TicketAnswer, TicketId
 from .symptom_schema import SymptomRead, SymptomCreateBody, SymptomResponse, SymptomUpdate, SymptomWithQuestions
-from .question_set_schema import QuestionSetRequest
+from .question_set_schema import QuestionSetRequest, QuestionSetCreateBody, QuestionSetResponse
 from .question_schema import QuestionResponse, QuestionList
 from .answer_schema import AnswerRead
 from .answer_record_schema import AnswerRecordCreate, AnswerRecordResponse
@@ -17,4 +17,5 @@ __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseByAnimalRe
            "SymptomRead", "QuestionSetRequest", "QuestionResponse", "AnswerRead", "AnswerRecordCreate",
            "AnswerRecordResponse", "TicketSummaryResponse", "TicketQuestionRead", "TicketAnswerRead",
            "SymptomCreateBody", "SymptomResponse", "AnimalUpdate", "SymptomUpdate", "TicketInfo", "SymptomSummary",
-           "AnswerSummary", "QuestionList", "UrgentCaseUpdateFailed", "UrgentCaseId"]
+           "AnswerSummary", "QuestionList", "UrgentCaseUpdateFailed", "UrgentCaseId", "QuestionSetCreateBody",
+           "QuestionSetResponse"]

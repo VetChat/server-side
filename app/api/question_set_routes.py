@@ -2,7 +2,7 @@ from typing import List
 from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.schemas import QuestionList, AnswerRead
+from app.schemas import QuestionList, AnswerRead, QuestionSetCreateBody, QuestionSetResponse
 from app.utils import limiter
 from app.database import get_db
 from app.crud import QuestionCRUD, QuestionSetCRUD
@@ -45,4 +45,23 @@ async def get_question_set_by_question_set_id(request: Request, question_set_id:
     return question_response
 
 
-@router.post("/question_set/question_set_ids", response_model=List[QuestionList], tags=["Question Set"])
+@router.post("/question_set", response_model=QuestionSetResponse, tags=["Question Set"])
+@limiter.limit("5/minute")
+async def add_question_set(request: Request, create_body: QuestionSetCreateBody, db: Session = Depends(get_db)) \
+        -> QuestionSetResponse:
+    question_set_crud = QuestionSetCRUD(db)
+    existing_question_set = question_set_crud.fetch_question_set_by_symptom_animal_id(create_body.symptomId,
+                                                                                      create_body.animalId)
+
+    if existing_question_set:
+        raise HTTPException(status_code=409,
+                            detail=f"Question set with symptom id {create_body.symptomId} and animal id {create_body.animalId} already exists")
+
+    question_set_data = question_set_crud.create_question_set(create_body.symptomId, create_body.animalId)
+
+    return QuestionSetResponse(
+        questionSetId=question_set_data.question_set_id,
+        symptomId=question_set_data.symptom_id,
+        animalId=question_set_data.animal_id,
+        message="The question set has been successfully added."
+    )

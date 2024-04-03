@@ -8,3 +8,19 @@ class QuestionSetCRUD:
 
     def fetch_question_set_id_by_id(self, question_set_id: int):
         return self.db.query(QuestionSet).filter(QuestionSet.question_set_id == question_set_id).first()
+
+    def fetch_question_set_by_symptom_animal_id(self, symptom_id: int, animal_id: int):
+        return (self.db.query(QuestionSet)
+                .filter(QuestionSet.symptom_id == symptom_id,
+                        QuestionSet.animal_id == animal_id)
+                .first())
+
+    def create_question_set(self, symptom_id: int, animal_id: int):
+        new_question_set = QuestionSet(
+            symptom_id=symptom_id,
+            animal_id=animal_id
+        )
+        self.db.add(new_question_set)
+        self.db.commit()
+        self.db.refresh(new_question_set)
+        return new_question_set
