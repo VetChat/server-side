@@ -5,32 +5,35 @@ from sqlalchemy.orm import Session
 from app.utils import limiter
 from app.database import get_db
 from app.crud import UrgentCaseCRUD, AnimalCRUD
-from app.schemas import UrgentCaseByAnimalResponse, UrgentCaseResponse, UrgentCaseCreate, UrgentCaseUpdate, \
+from app.schemas import UrgentCaseWithUrgency, UrgentCaseResponse, UrgentCaseCreate, UrgentCaseUpdate, \
     UrgentCaseBulkResponse, UrgentCaseUpdateFailed, UrgentCaseId
 
 router = APIRouter()
 
 
-@router.get("/urgent_cases/", response_model=List[UrgentCaseByAnimalResponse], tags=["Urgent Cases"])
+@router.get("/urgent_cases/", response_model=List[UrgentCaseWithUrgency], tags=["Urgent Cases"])
 @limiter.limit("10/minute")
-async def get_all_urgent_cases(request: Request, db: Session = Depends(get_db)) -> List[UrgentCaseByAnimalResponse]:
+async def get_all_urgent_cases(request: Request, db: Session = Depends(get_db)) -> List[UrgentCaseWithUrgency]:
     urgent_crud = UrgentCaseCRUD(db)
     urgent_cases = urgent_crud.fetch_all_urgent_case()
     urgent_cases_response = [
-        UrgentCaseByAnimalResponse(
+        UrgentCaseWithUrgency(
             urgentId=urgent.urgent_id,
             urgentName=urgent.urgent_name,
-            urgencyId=urgent.urgency_id
+            urgencyId=urgent.urgency_id,
+            urgencyDetail=urgent.urgency_detail,
+            duration=urgent.duration,
+            urgencyLevel=urgent.urgency_level
         )
         for urgent in urgent_cases
     ]
     return urgent_cases_response
 
 
-@router.get("/animal/{animal_id}/urgent_cases", response_model=List[UrgentCaseByAnimalResponse], tags=["Urgent Cases"])
+@router.get("/animal/{animal_id}/urgent_cases", response_model=List[UrgentCaseWithUrgency], tags=["Urgent Cases"])
 @limiter.limit("10/minute")
 async def get_urgent_cases_by_animal_id(request: Request, animal_id: int, db: Session = Depends(get_db)) -> (
-        List)[UrgentCaseByAnimalResponse]:
+        List)[UrgentCaseWithUrgency]:
     animal_crud = AnimalCRUD(db)
     animal = animal_crud.fetch_animal_by_id(animal_id)
     if not animal:
@@ -39,10 +42,13 @@ async def get_urgent_cases_by_animal_id(request: Request, animal_id: int, db: Se
     urgent_crud = UrgentCaseCRUD(db)
     urgent_cases = urgent_crud.fetch_urgent_case_by_animal_id(animal_id)
     urgent_cases_response = [
-        UrgentCaseByAnimalResponse(
+        UrgentCaseWithUrgency(
             urgentId=urgent.urgent_id,
             urgentName=urgent.urgent_name,
-            urgencyId=urgent.urgency_id
+            urgencyId=urgent.urgency_id,
+            urgencyDetail=urgent.urgency_detail,
+            duration=urgent.duration,
+            urgencyLevel=urgent.urgency_level
         )
         for urgent in urgent_cases
     ]
