@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS answer
     skip_to_question INT,
     PRIMARY KEY (answer_id),
     CONSTRAINT FK_QuestionAnswer FOREIGN KEY (question_id) REFERENCES question (question_id) ON DELETE CASCADE
-);
+) CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;;
 
 -- Insert mock data to the answer table
 INSERT INTO answer

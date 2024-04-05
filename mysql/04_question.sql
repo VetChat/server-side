@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS question
     PRIMARY KEY (question_id),
     INDEX idx_question_set_id (question_set_id),
     CONSTRAINT FK_QuestionSet FOREIGN KEY (question_set_id) REFERENCES question_set (question_set_id) ON DELETE CASCADE
-);
+) CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;;
 
 -- Insert mock data into the question table
 INSERT INTO question

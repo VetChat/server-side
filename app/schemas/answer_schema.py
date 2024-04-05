@@ -10,3 +10,11 @@ class AnswerRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class AnswerCreate(BaseModel):
+    answer: str
+    skipToQuestion: Optional[int] = None
+
+    class Config:
+        from_attributes = True

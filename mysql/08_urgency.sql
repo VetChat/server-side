@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS urgency
     urgency_level  INT          NOT NULL,
     PRIMARY KEY (urgency_id),
     CONSTRAINT UC_Urgency UNIQUE (urgency_detail, duration, urgency_level)
-);
+) CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;;
 
 -- Insert mock data into the urgency table
 INSERT INTO urgency

@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS answer_record
     PRIMARY KEY (answer_record_id),
     CONSTRAINT FK_AnswerRecordTicket FOREIGN KEY (ticket_id) REFERENCES ticket (ticket_id) ON DELETE CASCADE,
     CONSTRAINT UC_AnswerTicket UNIQUE (ticket_id, question)
-);
+) CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;;
 
 -- Insert mock data to the answer record table
 INSERT INTO answer_record
