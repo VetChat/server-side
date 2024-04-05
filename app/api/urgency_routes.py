@@ -24,7 +24,7 @@ async def get_all_urgency(request: Request, db: Session = Depends(get_db)) -> Li
         )
         for urgency in urgencies
     ]
-    return urgencies
+    return response
 
 
 @router.post("/urgency/most_urgent", response_model=UrgencyResponse, tags=["Urgency"])
