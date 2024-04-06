@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from ..utils import limiter
 from ..database import get_db
 from ..crud import UrgencyCRUD
-from ..schemas import UrgencyResponse, UrgencyMostRequest
+from ..schemas import UrgencyResponse, UrgencyMostRequest, UrgencyRead
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -13,6 +13,24 @@ def custom_generate_unique_id(route: APIRoute):
 
 
 router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
+
+
+@router.get("/urgency", response_model=List[UrgencyResponse], tags=["Urgency"])
+@limiter.limit("30/minute")
+async def get_all_urgency(request: Request, db: Session = Depends(get_db)) -> List[UrgencyRead]:
+    urgency_crud = UrgencyCRUD(db)
+    urgencies = urgency_crud.fetch_all_urgency()
+
+    response = [
+        UrgencyRead(
+            urgencyId=urgency.urgency_id,
+            urgencyDetail=urgency.urgency_detail,
+            duration=urgency.duration,
+            urgencyLevel=urgency.urgency_level
+        )
+        for urgency in urgencies
+    ]
+    return response
 
 
 @router.post("/urgency/most_urgent", response_model=UrgencyResponse, tags=["Urgency"])

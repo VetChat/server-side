@@ -50,10 +50,17 @@ class UrgentCaseCRUD:
             .all()
         )
 
-    def fetch_urgent_case_by_name(self, animal_id: int, urgent_case: UrgentCaseCreate):
+    def fetch_urgent_case_by_name(self, animal_id: int, urgent_name: str):
         return (
             self.db.query(UrgentCase)
-            .filter(and_(UrgentCase.animal_id == animal_id, UrgentCase.urgent_name == urgent_case.urgent_name))
+            .filter(and_(UrgentCase.animal_id == animal_id, UrgentCase.urgent_name == urgent_name))
+            .first()
+        )
+
+    def fetch_urgent_cases_by_name(self, animal_id: int, urgent_names: List[str]):
+        return (
+            self.db.query(UrgentCase)
+            .filter(and_(UrgentCase.animal_id == animal_id, UrgentCase.urgent_name.in_(urgent_names)))
             .first()
         )
 
@@ -64,10 +71,11 @@ class UrgentCaseCRUD:
             .all()
         )
 
-    def add_urgent_case(self, urgent_name: str, urgency_id: int):
+    def add_urgent_case(self, urgent_name: str, urgency_id: int, animal_id: int):
         new_urgent_case = UrgentCase(
             urgent_name=urgent_name,
-            urgency_id=urgency_id
+            urgency_id=urgency_id,
+            animal_id=animal_id
         )
         self.db.add(new_urgent_case)
         self.db.commit()

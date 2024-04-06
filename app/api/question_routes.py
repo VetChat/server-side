@@ -3,10 +3,13 @@ from fastapi import Request, APIRouter, Depends, HTTPException
 from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from collections import defaultdict
-from ..utils import limiter
-from ..database import get_db
-from ..crud import QuestionCRUD
-from ..schemas import QuestionSetRequest, QuestionResponse, AnswerRead, QuestionList
+
+from app.schemas.question_schema import QuestionWithListAnswerResponse
+from app.utils import limiter
+from app.database import get_db
+from app.crud import QuestionCRUD, AnswerCRUD
+from app.schemas import QuestionSetRequest, QuestionResponse, AnswerRead, QuestionWithListAnswer, \
+    QuestionWithListAnswerCreate, AnswerBulkResponse, AnswerResponse, AnswerCreateFailed
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -38,7 +41,7 @@ async def get_questions_by_set_ids(request: Request, question: List[QuestionSetR
             symptomId=symptom_id,
             symptomName=symptom_name,
             listQuestion=[
-                QuestionList(
+                QuestionWithListAnswer(
                     questionId=question.Question.question_id,
                     question=question.Question.question,
                     pattern=question.Question.pattern,
@@ -60,3 +63,61 @@ async def get_questions_by_set_ids(request: Request, question: List[QuestionSetR
     ]
 
     return questions_response
+
+
+@router.post("/question_set/question", response_model=QuestionWithListAnswerResponse, tags=["Question"])
+@limiter.limit("10/minute")
+async def create_question_by_set_id(request: Request, question: QuestionWithListAnswerCreate,
+                                    db: Session = Depends(get_db)) -> QuestionWithListAnswerResponse:
+    question_crud = QuestionCRUD(db)
+    questions_data = question_crud.fetch_question_by_question_and_question_set_id(question.question,
+                                                                                  question.questionSetId)
+
+    if questions_data:
+        raise HTTPException(status_code=409,
+                            detail=f"Question with ID {question.question} in this question set already exists")
+
+    question_data = question_crud.create_question(question.questionSetId, question.question, question.pattern,
+                                                  question.ordinal, question.imagePath)
+
+    if not question_data:
+        raise HTTPException(status_code=500, detail="Failed to add the question")
+
+    answer_crud = AnswerCRUD(db)
+    existed_answers = answer_crud.fetch_answer_by_question_id_and_answer(question_data.question_id,
+                                                                         [a.answer for a in question.listAnswer])
+
+    if existed_answers:
+        raise HTTPException(status_code=409,
+                            detail=f"Answers for question with ID {question.questionId} already exists")
+
+    answer_result = AnswerBulkResponse(success=[], failed=[])
+    for answer in question.listAnswer:
+        answer_data = answer_crud.create_answer(question_data.question_id, answer.answer, answer.summary,
+                                                answer.skipToQuestion)
+        if answer_data:
+            answer_result.success.append(
+                AnswerResponse(
+                    answerId=answer_data.answer_id,
+                    answer=answer_data.answer,
+                    summary=answer_data.summary,
+                    skipToQuestion=answer_data.skip_to_question,
+                    message="Answer added successfully"
+                )
+            )
+        else:
+            answer_result.failed.append(
+                AnswerCreateFailed(
+                    answer=answer_data.answer,
+                    message="Failed to add the answer"
+                )
+            )
+
+    return QuestionWithListAnswerResponse(
+        questionId=question_data.question_id,
+        question=question_data.question,
+        pattern=question_data.pattern,
+        imagePath=question_data.image_path,
+        ordinal=question_data.ordinal,
+        listAnswer=answer_result
+    )

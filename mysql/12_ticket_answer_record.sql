@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS ticket_answer_record
     PRIMARY KEY (ticket_answer_record_id),
     CONSTRAINT FK_TicketAnswerRecordTicket FOREIGN KEY (ticket_id) REFERENCES ticket (ticket_id) ON DELETE CASCADE,
     CONSTRAINT UC_TicketAnswerTicket UNIQUE (ticket_id, ticket_question)
-);
+) CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;;
 
 -- Mock data to the ticket answer record table
 INSERT INTO ticket_answer_record

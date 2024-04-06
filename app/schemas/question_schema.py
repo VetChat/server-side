@@ -1,10 +1,9 @@
-from typing import Optional, List
-
+from typing import List, Optional
 from pydantic import BaseModel
-from .answer_schema import AnswerRead
+from .answer_schema import AnswerRead, AnswerCreate, AnswerBulkResponse
 
 
-class QuestionList(BaseModel):
+class QuestionWithListAnswer(BaseModel):
     questionId: int
     question: str
     pattern: str
@@ -12,14 +11,26 @@ class QuestionList(BaseModel):
     ordinal: int
     listAnswer: List[AnswerRead]
 
-    class Config:
-        from_attributes = True
-
 
 class QuestionResponse(BaseModel):
     symptomId: int
     symptomName: str
-    listQuestion: List[QuestionList]
+    listQuestion: List[QuestionWithListAnswer]
 
-    class Config:
-        from_attributes = True
+
+class QuestionWithListAnswerCreate(BaseModel):
+    questionSetId: int
+    question: str
+    pattern: str
+    imagePath: Optional[str] = None
+    ordinal: int
+    listAnswer: List[AnswerCreate]
+
+
+class QuestionWithListAnswerResponse(BaseModel):
+    questionId: int
+    question: str
+    pattern: str
+    imagePath: Optional[str] = None
+    ordinal: int
+    listAnswer: AnswerBulkResponse
