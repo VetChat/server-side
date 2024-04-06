@@ -1,5 +1,6 @@
 from typing import List
 
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
 from ..models import Question, Symptom, QuestionSet
 from ..schemas import QuestionWithListAnswer
@@ -9,10 +10,10 @@ class QuestionCRUD:
     def __init__(self, db: Session):
         self.db = db
 
-    def fetch_question_by_question_id_and_question_set_id(self, question_id: int, question_set_id: int):
+    def fetch_question_by_question_and_question_set_id(self, question: str, question_set_id: int):
         return (
             self.db.query(Question)
-            .filter(Question.question_id == question_id, Question.question_set_id == question_set_id)
+            .filter(Question.question == question, Question.question_set_id == question_set_id)
             .first()
         )
 
@@ -51,7 +52,11 @@ class QuestionCRUD:
             ordinal=ordinal,
             image_path=image_path
         )
-        self.db.add(new_question)
-        self.db.commit()
-        self.db.refresh(new_question)
-        return new_question
+        try:
+            self.db.add(new_question)
+            self.db.commit()
+            self.db.refresh(new_question)
+            return new_question
+        except SQLAlchemyError:
+            self.db.rollback()
+            return None

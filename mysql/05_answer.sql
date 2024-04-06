@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS answer
     summary          VARCHAR(255),
     skip_to_question INT,
     PRIMARY KEY (answer_id),
-    CONSTRAINT FK_QuestionAnswer FOREIGN KEY (question_id) REFERENCES question (question_id) ON DELETE CASCADE
+    CONSTRAINT FK_QuestionAnswer FOREIGN KEY (question_id) REFERENCES question (question_id) ON DELETE CASCADE,
+    CONSTRAINT UC_Answer UNIQUE (question_id, answer),
+    INDEX idx_question_id (question_id)
 ) CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;;
 
