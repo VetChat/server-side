@@ -11,6 +11,10 @@ class BaseQuestion(BaseModel):
     ordinal: int
 
 
+class QuestionId(BaseModel):
+    questionId: int
+
+
 class QuestionWithListAnswer(BaseQuestion):
     listAnswer: List[AnswerRead]
 
@@ -68,4 +72,9 @@ class QuestionCreateBulkResponse(BaseModel):
 
 class QuestionUpdateBulkResponse(BaseModel):
     success: Optional[List[QuestionWithListAnswerUpdateResponse]] = None
+    failed: Optional[List[QuestionUpdateFailedResponse]] = None
+
+
+class QuestionDeleteBulkResponse(BaseModel):
+    success: Optional[List[QuestionWithListAnswerDeleteResponse]] = None
     failed: Optional[List[QuestionUpdateFailedResponse]] = None

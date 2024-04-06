@@ -4,7 +4,7 @@ from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from collections import defaultdict
 
-from app.schemas.question_schema import QuestionWithListAnswerUpdateResponse
+from app.schemas.question_schema import QuestionWithListAnswerUpdateResponse, QuestionId, QuestionDeleteBulkResponse
 from app.utils import limiter
 from app.database import get_db
 from app.crud import QuestionCRUD, AnswerCRUD
@@ -221,6 +221,76 @@ async def update_questions(request: Request, question: List[QuestionWithListAnsw
                 ordinal=question_data.ordinal,
                 listAnswer=answer_result,
                 message="Question updated successfully"
+            )
+        )
+
+    return question_result
+
+
+@router.delete("/question_set/question/bulk", response_model=QuestionDeleteBulkResponse, tags=["Question"])
+@limiter.limit("2/minute")
+async def delete_questions(request: Request, question_ids: List[QuestionId],
+                           db: Session = Depends(get_db)) -> QuestionDeleteBulkResponse:
+    print("test")
+    question_crud = QuestionCRUD(db)
+    questions_data = question_crud.fetch_question_by_list_id([q.questionId for q in question_ids])
+
+    if len(questions_data) != len(question_ids):
+        raise HTTPException(status_code=404, detail=f"One or more question id not found")
+
+    answer_crud = AnswerCRUD(db)
+
+    question_result = QuestionDeleteBulkResponse(success=[], failed=[])
+    for q in question_ids:
+        question_data = question_crud.fetch_question_by_id(q.questionId)
+        answers = question_data.answers
+
+        for answer in answers:
+            is_success = answer_crud.delete_answer(answer.answer_id)
+            if not is_success:
+                question_result.failed.append(
+                    QuestionUpdateFailedResponse(
+                        questionId=question_data.question_id,
+                        question=question_data.question,
+                        pattern=question_data.pattern,
+                        imagePath=question_data.image_path,
+                        ordinal=question_data.ordinal,
+                        message=f"Failed to delete the answer with ID {answer.answer_id}"
+                    )
+                )
+                continue
+
+        is_success = question_crud.delete_question(question_data.question_id)
+
+        if not is_success:
+            question_result.failed.append(
+                QuestionUpdateFailedResponse(
+                    questionId=question_data.question_id,
+                    question=question_data.question,
+                    pattern=question_data.pattern,
+                    imagePath=question_data.image_path,
+                    ordinal=question_data.ordinal,
+                    message="Failed to delete the question"
+                )
+            )
+            continue
+
+        question_result.success.append(
+            QuestionWithListAnswerDeleteResponse(
+                questionId=question_data.question_id,
+                question=question_data.question,
+                pattern=question_data.pattern,
+                imagePath=question_data.image_path,
+                ordinal=question_data.ordinal,
+                listAnswer=[
+                    AnswerRead(
+                        answerId=answer.answer_id,
+                        answer=answer.answer,
+                        summary=answer.summary,
+                        skipToQuestion=answer.skip_to_question
+                    ) for answer in answers
+                ],
+                message="Question deleted successfully"
             )
         )
 

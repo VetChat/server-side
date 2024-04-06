@@ -177,27 +177,6 @@ async def update_urgent_cases(request: Request, urgent_cases: List[UrgentCaseUpd
     return urgent_cases_data
 
 
-@router.delete("/urgent_cases/{urgent_id}", response_model=UrgentCaseResponse, tags=["Urgent Cases"])
-@limiter.limit("5/minute")
-async def remove_urgent_case(request: Request, urgent_id: int, db: Session = Depends(get_db)) -> UrgentCaseResponse:
-    urgent_crud = UrgentCaseCRUD(db)
-    urgent_case_data = urgent_crud.fetch_urgent_case_by_id(urgent_id)
-    if urgent_case_data is None:
-        raise HTTPException(status_code=404, detail=f"Urgent case with id {urgent_id} not found")
-
-    is_success = urgent_crud.remove_urgent_case(urgent_id)
-    if not is_success:
-        raise HTTPException(status_code=500, detail=f"Failed to remove the urgent case id: {urgent_id}")
-
-    return UrgentCaseResponse(
-        urgentId=urgent_case_data.urgent_id,
-        urgentName=urgent_case_data.urgent_name,
-        urgencyId=urgent_case_data.urgency_id,
-        animalId=urgent_case_data.animal_id,
-        message="The urgent case has been successfully removed."
-    )
-
-
 @router.delete("/urgent_cases/bulk", response_model=UrgentCaseBulkResponse, tags=["Urgent Cases"])
 @limiter.limit("2/minute")
 async def remove_urgent_cases(request: Request, urgent_ids: List[UrgentCaseId],
@@ -229,3 +208,24 @@ async def remove_urgent_cases(request: Request, urgent_ids: List[UrgentCaseId],
             )
 
     return urgent_cases_data
+
+
+@router.delete("/urgent_cases/{urgent_id}", response_model=UrgentCaseResponse, tags=["Urgent Cases"])
+@limiter.limit("5/minute")
+async def remove_urgent_case(request: Request, urgent_id: int, db: Session = Depends(get_db)) -> UrgentCaseResponse:
+    urgent_crud = UrgentCaseCRUD(db)
+    urgent_case_data = urgent_crud.fetch_urgent_case_by_id(urgent_id)
+    if urgent_case_data is None:
+        raise HTTPException(status_code=404, detail=f"Urgent case with id {urgent_id} not found")
+
+    is_success = urgent_crud.remove_urgent_case(urgent_id)
+    if not is_success:
+        raise HTTPException(status_code=500, detail=f"Failed to remove the urgent case id: {urgent_id}")
+
+    return UrgentCaseResponse(
+        urgentId=urgent_case_data.urgent_id,
+        urgentName=urgent_case_data.urgent_name,
+        urgencyId=urgent_case_data.urgency_id,
+        animalId=urgent_case_data.animal_id,
+        message="The urgent case has been successfully removed."
+    )

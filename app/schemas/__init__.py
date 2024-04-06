@@ -8,7 +8,7 @@ from .question_set_schema import QuestionSetRequest, QuestionSetCreateBody, Ques
 from .question_schema import QuestionResponse, QuestionWithListAnswer, QuestionWithListAnswerCreate, \
     QuestionWithListAnswerUpdate, QuestionCreateBulkResponse, QuestionWithListAnswerDeleteResponse, \
     QuestionWithListAnswerCreateResponse, QuestionCreateFailedResponse, QuestionUpdateFailedResponse, \
-    QuestionUpdateBulkResponse
+    QuestionUpdateBulkResponse, QuestionId, QuestionDeleteBulkResponse
 from .answer_schema import AnswerRead, AnswerCreate, AnswerResponse, AnswerCreateBulkResponse, AnswerCreateFailed, \
     AnswerUpdate, AnswerUpdateBulkResponse, AnswerUpdateFailed
 from .answer_record_schema import AnswerRecordCreate, AnswerRecordResponse
@@ -25,7 +25,7 @@ __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseWithUrgenc
            "AnswerSummary", "QuestionWithListAnswer", "UrgentCaseUpdateFailed", "UrgentCaseId", "QuestionSetCreateBody",
            "QuestionSetResponse", "TicketLabel", "TicketEachSummaryResponse", "TicketDataResponse", "AnswerCreate",
            "QuestionWithListAnswerCreate", "AnswerResponse", "AnswerCreateBulkResponse", "AnswerCreateFailed",
-           "AnswerUpdate", "AnswerUpdateBulkResponse", "AnswerUpdateFailed",
+           "AnswerUpdate", "AnswerUpdateBulkResponse", "AnswerUpdateFailed", "QuestionId",
            "QuestionWithListAnswerUpdate", "QuestionCreateBulkResponse", "QuestionWithListAnswerDeleteResponse",
            "QuestionWithListAnswerCreateResponse", "QuestionCreateFailedResponse", "QuestionUpdateFailedResponse",
-           "QuestionUpdateBulkResponse"]
+           "QuestionUpdateBulkResponse", "QuestionDeleteBulkResponse"]
