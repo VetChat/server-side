@@ -9,7 +9,7 @@ from ..schemas import UrgencyResponse, UrgencyMostRequest, UrgencyRead
 router = APIRouter()
 
 
-@router.get("/urgency", response_model=List[UrgencyResponse], tags=["Urgency"])
+@router.get("/urgency", response_model=List[UrgencyRead], tags=["Urgency"])
 @limiter.limit("30/minute")
 async def get_all_urgency(request: Request, db: Session = Depends(get_db)) -> List[UrgencyRead]:
     urgency_crud = UrgencyCRUD(db)
