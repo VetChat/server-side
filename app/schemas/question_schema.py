@@ -1,14 +1,17 @@
 from typing import List, Optional
 from pydantic import BaseModel
-from .answer_schema import AnswerRead, AnswerCreate, AnswerBulkResponse
+from .answer_schema import AnswerRead, AnswerCreate, AnswerBulkResponse, AnswerUpdate
 
 
-class QuestionWithListAnswer(BaseModel):
+class BaseQuestion(BaseModel):
     questionId: int
     question: str
     pattern: str
     imagePath: Optional[str] = None
     ordinal: int
+
+
+class QuestionWithListAnswer(BaseQuestion):
     listAnswer: List[AnswerRead]
 
 
@@ -27,10 +30,15 @@ class QuestionWithListAnswerCreate(BaseModel):
     listAnswer: List[AnswerCreate]
 
 
-class QuestionWithListAnswerResponse(BaseModel):
-    questionId: int
-    question: str
-    pattern: str
-    imagePath: Optional[str] = None
-    ordinal: int
+class QuestionWithListAnswerResponse(BaseQuestion):
     listAnswer: AnswerBulkResponse
+    message: str
+
+
+class QuestionWithListAnswerUpdate(BaseQuestion):
+    listAnswer: List[AnswerUpdate]
+
+
+class QuestionWithListAnswerDeleteResponse(BaseQuestion):
+    listAnswer: List[AnswerRead]
+    message: str

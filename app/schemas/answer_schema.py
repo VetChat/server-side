@@ -21,6 +21,16 @@ class AnswerCreate(BaseModel):
         from_attributes = True
 
 
+class AnswerUpdate(BaseModel):
+    answerId: int
+    answer: str
+    summary: Optional[str] = None
+    skipToQuestion: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
 class AnswerResponse(BaseModel):
     answerId: int
     answer: str

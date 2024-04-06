@@ -5,8 +5,10 @@ from .urgency_schema import UrgencyRead, UrgencyResponse, UrgencyMostRequest
 from .ticket_schema import TicketCreate, TicketAnswer, TicketId
 from .symptom_schema import SymptomRead, SymptomCreateBody, SymptomResponse, SymptomUpdate, SymptomWithQuestions
 from .question_set_schema import QuestionSetRequest, QuestionSetCreateBody, QuestionSetResponse
-from .question_schema import QuestionResponse, QuestionWithListAnswer, QuestionWithListAnswerCreate
-from .answer_schema import AnswerRead, AnswerCreate, AnswerResponse, AnswerBulkResponse, AnswerCreateFailed
+from .question_schema import QuestionResponse, QuestionWithListAnswer, QuestionWithListAnswerCreate, \
+    QuestionWithListAnswerUpdate
+from .answer_schema import AnswerRead, AnswerCreate, AnswerResponse, AnswerBulkResponse, AnswerCreateFailed, \
+    AnswerUpdate
 from .answer_record_schema import AnswerRecordCreate, AnswerRecordResponse
 from .summary_schema import TicketSummaryResponse, TicketInfo, SymptomSummary, AnswerSummary, TicketLabel, \
     TicketEachSummaryResponse, TicketDataResponse
@@ -20,4 +22,5 @@ __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseWithUrgenc
            "SymptomCreateBody", "SymptomResponse", "AnimalUpdate", "SymptomUpdate", "TicketInfo", "SymptomSummary",
            "AnswerSummary", "QuestionWithListAnswer", "UrgentCaseUpdateFailed", "UrgentCaseId", "QuestionSetCreateBody",
            "QuestionSetResponse", "TicketLabel", "TicketEachSummaryResponse", "TicketDataResponse", "AnswerCreate",
-           "QuestionWithListAnswerCreate", "AnswerResponse", "AnswerBulkResponse", "AnswerCreateFailed"]
+           "QuestionWithListAnswerCreate", "AnswerResponse", "AnswerBulkResponse", "AnswerCreateFailed", "AnswerUpdate",
+           "QuestionWithListAnswerUpdate"]

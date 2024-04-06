@@ -30,3 +30,30 @@ class AnswerCRUD:
         except SQLAlchemyError:
             self.db.rollback()
             return None
+
+    def update_answer(self, answer_id: int, answer: str, summary: str, skip_to_question: int) -> Optional[Answer]:
+        answer_data = self.fetch_answer_by_id(answer_id)
+        if answer_data:
+            try:
+                answer_data.answer = answer
+                answer_data.summary = summary
+                answer_data.skip_to_question = skip_to_question
+                self.db.commit()
+                self.db.refresh(answer_data)
+                return answer_data
+            except SQLAlchemyError:
+                self.db.rollback()
+                return None
+        return None
+
+    def delete_answer(self, answer_id: int) -> bool:
+        answer_data = self.fetch_answer_by_id(answer_id)
+        if answer_data:
+            try:
+                self.db.delete(answer_data)
+                self.db.commit()
+                return True
+            except SQLAlchemyError:
+                self.db.rollback()
+                return False
+        return False

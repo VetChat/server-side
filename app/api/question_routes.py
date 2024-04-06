@@ -3,7 +3,8 @@ from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from collections import defaultdict
 
-from app.schemas.question_schema import QuestionWithListAnswerResponse
+from app.schemas.question_schema import QuestionWithListAnswerResponse, QuestionWithListAnswerUpdate, \
+    QuestionWithListAnswerDeleteResponse
 from app.utils import limiter
 from app.database import get_db
 from app.crud import QuestionCRUD, AnswerCRUD
@@ -61,8 +62,8 @@ async def get_questions_by_set_ids(request: Request, question: List[QuestionSetR
 
 @router.post("/question_set/question", response_model=QuestionWithListAnswerResponse, tags=["Question"])
 @limiter.limit("10/minute")
-async def create_question_by_set_id(request: Request, question: QuestionWithListAnswerCreate,
-                                    db: Session = Depends(get_db)) -> QuestionWithListAnswerResponse:
+async def create_question(request: Request, question: QuestionWithListAnswerCreate,
+                          db: Session = Depends(get_db)) -> QuestionWithListAnswerResponse:
     question_crud = QuestionCRUD(db)
     questions_data = question_crud.fetch_question_by_question_and_question_set_id(question.question,
                                                                                   question.questionSetId)
@@ -102,7 +103,7 @@ async def create_question_by_set_id(request: Request, question: QuestionWithList
         else:
             answer_result.failed.append(
                 AnswerCreateFailed(
-                    answer=answer_data.answer,
+                    answer=answer.answer,
                     message="Failed to add the answer"
                 )
             )
@@ -113,5 +114,106 @@ async def create_question_by_set_id(request: Request, question: QuestionWithList
         pattern=question_data.pattern,
         imagePath=question_data.image_path,
         ordinal=question_data.ordinal,
-        listAnswer=answer_result
+        listAnswer=answer_result,
+        message="Question added successfully"
+    )
+
+
+@router.put("/question_set/question", response_model=QuestionWithListAnswerResponse, tags=["Question"])
+@limiter.limit("20/minute")
+async def update_question(request: Request, question: QuestionWithListAnswerUpdate,
+                          db: Session = Depends(get_db)) -> QuestionWithListAnswerResponse:
+    question_crud = QuestionCRUD(db)
+    questions_data = question_crud.fetch_question_by_id(question.questionId)
+
+    if not questions_data:
+        raise HTTPException(status_code=404,
+                            detail=f"Question with ID {question.question} in this question set not found")
+
+    question_data = question_crud.update_question(questions_data.question_id, question.question, question.pattern,
+                                                  question.ordinal, question.imagePath)
+
+    if not question_data:
+        raise HTTPException(status_code=500, detail="Failed to update the question")
+
+    answer_crud = AnswerCRUD(db)
+    existed_answers = answer_crud.fetch_answer_by_question_id_and_answer(question_data.question_id,
+                                                                         [a.answer for a in question.listAnswer])
+
+    if existed_answers:
+        raise HTTPException(status_code=409,
+                            detail=f"Answers for question with ID {question.questionId} already exists")
+
+    answer_result = AnswerBulkResponse(success=[], failed=[])
+    for answer in question.listAnswer:
+        answer_data = answer_crud.update_answer(answer.answerId, answer.answer, answer.summary,
+                                                answer.skipToQuestion)
+        if answer_data:
+            answer_result.success.append(
+                AnswerResponse(
+                    answerId=answer_data.answer_id,
+                    answer=answer_data.answer,
+                    summary=answer_data.summary,
+                    skipToQuestion=answer_data.skip_to_question,
+                    message="Answer added successfully"
+                )
+            )
+        else:
+            answer_result.failed.append(
+                AnswerCreateFailed(
+                    answer=answer.answer,
+                    message="Failed to add the answer"
+                )
+            )
+
+    return QuestionWithListAnswerResponse(
+        questionId=question_data.question_id,
+        question=question_data.question,
+        pattern=question_data.pattern,
+        imagePath=question_data.image_path,
+        ordinal=question_data.ordinal,
+        listAnswer=answer_result,
+        message="Question updated successfully"
+    )
+
+
+@router.delete("/question_set/question/{question_id}", response_model=QuestionWithListAnswerDeleteResponse,
+               tags=["Question"])
+@limiter.limit("10/minute")
+async def delete_question(request: Request, question_id: int,
+                          db: Session = Depends(get_db)) -> QuestionWithListAnswerDeleteResponse:
+    question_crud = QuestionCRUD(db)
+    question_data = question_crud.fetch_question_by_id(question_id)
+
+    if not question_data:
+        raise HTTPException(status_code=404, detail=f"Question with ID {question_id} not found")
+
+    answers = question_data.answers
+
+    answer_crud = AnswerCRUD(db)
+    for answer in answers:
+        is_success = answer_crud.delete_answer(answer.answer_id)
+        if not is_success:
+            raise HTTPException(status_code=500, detail=f"Failed to delete the answer with ID {answer.answer_id}")
+
+    is_success = question_crud.delete_question(question_data.question_id)
+
+    if not is_success:
+        raise HTTPException(status_code=500, detail="Failed to delete the question")
+
+    return QuestionWithListAnswerDeleteResponse(
+        questionId=question_data.question_id,
+        question=question_data.question,
+        pattern=question_data.pattern,
+        imagePath=question_data.image_path,
+        ordinal=question_data.ordinal,
+        listAnswer=[
+            AnswerRead(
+                answerId=answer.answer_id,
+                answer=answer.answer,
+                summary=answer.summary,
+                skipToQuestion=answer.skip_to_question
+            ) for answer in answers
+        ],
+        message="Question deleted successfully"
     )

@@ -17,12 +17,8 @@ class QuestionCRUD:
             .first()
         )
 
-    def fetch_question_by_question_ids_and_question_set_id(self, question_ids: List[int], question_set_id: int):
-        return (
-            self.db.query(Question)
-            .filter(Question.question_id.in_(question_ids), Question.question_set_id == question_set_id)
-            .all()
-        )
+    def fetch_question_by_id(self, question_id: int):
+        return self.db.query(Question).filter(Question.question_id == question_id).first()
 
     def fetch_questions_by_question_set_id(self, question_set_id: int):
         return (
@@ -60,3 +56,29 @@ class QuestionCRUD:
         except SQLAlchemyError:
             self.db.rollback()
             return None
+
+    def update_question(self, question_id: int, question: str, pattern: str, ordinal: int, image_path: str = None):
+        question_data = self.fetch_question_by_id(question_id)
+        if not question_data:
+            return None
+
+        question_data.question = question
+        question_data.pattern = pattern
+        question_data.ordinal = ordinal
+        question_data.image_path = image_path
+
+        try:
+            self.db.commit()
+            self.db.refresh(question_data)
+            return question_data
+        except SQLAlchemyError:
+            self.db.rollback()
+            return None
+
+    def delete_question(self, question_id: int):
+        question = self.fetch_question_by_id(question_id)
+        if question:
+            self.db.delete(question)
+            self.db.commit()
+            return True
+        return False
