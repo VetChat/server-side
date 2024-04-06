@@ -1,12 +1,18 @@
 from typing import List
 from fastapi import Request, APIRouter, Depends
+from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from ..utils import limiter
 from ..database import get_db
 from ..crud import TicketQuestionCRUD
 from ..schemas import TicketQuestionRead, TicketAnswerRead
 
-router = APIRouter()
+
+def custom_generate_unique_id(route: APIRoute):
+    return f"{route.tags[0]}-{route.name}"
+
+
+router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 
 
 @router.get("/ticket_questions", response_model=List[TicketQuestionRead], tags=["Ticket Questions"])

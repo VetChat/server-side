@@ -1,11 +1,17 @@
 from fastapi import Request, APIRouter, Depends, HTTPException
+from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from app.utils import limiter
 from app.database import get_db
 from app.schemas import TicketCreate, TicketId
 from app.crud import TicketCRUD, TicketAnswerRecordCRUD, TicketQuestionCRUD
 
-router = APIRouter()
+
+def custom_generate_unique_id(route: APIRoute):
+    return f"{route.tags[0]}-{route.name}"
+
+
+router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 
 
 @router.post("/tickets", response_model=TicketId, tags=["Tickets"])
