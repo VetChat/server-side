@@ -1,11 +1,17 @@
 from fastapi import Request, APIRouter, Depends
+from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from ..utils import limiter
 from ..database import get_db
 from ..crud import AnswerRecordCRUD
 from ..schemas import AnswerRecordCreate, AnswerRecordResponse
 
-router = APIRouter()
+
+def custom_generate_unique_id(route: APIRoute):
+    return f"{route.tags[0]}-{route.name}"
+
+
+router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 
 
 @router.post("/answer_records", response_model=AnswerRecordResponse, tags=["Answer_records"])

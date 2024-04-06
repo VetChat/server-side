@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import Request, APIRouter, Depends, HTTPException
+from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from collections import defaultdict
 
@@ -11,7 +12,12 @@ from app.schemas import QuestionSetRequest, QuestionResponse, AnswerRead, Questi
     QuestionWithListAnswerResponse, QuestionWithListAnswerUpdate, QuestionWithListAnswerDeleteResponse, \
     QuestionFailedResponse, AnswerCreate
 
-router = APIRouter()
+
+def custom_generate_unique_id(route: APIRoute):
+    return f"{route.tags[0]}-{route.name}"
+
+
+router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 
 
 @router.post("/questions/question_set_ids", response_model=List[QuestionResponse], tags=["Question"])
