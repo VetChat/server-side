@@ -4,13 +4,16 @@ from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from collections import defaultdict
 
+from app.schemas.question_schema import QuestionWithListAnswerUpdateResponse
 from app.utils import limiter
 from app.database import get_db
 from app.crud import QuestionCRUD, AnswerCRUD
 from app.schemas import QuestionSetRequest, QuestionResponse, AnswerRead, QuestionWithListAnswer, \
-    QuestionWithListAnswerCreate, AnswerBulkResponse, AnswerResponse, AnswerCreateFailed, QuestionBulkResponse, \
-    QuestionWithListAnswerResponse, QuestionWithListAnswerUpdate, QuestionWithListAnswerDeleteResponse, \
-    QuestionFailedResponse, AnswerCreate
+    QuestionWithListAnswerCreate, AnswerCreateBulkResponse, AnswerResponse, AnswerCreateFailed, \
+    QuestionCreateBulkResponse, \
+    QuestionWithListAnswerCreateResponse, QuestionWithListAnswerUpdate, QuestionWithListAnswerDeleteResponse, \
+    QuestionCreateFailedResponse, AnswerCreate, AnswerUpdate, QuestionUpdateBulkResponse, QuestionUpdateFailedResponse, \
+    AnswerUpdateFailed, AnswerUpdateBulkResponse
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -66,10 +69,10 @@ async def get_questions_by_set_ids(request: Request, question: List[QuestionSetR
     return questions_response
 
 
-@router.post("/question_set/question", response_model=QuestionWithListAnswerResponse, tags=["Question"])
+@router.post("/question_set/question", response_model=QuestionWithListAnswerCreateResponse, tags=["Question"])
 @limiter.limit("10/minute")
 async def create_question(request: Request, question: QuestionWithListAnswerCreate,
-                          db: Session = Depends(get_db)) -> QuestionWithListAnswerResponse:
+                          db: Session = Depends(get_db)) -> QuestionWithListAnswerCreateResponse:
     question_crud = QuestionCRUD(db)
     questions_data = question_crud.fetch_question_by_question_and_question_set_id(question.question,
                                                                                   question.questionSetId)
@@ -88,7 +91,7 @@ async def create_question(request: Request, question: QuestionWithListAnswerCrea
 
     answer_result = create_answer(answer_crud, question_data.question_id, questions_data.listAnswer)
 
-    return QuestionWithListAnswerResponse(
+    return QuestionWithListAnswerCreateResponse(
         questionId=question_data.question_id,
         question=question_data.question,
         pattern=question_data.pattern,
@@ -99,10 +102,10 @@ async def create_question(request: Request, question: QuestionWithListAnswerCrea
     )
 
 
-@router.post("/question_set/question/bulk", response_model=QuestionBulkResponse, tags=["Question"])
-@limiter.limit("10/minute")
-async def create_question(request: Request, question: List[QuestionWithListAnswerCreate],
-                          db: Session = Depends(get_db)) -> QuestionBulkResponse:
+@router.post("/question_set/question/bulk", response_model=QuestionCreateBulkResponse, tags=["Question"])
+@limiter.limit("2/minute")
+async def create_questions(request: Request, question: List[QuestionWithListAnswerCreate],
+                           db: Session = Depends(get_db)) -> QuestionCreateBulkResponse:
     question_crud = QuestionCRUD(db)
     questions_data = question_crud.fetch_questions_by_questions_and_question_set_id([q.question for q in question],
                                                                                     question[0].questionSetId)
@@ -113,13 +116,13 @@ async def create_question(request: Request, question: List[QuestionWithListAnswe
 
     answer_crud = AnswerCRUD(db)
 
-    question_result = QuestionBulkResponse(success=[], failed=[])
+    question_result = QuestionCreateBulkResponse(success=[], failed=[])
     for q in question:
         question_data = question_crud.create_question(q.questionSetId, q.question, q.pattern, q.ordinal, q.imagePath)
 
         if not question_data:
             question_result.failed.append(
-                QuestionFailedResponse(
+                QuestionCreateFailedResponse(
                     question=q.question,
                     pattern=q.pattern,
                     imagePath=q.imagePath,
@@ -132,7 +135,7 @@ async def create_question(request: Request, question: List[QuestionWithListAnswe
         answer_result = create_answer(answer_crud, question_data.question_id, q.listAnswer)
 
         question_result.success.append(
-            QuestionWithListAnswerResponse(
+            QuestionWithListAnswerCreateResponse(
                 questionId=question_data.question_id,
                 question=question_data.question,
                 pattern=question_data.pattern,
@@ -146,10 +149,10 @@ async def create_question(request: Request, question: List[QuestionWithListAnswe
     return question_result
 
 
-@router.put("/question_set/question", response_model=QuestionWithListAnswerResponse, tags=["Question"])
+@router.put("/question_set/question", response_model=QuestionWithListAnswerCreateResponse, tags=["Question"])
 @limiter.limit("20/minute")
 async def update_question(request: Request, question: QuestionWithListAnswerUpdate,
-                          db: Session = Depends(get_db)) -> QuestionWithListAnswerResponse:
+                          db: Session = Depends(get_db)) -> QuestionWithListAnswerCreateResponse:
     question_crud = QuestionCRUD(db)
     questions_data = question_crud.fetch_question_by_id(question.questionId)
 
@@ -164,36 +167,9 @@ async def update_question(request: Request, question: QuestionWithListAnswerUpda
         raise HTTPException(status_code=500, detail="Failed to update the question")
 
     answer_crud = AnswerCRUD(db)
-    existed_answers = answer_crud.fetch_answer_by_question_id_and_answer(question_data.question_id,
-                                                                         [a.answer for a in question.listAnswer])
+    answer_result = update_answer(answer_crud, question.listAnswer)
 
-    if existed_answers:
-        raise HTTPException(status_code=409,
-                            detail=f"Answers for question with ID {question.questionId} already exists")
-
-    answer_result = AnswerBulkResponse(success=[], failed=[])
-    for answer in question.listAnswer:
-        answer_data = answer_crud.update_answer(answer.answerId, answer.answer, answer.summary,
-                                                answer.skipToQuestion)
-        if answer_data:
-            answer_result.success.append(
-                AnswerResponse(
-                    answerId=answer_data.answer_id,
-                    answer=answer_data.answer,
-                    summary=answer_data.summary,
-                    skipToQuestion=answer_data.skip_to_question,
-                    message="Answer added successfully"
-                )
-            )
-        else:
-            answer_result.failed.append(
-                AnswerCreateFailed(
-                    answer=answer.answer,
-                    message="Failed to add the answer"
-                )
-            )
-
-    return QuestionWithListAnswerResponse(
+    return QuestionWithListAnswerCreateResponse(
         questionId=question_data.question_id,
         question=question_data.question,
         pattern=question_data.pattern,
@@ -202,6 +178,53 @@ async def update_question(request: Request, question: QuestionWithListAnswerUpda
         listAnswer=answer_result,
         message="Question updated successfully"
     )
+
+
+@router.put("/question_set/question/bulk", response_model=QuestionUpdateBulkResponse, tags=["Question"])
+@limiter.limit("2/minute")
+async def update_questions(request: Request, question: List[QuestionWithListAnswerUpdate],
+                           db: Session = Depends(get_db)) -> QuestionUpdateBulkResponse:
+    question_crud = QuestionCRUD(db)
+    questions_data = question_crud.fetch_question_by_list_id([q.questionId for q in question])
+
+    print(f"test: {question}")
+    if len(questions_data) != len(question):
+        raise HTTPException(status_code=404, detail=f"One or more question id not found")
+
+    answer_crud = AnswerCRUD(db)
+
+    question_result = QuestionUpdateBulkResponse(success=[], failed=[])
+    for q in question:
+        question_data = question_crud.update_question(q.questionId, q.question, q.pattern, q.ordinal, q.imagePath)
+
+        if not question_data:
+            question_result.failed.append(
+                QuestionUpdateFailedResponse(
+                    questionId=q.question_id,
+                    question=q.question,
+                    pattern=q.pattern,
+                    imagePath=q.imagePath,
+                    ordinal=q.ordinal,
+                    message="Failed to update the question"
+                )
+            )
+            continue
+
+        answer_result = update_answer(answer_crud, q.listAnswer)
+
+        question_result.success.append(
+            QuestionWithListAnswerUpdateResponse(
+                questionId=question_data.question_id,
+                question=question_data.question,
+                pattern=question_data.pattern,
+                imagePath=question_data.image_path,
+                ordinal=question_data.ordinal,
+                listAnswer=answer_result,
+                message="Question updated successfully"
+            )
+        )
+
+    return question_result
 
 
 @router.delete("/question_set/question/{question_id}", response_model=QuestionWithListAnswerDeleteResponse,
@@ -246,8 +269,8 @@ async def delete_question(request: Request, question_id: int,
     )
 
 
-def create_answer(answer_crud: AnswerCRUD, question_id: int, answers: List[AnswerCreate]) -> AnswerBulkResponse:
-    answer_result = AnswerBulkResponse(success=[], failed=[])
+def create_answer(answer_crud: AnswerCRUD, question_id: int, answers: List[AnswerCreate]) -> AnswerCreateBulkResponse:
+    answer_result = AnswerCreateBulkResponse(success=[], failed=[])
 
     for answer in answers:
         existed_answers = answer_crud.fetch_answer_by_question_id_and_answer(question_id, answer.answer)
@@ -278,4 +301,47 @@ def create_answer(answer_crud: AnswerCRUD, question_id: int, answers: List[Answe
                     message="Failed to add the answer"
                 )
             )
+    return answer_result
+
+
+def update_answer(answer_crud: AnswerCRUD, answers: List[AnswerUpdate]) -> AnswerUpdateBulkResponse:
+    answer_result = AnswerUpdateBulkResponse(success=[], failed=[])
+
+    for answer in answers:
+        existed_answers = answer_crud.fetch_answer_by_id(answer.answerId)
+        if not existed_answers:
+            answer_result.failed.append(
+                AnswerUpdateFailed(
+                    answerId=answer.answerId,
+                    answer=answer.answer,
+                    summary=answer.summary,
+                    skipToQuestion=answer.skipToQuestion,
+                    message="Answer not found"
+                )
+            )
+            continue
+
+        answer_data = answer_crud.update_answer(answer.answerId, answer.answer, answer.summary, answer.skipToQuestion)
+
+        if answer_data:
+            answer_result.success.append(
+                AnswerResponse(
+                    answerId=answer_data.answer_id,
+                    answer=answer_data.answer,
+                    summary=answer_data.summary,
+                    skipToQuestion=answer_data.skip_to_question,
+                    message="Answer updated successfully"
+                )
+            )
+        else:
+            answer_result.failed.append(
+                AnswerUpdateFailed(
+                    answerId=answer.answerId,
+                    answer=answer.answer,
+                    summary=answer.summary,
+                    skipToQuestion=answer.skipToQuestion,
+                    message="Failed to update the answer"
+                )
+            )
+
     return answer_result

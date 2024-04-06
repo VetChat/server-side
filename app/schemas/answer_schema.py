@@ -47,6 +47,15 @@ class AnswerCreateFailed(BaseModel):
     message: str
 
 
-class AnswerBulkResponse(BaseModel):
+class AnswerUpdateFailed(AnswerUpdate):
+    message: str
+
+
+class AnswerCreateBulkResponse(BaseModel):
     success: Optional[List[AnswerResponse]] = None
     failed: Optional[List[AnswerCreateFailed]] = None
+
+
+class AnswerUpdateBulkResponse(BaseModel):
+    success: Optional[List[AnswerResponse]] = None
+    failed: Optional[List[AnswerUpdateFailed]] = None

@@ -49,7 +49,7 @@ class UrgentCaseUpdate(BaseModel):
 
 
 class UrgentCaseUpdateFailed(BaseModel):
-    urgentId: int
+    urgentName: str
     message: str
 
 

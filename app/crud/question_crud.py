@@ -21,11 +21,14 @@ class QuestionCRUD:
         return (
             self.db.query(Question)
             .filter(Question.question.in_(questions), Question.question_set_id == question_set_id)
-            .all()
+            .first()
         )
 
     def fetch_question_by_id(self, question_id: int):
         return self.db.query(Question).filter(Question.question_id == question_id).first()
+
+    def fetch_question_by_list_id(self, question_ids: List[int]):
+        return self.db.query(Question).filter(Question.question_id.in_(question_ids)).all()
 
     def fetch_questions_by_question_set_id(self, question_set_id: int):
         return (

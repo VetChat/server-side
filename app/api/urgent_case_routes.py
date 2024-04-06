@@ -110,7 +110,7 @@ async def add_urgent_cases(request: Request, urgent_cases: List[UrgentCaseCreate
         else:
             urgent_cases_data.failed.append(
                 UrgentCaseUpdateFailed(
-                    urgentId=urgent_case.urgentId,
+                    urgentName=urgent_case.urgentName,
                     message="Failed to add the urgent case."
                 )
             )
@@ -169,7 +169,7 @@ async def update_urgent_cases(request: Request, urgent_cases: List[UrgentCaseUpd
         else:
             urgent_cases_data.failed.append(
                 UrgentCaseUpdateFailed(
-                    urgentId=urgent_case.urgentId,
+                    urgentName=urgent_case.urgentName,
                     message="Failed to update the urgent case."
                 )
             )
@@ -223,7 +223,7 @@ async def remove_urgent_cases(request: Request, urgent_ids: List[UrgentCaseId],
         else:
             urgent_cases_data.failed.append(
                 UrgentCaseUpdateFailed(
-                    urgentId=urgent_case.urgent_id,
+                    urgentName=urgent_case.urgentName,
                     message="Failed to remove the urgent case."
                 )
             )

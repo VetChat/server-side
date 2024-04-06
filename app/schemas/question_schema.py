@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel
-from .answer_schema import AnswerRead, AnswerCreate, AnswerBulkResponse, AnswerUpdate
+from .answer_schema import AnswerRead, AnswerCreate, AnswerCreateBulkResponse, AnswerUpdate, AnswerUpdateBulkResponse
 
 
 class BaseQuestion(BaseModel):
@@ -30,8 +30,13 @@ class QuestionWithListAnswerCreate(BaseModel):
     listAnswer: List[AnswerCreate]
 
 
-class QuestionWithListAnswerResponse(BaseQuestion):
-    listAnswer: AnswerBulkResponse
+class QuestionWithListAnswerCreateResponse(BaseQuestion):
+    listAnswer: AnswerCreateBulkResponse
+    message: str
+
+
+class QuestionWithListAnswerUpdateResponse(BaseQuestion):
+    listAnswer: AnswerUpdateBulkResponse
     message: str
 
 
@@ -44,7 +49,7 @@ class QuestionWithListAnswerDeleteResponse(BaseQuestion):
     message: str
 
 
-class QuestionFailedResponse(BaseModel):
+class QuestionCreateFailedResponse(BaseModel):
     question: str
     pattern: str
     imagePath: Optional[str] = None
@@ -52,6 +57,15 @@ class QuestionFailedResponse(BaseModel):
     message: str
 
 
-class QuestionBulkResponse(BaseModel):
-    success: Optional[List[QuestionWithListAnswerResponse]] = None
-    failed: Optional[List[QuestionFailedResponse]] = None
+class QuestionUpdateFailedResponse(BaseQuestion):
+    message: str
+
+
+class QuestionCreateBulkResponse(BaseModel):
+    success: Optional[List[QuestionWithListAnswerCreateResponse]] = None
+    failed: Optional[List[QuestionCreateFailedResponse]] = None
+
+
+class QuestionUpdateBulkResponse(BaseModel):
+    success: Optional[List[QuestionWithListAnswerUpdateResponse]] = None
+    failed: Optional[List[QuestionUpdateFailedResponse]] = None
