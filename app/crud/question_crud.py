@@ -17,6 +17,13 @@ class QuestionCRUD:
             .first()
         )
 
+    def fetch_questions_by_questions_and_question_set_id(self, questions: List[str], question_set_id: int):
+        return (
+            self.db.query(Question)
+            .filter(Question.question.in_(questions), Question.question_set_id == question_set_id)
+            .all()
+        )
+
     def fetch_question_by_id(self, question_id: int):
         return self.db.query(Question).filter(Question.question_id == question_id).first()
 

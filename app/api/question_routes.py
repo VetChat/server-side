@@ -3,13 +3,13 @@ from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from collections import defaultdict
 
-from app.schemas.question_schema import QuestionWithListAnswerResponse, QuestionWithListAnswerUpdate, \
-    QuestionWithListAnswerDeleteResponse
 from app.utils import limiter
 from app.database import get_db
 from app.crud import QuestionCRUD, AnswerCRUD
 from app.schemas import QuestionSetRequest, QuestionResponse, AnswerRead, QuestionWithListAnswer, \
-    QuestionWithListAnswerCreate, AnswerBulkResponse, AnswerResponse, AnswerCreateFailed
+    QuestionWithListAnswerCreate, AnswerBulkResponse, AnswerResponse, AnswerCreateFailed, QuestionBulkResponse, \
+    QuestionWithListAnswerResponse, QuestionWithListAnswerUpdate, QuestionWithListAnswerDeleteResponse, \
+    QuestionFailedResponse, AnswerCreate
 
 router = APIRouter()
 
@@ -79,34 +79,8 @@ async def create_question(request: Request, question: QuestionWithListAnswerCrea
         raise HTTPException(status_code=500, detail="Failed to add the question")
 
     answer_crud = AnswerCRUD(db)
-    existed_answers = answer_crud.fetch_answer_by_question_id_and_answer(question_data.question_id,
-                                                                         [a.answer for a in question.listAnswer])
 
-    if existed_answers:
-        raise HTTPException(status_code=409,
-                            detail=f"Answers for question with ID {question.questionId} already exists")
-
-    answer_result = AnswerBulkResponse(success=[], failed=[])
-    for answer in question.listAnswer:
-        answer_data = answer_crud.create_answer(question_data.question_id, answer.answer, answer.summary,
-                                                answer.skipToQuestion)
-        if answer_data:
-            answer_result.success.append(
-                AnswerResponse(
-                    answerId=answer_data.answer_id,
-                    answer=answer_data.answer,
-                    summary=answer_data.summary,
-                    skipToQuestion=answer_data.skip_to_question,
-                    message="Answer added successfully"
-                )
-            )
-        else:
-            answer_result.failed.append(
-                AnswerCreateFailed(
-                    answer=answer.answer,
-                    message="Failed to add the answer"
-                )
-            )
+    answer_result = create_answer(answer_crud, question_data.question_id, questions_data.listAnswer)
 
     return QuestionWithListAnswerResponse(
         questionId=question_data.question_id,
@@ -117,6 +91,53 @@ async def create_question(request: Request, question: QuestionWithListAnswerCrea
         listAnswer=answer_result,
         message="Question added successfully"
     )
+
+
+@router.post("/question_set/question/bulk", response_model=QuestionBulkResponse, tags=["Question"])
+@limiter.limit("10/minute")
+async def create_question(request: Request, question: List[QuestionWithListAnswerCreate],
+                          db: Session = Depends(get_db)) -> QuestionBulkResponse:
+    question_crud = QuestionCRUD(db)
+    questions_data = question_crud.fetch_questions_by_questions_and_question_set_id([q.question for q in question],
+                                                                                    question[0].questionSetId)
+
+    if questions_data:
+        raise HTTPException(status_code=409,
+                            detail=f"Questions in this question set already exists")
+
+    answer_crud = AnswerCRUD(db)
+
+    question_result = QuestionBulkResponse(success=[], failed=[])
+    for q in question:
+        question_data = question_crud.create_question(q.questionSetId, q.question, q.pattern, q.ordinal, q.imagePath)
+
+        if not question_data:
+            question_result.failed.append(
+                QuestionFailedResponse(
+                    question=q.question,
+                    pattern=q.pattern,
+                    imagePath=q.imagePath,
+                    ordinal=q.ordinal,
+                    message="Failed to add the question"
+                )
+            )
+            continue
+
+        answer_result = create_answer(answer_crud, question_data.question_id, q.listAnswer)
+
+        question_result.success.append(
+            QuestionWithListAnswerResponse(
+                questionId=question_data.question_id,
+                question=question_data.question,
+                pattern=question_data.pattern,
+                imagePath=question_data.image_path,
+                ordinal=question_data.ordinal,
+                listAnswer=answer_result,
+                message="Question added successfully"
+            )
+        )
+
+    return question_result
 
 
 @router.put("/question_set/question", response_model=QuestionWithListAnswerResponse, tags=["Question"])
@@ -217,3 +238,38 @@ async def delete_question(request: Request, question_id: int,
         ],
         message="Question deleted successfully"
     )
+
+
+def create_answer(answer_crud: AnswerCRUD, question_id: int, answers: List[AnswerCreate]) -> AnswerBulkResponse:
+    answer_result = AnswerBulkResponse(success=[], failed=[])
+
+    for answer in answers:
+        existed_answers = answer_crud.fetch_answer_by_question_id_and_answer(question_id, answer.answer)
+        if existed_answers:
+            answer_result.failed.append(
+                AnswerCreateFailed(
+                    answer=answer.answer,
+                    message="Answer already exists"
+                )
+            )
+            continue
+
+        answer_data = answer_crud.create_answer(question_id, answer.answer, answer.summary, answer.skipToQuestion)
+        if answer_data:
+            answer_result.success.append(
+                AnswerResponse(
+                    answerId=answer_data.answer_id,
+                    answer=answer_data.answer,
+                    summary=answer_data.summary,
+                    skipToQuestion=answer_data.skip_to_question,
+                    message="Answer added successfully"
+                )
+            )
+        else:
+            answer_result.failed.append(
+                AnswerCreateFailed(
+                    answer=answer.answer,
+                    message="Failed to add the answer"
+                )
+            )
+    return answer_result

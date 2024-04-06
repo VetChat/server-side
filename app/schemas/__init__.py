@@ -6,7 +6,8 @@ from .ticket_schema import TicketCreate, TicketAnswer, TicketId
 from .symptom_schema import SymptomRead, SymptomCreateBody, SymptomResponse, SymptomUpdate, SymptomWithQuestions
 from .question_set_schema import QuestionSetRequest, QuestionSetCreateBody, QuestionSetResponse
 from .question_schema import QuestionResponse, QuestionWithListAnswer, QuestionWithListAnswerCreate, \
-    QuestionWithListAnswerUpdate
+    QuestionWithListAnswerUpdate, QuestionBulkResponse, QuestionWithListAnswerDeleteResponse, \
+    QuestionWithListAnswerResponse, QuestionFailedResponse
 from .answer_schema import AnswerRead, AnswerCreate, AnswerResponse, AnswerBulkResponse, AnswerCreateFailed, \
     AnswerUpdate
 from .answer_record_schema import AnswerRecordCreate, AnswerRecordResponse
@@ -23,4 +24,5 @@ __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseWithUrgenc
            "AnswerSummary", "QuestionWithListAnswer", "UrgentCaseUpdateFailed", "UrgentCaseId", "QuestionSetCreateBody",
            "QuestionSetResponse", "TicketLabel", "TicketEachSummaryResponse", "TicketDataResponse", "AnswerCreate",
            "QuestionWithListAnswerCreate", "AnswerResponse", "AnswerBulkResponse", "AnswerCreateFailed", "AnswerUpdate",
-           "QuestionWithListAnswerUpdate"]
+           "QuestionWithListAnswerUpdate", "QuestionBulkResponse", "QuestionWithListAnswerDeleteResponse",
+           "QuestionWithListAnswerResponse", "QuestionFailedResponse"]

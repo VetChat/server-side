@@ -42,3 +42,16 @@ class QuestionWithListAnswerUpdate(BaseQuestion):
 class QuestionWithListAnswerDeleteResponse(BaseQuestion):
     listAnswer: List[AnswerRead]
     message: str
+
+
+class QuestionFailedResponse(BaseModel):
+    question: str
+    pattern: str
+    imagePath: Optional[str] = None
+    ordinal: int
+    message: str
+
+
+class QuestionBulkResponse(BaseModel):
+    success: Optional[List[QuestionWithListAnswerResponse]] = None
+    failed: Optional[List[QuestionFailedResponse]] = None
