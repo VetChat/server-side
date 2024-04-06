@@ -46,10 +46,6 @@ class UrgentCaseUpdate(BaseModel):
     urgentId: int
     urgentName: str
     urgencyId: int
-    message: str
-
-    class Config:
-        from_attributes = True
 
 
 class UrgentCaseUpdateFailed(BaseModel):

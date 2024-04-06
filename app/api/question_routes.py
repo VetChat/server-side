@@ -85,13 +85,12 @@ async def create_question_by_set_id(request: Request, question: QuestionWithList
         raise HTTPException(status_code=409,
                             detail=f"Answers for question with ID {question.questionId} already exists")
 
-    answer_success = []
-    answer_failed = []
+    answer_result = AnswerBulkResponse(success=[], failed=[])
     for answer in question.listAnswer:
         answer_data = answer_crud.create_answer(question_data.question_id, answer.answer, answer.summary,
                                                 answer.skipToQuestion)
         if answer_data:
-            answer_success.append(
+            answer_result.success.append(
                 AnswerResponse(
                     answerId=answer_data.answer_id,
                     answer=answer_data.answer,
@@ -101,14 +100,12 @@ async def create_question_by_set_id(request: Request, question: QuestionWithList
                 )
             )
         else:
-            answer_failed.append(
+            answer_result.failed.append(
                 AnswerCreateFailed(
                     answer=answer_data.answer,
                     message="Failed to add the answer"
                 )
             )
-    answer_data = AnswerBulkResponse(success=answer_success if answer_success else None,
-                                     failed=None if not answer_failed else answer_failed)
 
     return QuestionWithListAnswerResponse(
         questionId=question_data.question_id,
@@ -116,6 +113,5 @@ async def create_question_by_set_id(request: Request, question: QuestionWithList
         pattern=question_data.pattern,
         imagePath=question_data.image_path,
         ordinal=question_data.ordinal,
-        listAnswer=AnswerBulkResponse(success=answer_success if answer_success else None,
-                                      failed=None if not answer_failed else answer_failed)
+        listAnswer=answer_result
     )
