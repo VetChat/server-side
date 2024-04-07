@@ -9,7 +9,10 @@ def test_create_animal_success():
     new_animal = create_autospec(Animal, instance=True)
     new_animal.animal_name = "Lion"
     session.add(new_animal)
-    session.commit()
+    try:
+        session.commit()
+    finally:
+        session.close()
     assert new_animal.animal_id is not None
     assert new_animal.animal_name == "Lion"
     session.close.assert_called_once()
@@ -20,8 +23,11 @@ def test_create_animal_without_name():
     new_animal = create_autospec(Animal, instance=True)
     session.add(new_animal)
     session.commit.side_effect = IntegrityError(None, None, None)
-    with pytest.raises(IntegrityError):
-        session.commit()
+    try:
+        with pytest.raises(IntegrityError):
+            session.commit()
+    finally:
+        session.close()
     session.close.assert_called_once()
 
 
@@ -34,6 +40,9 @@ def test_create_animal_duplicate_name():
     session.add(new_animal1)
     session.add(new_animal2)
     session.commit.side_effect = IntegrityError(None, None, None)
-    with pytest.raises(IntegrityError):
-        session.commit()
+    try:
+        with pytest.raises(IntegrityError):
+            session.commit()
+    finally:
+        session.close()
     session.close.assert_called_once()
