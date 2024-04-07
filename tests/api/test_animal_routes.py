@@ -12,8 +12,8 @@ def test_get_animal_by_id(mocker):
     mock_animal = AnimalRead(animalId=test_animal_id, animalName=test_animal_name)
     mock_crud = MagicMock(spec=AnimalCRUD)
     mock_crud.fetch_animal_by_id.return_value = mock_animal
-    mock_db = mocker.patch.object(get_db, 'return_value', autospec=True)
-    mock_db.query.return_value.filter.return_value.first.return_value = mock_animal
+
+    mock_db = mocker.patch('app.database.get_db', return_value=mock_crud)
 
     # Act
     response = get_animal_by_id(None, test_animal_id, db=mock_db)
