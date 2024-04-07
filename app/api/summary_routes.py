@@ -19,10 +19,10 @@ def custom_generate_unique_id(route: APIRoute):
 router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 
 
-@router.get("/summary", response_model=List[TicketSummaryResponse], tags=["Summary"])
+@router.get("/summary", response_model=TicketSummaryResponse, tags=["Summary"])
 @limiter.limit("20/minute")
 async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Optional[int] = 0,
-                      db: Session = Depends(get_db)) -> List[TicketSummaryResponse]:
+                      db: Session = Depends(get_db)) -> TicketSummaryResponse:
     ticket_crud = TicketCRUD(db)
     tickets_id = [ticket_id[0] for ticket_id in ticket_crud.fetch_tickets_id(limit, start_at)]
 
@@ -41,47 +41,43 @@ async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Opt
     for each in summary:
         dict_summary[each.ticket_id].setdefault(each.symptom_id, []).append(each)
 
-    response = [
-        TicketSummaryResponse(
-            label=[
-                TicketLabel(
-                    ticketQuestion=label.ticket_question,
-                    ordinal=label.ordinal
-                ) for label in fifth_question
-            ],
-            listTicket=[
-                TicketDataResponse(
-                    ticketId=ticket_id,
-                    info=[
-                        TicketInfo(
-                            ticketAnswerRecordId=info.ticket_answer_record_id,
-                            ticketAnswer=info.ticket_answer,
-                            ticketQuestion=info.ticket_question,
-                            ordinal=info.ordinal
-                        ) for info in dict_ticket_info[ticket_id]
-                    ],
-                    summary=[
-                        SymptomSummary(
-                            symptomId=dict_summary[ticket_id][symptom_id][0].symptom_id,
-                            symptomName=dict_summary[ticket_id][symptom_id][0].symptom_name,
-                            listAnswer=[
-                                AnswerSummary(
-                                    answerRecordId=answer.answer_record_id,
-                                    question=answer.question,
-                                    imagePath=answer.image_path,
-                                    ordinal=i,
-                                    answer=answer.answer,
-                                    summary=answer.summary
-                                ) for i, answer in enumerate(dict_summary[ticket_id][symptom_id], start=1)
-                            ]
-                        ) for symptom_id in dict_summary[ticket_id]
-                    ]
-                ) for ticket_id in tickets_id
-            ]
-        )
-    ]
-
-    return response
+    return TicketSummaryResponse(
+        label=[
+            TicketLabel(
+                ticketQuestion=label.ticket_question,
+                ordinal=label.ordinal
+            ) for label in fifth_question
+        ],
+        listTicket=[
+            TicketDataResponse(
+                ticketId=ticket_id,
+                info=[
+                    TicketInfo(
+                        ticketAnswerRecordId=info.ticket_answer_record_id,
+                        ticketAnswer=info.ticket_answer,
+                        ticketQuestion=info.ticket_question,
+                        ordinal=info.ordinal
+                    ) for info in dict_ticket_info[ticket_id]
+                ],
+                summary=[
+                    SymptomSummary(
+                        symptomId=dict_summary[ticket_id][symptom_id][0].symptom_id,
+                        symptomName=dict_summary[ticket_id][symptom_id][0].symptom_name,
+                        listAnswer=[
+                            AnswerSummary(
+                                answerRecordId=answer.answer_record_id,
+                                question=answer.question,
+                                imagePath=answer.image_path,
+                                ordinal=i,
+                                answer=answer.answer,
+                                summary=answer.summary
+                            ) for i, answer in enumerate(dict_summary[ticket_id][symptom_id], start=1)
+                        ]
+                    ) for symptom_id in dict_summary[ticket_id]
+                ]
+            ) for ticket_id in tickets_id
+        ]
+    )
 
 
 @router.get("/summary/{ticket_id}", response_model=TicketEachSummaryResponse, tags=["Summary"])
