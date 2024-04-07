@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from ..models import QuestionSet, Symptom
 
 
@@ -13,6 +13,12 @@ class QuestionSetCRUD:
         return (self.db.query(QuestionSet)
                 .filter(QuestionSet.symptom_id == symptom_id,
                         QuestionSet.animal_id == animal_id)
+                .first())
+
+    def fetch_question_set_info_by_id(self, question_set_id: int):
+        return (self.db.query(QuestionSet)
+                .filter(QuestionSet.question_set_id == question_set_id)
+                .options(joinedload(QuestionSet.symptom), joinedload(QuestionSet.animal))
                 .first())
 
     def create_question_set(self, symptom_id: int, animal_id: int):

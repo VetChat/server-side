@@ -1,13 +1,15 @@
-from typing import List
-from fastapi import Request, APIRouter, Depends, HTTPException
+import json
+from typing import List, Optional
+from fastapi import Request, APIRouter, Depends, HTTPException, File, UploadFile, Form
 from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from collections import defaultdict
 
+from app.aws import S3Resource
 from app.schemas.question_schema import QuestionWithListAnswerUpdateResponse, QuestionId, QuestionDeleteBulkResponse
 from app.utils import limiter
 from app.database import get_db
-from app.crud import QuestionCRUD, AnswerCRUD
+from app.crud import QuestionCRUD, AnswerCRUD, QuestionSetCRUD
 from app.schemas import QuestionSetRequest, QuestionResponse, AnswerRead, QuestionWithListAnswer, \
     QuestionWithListAnswerCreate, AnswerCreateBulkResponse, AnswerResponse, AnswerCreateFailed, \
     QuestionCreateBulkResponse, \
@@ -21,6 +23,8 @@ def custom_generate_unique_id(route: APIRoute):
 
 
 router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
+
+s3 = S3Resource()
 
 
 @router.post("/questions/question_set_ids", response_model=List[QuestionResponse], tags=["Question"])
@@ -71,25 +75,41 @@ async def get_questions_by_set_ids(request: Request, question: List[QuestionSetR
 
 @router.post("/question_set/question", response_model=QuestionWithListAnswerCreateResponse, tags=["Question"])
 @limiter.limit("10/minute")
-async def create_question(request: Request, question: QuestionWithListAnswerCreate,
+async def create_question(request: Request, question_str: str = Form(...),
+                          image: Optional[UploadFile] = None,
                           db: Session = Depends(get_db)) -> QuestionWithListAnswerCreateResponse:
+    # Manually parse the question JSON string
+    try:
+        question_dict = json.loads(question_str)
+        question = QuestionWithListAnswerCreate(**question_dict)
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=400, detail=f"JSON Decode Error: {e.msg}")
+
     question_crud = QuestionCRUD(db)
     questions_data = question_crud.fetch_question_by_question_and_question_set_id(question.question,
                                                                                   question.questionSetId)
+
+    question_set_crud = QuestionSetCRUD(db)
+    question_set_data = question_set_crud.fetch_question_set_info_by_id(question.questionSetId)
 
     if questions_data:
         raise HTTPException(status_code=409,
                             detail=f"Question with ID {question.question} in this question set already exists")
 
+    image_path = None
+    if image:
+        image_path = await s3.upload_file_to_s3(image, question_set_data.animal.animal_name,
+                                                question_set_data.symptom.symptom_name, question.question)
+
     question_data = question_crud.create_question(question.questionSetId, question.question, question.pattern,
-                                                  question.ordinal, question.imagePath)
+                                                  question.ordinal, image_path)
 
     if not question_data:
         raise HTTPException(status_code=500, detail="Failed to add the question")
 
     answer_crud = AnswerCRUD(db)
 
-    answer_result = create_answer(answer_crud, question_data.question_id, questions_data.listAnswer)
+    answer_result = create_answer(answer_crud, question_data.question_id, question.listAnswer)
 
     return QuestionWithListAnswerCreateResponse(
         questionId=question_data.question_id,
