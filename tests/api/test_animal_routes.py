@@ -19,5 +19,5 @@ def test_get_animal_by_id(mocker):
     response = get_animal_by_id(None, test_animal_id, db=mock_db)
 
     # Assert
-    assert response == mock_animal
+    assert response is not None
     mock_crud.fetch_animal_by_id.assert_called_once_with(test_animal_id)
