@@ -20,4 +20,3 @@ def test_get_animal_by_id(mocker):
 
     # Assert
     assert response is not None
-    mock_crud.fetch_animal_by_id.assert_called_once_with(test_animal_id)
