@@ -1,5 +1,6 @@
 import json
-from typing import List, Optional
+import re
+from typing import List, Optional, Tuple
 from fastapi import Request, APIRouter, Depends, HTTPException, File, UploadFile, Form
 from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
@@ -96,13 +97,13 @@ async def create_question(request: Request, question_str: str = Form(...),
         raise HTTPException(status_code=409,
                             detail=f"Question with ID {question.question} in this question set already exists")
 
-    image_path = None
     if image:
         image_path = await s3.upload_file_to_s3(image, question_set_data.animal.animal_name,
                                                 question_set_data.symptom.symptom_name, question.question)
+        question.imagePath = image_path
 
     question_data = question_crud.create_question(question.questionSetId, question.question, question.pattern,
-                                                  question.ordinal, image_path)
+                                                  question.ordinal, question.imagePath)
 
     if not question_data:
         raise HTTPException(status_code=500, detail="Failed to add the question")
@@ -124,20 +125,59 @@ async def create_question(request: Request, question_str: str = Form(...),
 
 @router.post("/question_set/question/bulk", response_model=QuestionCreateBulkResponse, tags=["Question"])
 @limiter.limit("2/minute")
-async def create_questions(request: Request, question: List[QuestionWithListAnswerCreate],
+async def create_questions(request: Request, questions_data: str = Form(...),
+                           images: List[Optional[UploadFile]] = None,
                            db: Session = Depends(get_db)) -> QuestionCreateBulkResponse:
+    questions = json.loads(questions_data)
+
     question_crud = QuestionCRUD(db)
-    questions_data = question_crud.fetch_questions_by_questions_and_question_set_id([q.question for q in question],
-                                                                                    question[0].questionSetId)
-
-    if questions_data:
-        raise HTTPException(status_code=409,
-                            detail=f"Questions in this question set already exists")
-
     answer_crud = AnswerCRUD(db)
+    question_set_crud = QuestionSetCRUD(db)
 
     question_result = QuestionCreateBulkResponse(success=[], failed=[])
-    for q in question:
+    for question_dict in questions:
+        try:
+            q = QuestionWithListAnswerCreate(**question_dict)
+        except json.JSONDecodeError as e:
+            raise HTTPException(status_code=400, detail=f"JSON Decode Error: {e.msg}")
+
+        questions_data = question_crud.fetch_question_by_question_and_question_set_id(q.question, q.questionSetId)
+
+        if questions_data:
+            question_result.failed.append(
+                QuestionCreateFailedResponse(
+                    question=q.question,
+                    pattern=q.pattern,
+                    imagePath=q.imagePath,
+                    ordinal=q.ordinal,
+                    message="Question already exists"
+                )
+            )
+            continue
+
+        question_set_data = question_set_crud.fetch_question_set_info_by_id(q.questionSetId)
+
+        for image in images:
+            if image:
+                file_name = image.filename.split(".")[0]
+                file_extension = image.filename.split(".")[-1]
+
+                question_formatted = q.question.replace(" ", "-")
+                question_formatted = re.sub(r'[\\/:*?"<>|]+', '', question_formatted)
+
+                if file_name != question_formatted:
+                    continue
+                if file_extension not in ["jpg", "jpeg", "png"]:
+                    images.remove(image)
+                    continue
+                    
+                image_path = await s3.upload_file_to_s3(image, question_set_data.animal.animal_name,
+                                                        question_set_data.symptom.symptom_name, q.question)
+                q.imagePath = image_path
+
+                images.remove(image)
+                break
+
         question_data = question_crud.create_question(q.questionSetId, q.question, q.pattern, q.ordinal, q.imagePath)
 
         if not question_data:

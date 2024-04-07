@@ -1,6 +1,10 @@
+import re
 import boto3
 import os
+
+from typing import Optional
 from fastapi import UploadFile
+from pydantic import HttpUrl
 
 
 class S3Resource:
@@ -10,14 +14,19 @@ class S3Resource:
         self.aws_region = os.getenv('AWS_DEFAULT_REGION')
         self.s3 = self.resource.Bucket(self.bucket_name)
 
-    async def upload_file_to_s3(self, file: UploadFile, animal: str, symptom: str, question: str) -> str:
+    async def upload_file_to_s3(self, file: UploadFile, animal: str, symptom: str, question: str) -> Optional[HttpUrl]:
         """Uploads a file to S3 and returns the URL of the uploaded file."""
         file_extension = file.filename.split(".")[-1]
 
-        # Replace spaces with "+"
-        animal = animal.replace(" ", "+")
-        symptom = symptom.replace(" ", "+")
-        question = question.replace(" ", "+")
+        # Replace spaces with "-"
+        animal = animal.replace(" ", "-")
+        symptom = symptom.replace(" ", "-")
+        question = question.replace(" ", "-")
+
+        # Remove special characters that can't be in a file name
+        animal = re.sub(r'[\\/:*?"<>|]+', '', animal)
+        symptom = re.sub(r'[\\/:*?"<>|]+', '', symptom)
+        question = re.sub(r'[\\/:*?"<>|]+', '', question)
 
         file_key = f"{animal}_{symptom}_{question}.{file_extension}"
 
@@ -31,4 +40,4 @@ class S3Resource:
             return file_url
 
         except Exception as e:
-            return f"An error occurred while uploading the file to S3: {e}"
+            return None

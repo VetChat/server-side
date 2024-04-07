@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from fastapi import UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 from .answer_schema import AnswerRead, AnswerCreate, AnswerCreateBulkResponse, AnswerUpdate, AnswerUpdateBulkResponse
 
 
@@ -32,6 +32,7 @@ class QuestionWithListAnswerCreate(BaseModel):
     question: str
     pattern: str
     ordinal: int
+    imagePath: Optional[HttpUrl] = None
     listAnswer: List[AnswerCreate]
 
 
