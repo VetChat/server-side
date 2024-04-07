@@ -292,7 +292,6 @@ async def update_questions(request: Request, questions_data: str = Form(...),
 @limiter.limit("2/minute")
 async def delete_questions(request: Request, question_ids: List[QuestionId],
                            db: Session = Depends(get_db)) -> QuestionDeleteBulkResponse:
-    print("test")
     question_crud = QuestionCRUD(db)
     questions_data = question_crud.fetch_question_by_list_id([q.questionId for q in question_ids])
 
@@ -321,6 +320,21 @@ async def delete_questions(request: Request, question_ids: List[QuestionId],
                 )
                 continue
 
+        if question_data.image_path:
+            is_success = await s3.remove_file_from_s3(question_data.image_path)
+            if not is_success:
+                question_result.failed.append(
+                    QuestionUpdateFailedResponse(
+                        questionId=question_data.question_id,
+                        question=question_data.question,
+                        pattern=question_data.pattern,
+                        imagePath=question_data.image_path,
+                        ordinal=question_data.ordinal,
+                        message="Failed to delete the image"
+                    )
+                )
+                continue
+                
         is_success = question_crud.delete_question(question_data.question_id)
 
         if not is_success:
@@ -484,7 +498,7 @@ async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[Up
         question_set_data = question_set_crud.fetch_question_set_info_by_id(question.questionSetId)
     else:
         question_set_data = question_set_crud.fetch_question_set_info_by_question_id(question.questionId)
-        
+
     for image in images:
         file_name = image.filename.split(".")[0]
         file_extension = image.filename.split(".")[-1]

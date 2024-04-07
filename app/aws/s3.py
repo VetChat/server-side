@@ -36,3 +36,14 @@ class S3Resource:
 
         except Exception as e:
             return None
+
+    async def remove_file_from_s3(self, file_url: str) -> bool:
+        """Removes a file from S3."""
+        file_key = file_url.split('/')[-1]
+
+        try:
+            self.s3.Object(file_key).delete()
+            return True
+
+        except Exception as e:
+            return False
