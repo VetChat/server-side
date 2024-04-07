@@ -33,6 +33,7 @@ class QuestionWithListAnswerCreate(BaseModel):
     pattern: str
     ordinal: int
     imagePath: Optional[HttpUrl] = None
+    haveImage: bool
     listAnswer: List[AnswerCreate]
 
 
@@ -47,6 +48,7 @@ class QuestionWithListAnswerUpdateResponse(BaseQuestion):
 
 
 class QuestionWithListAnswerUpdate(BaseQuestion):
+    haveImage: bool
     listAnswer: List[AnswerUpdate]
 
 

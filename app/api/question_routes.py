@@ -1,14 +1,13 @@
 import json
-import re
-from typing import List, Optional, Tuple
-from fastapi import Request, APIRouter, Depends, HTTPException, File, UploadFile, Form
+from typing import List, Optional
+from fastapi import Request, APIRouter, Depends, HTTPException, UploadFile, Form
 from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from collections import defaultdict
 
 from app.aws import S3Resource
 from app.schemas.question_schema import QuestionWithListAnswerUpdateResponse, QuestionId, QuestionDeleteBulkResponse
-from app.utils import limiter
+from app.utils import limiter, format_file_name
 from app.database import get_db
 from app.crud import QuestionCRUD, AnswerCRUD, QuestionSetCRUD
 from app.schemas import QuestionSetRequest, QuestionResponse, AnswerRead, QuestionWithListAnswer, \
@@ -97,7 +96,7 @@ async def create_question(request: Request, question_str: str = Form(...),
         raise HTTPException(status_code=409,
                             detail=f"Question with ID {question.question} in this question set already exists")
 
-    if image:
+    if question.haveImage and image is not None:
         image_path = await s3.upload_file_to_s3(image, question_set_data.animal.animal_name,
                                                 question_set_data.symptom.symptom_name, question.question)
         question.imagePath = image_path
@@ -155,28 +154,8 @@ async def create_questions(request: Request, questions_data: str = Form(...),
             )
             continue
 
-        question_set_data = question_set_crud.fetch_question_set_info_by_id(q.questionSetId)
-
-        for image in images:
-            if image:
-                file_name = image.filename.split(".")[0]
-                file_extension = image.filename.split(".")[-1]
-
-                question_formatted = q.question.replace(" ", "-")
-                question_formatted = re.sub(r'[\\/:*?"<>|]+', '', question_formatted)
-
-                if file_name != question_formatted:
-                    continue
-                if file_extension not in ["jpg", "jpeg", "png"]:
-                    images.remove(image)
-                    continue
-                    
-                image_path = await s3.upload_file_to_s3(image, question_set_data.animal.animal_name,
-                                                        question_set_data.symptom.symptom_name, q.question)
-                q.imagePath = image_path
-
-                images.remove(image)
-                break
+        if q.haveImage:
+            await upload_image_to_s3(question_set_crud, images, q)
 
         question_data = question_crud.create_question(q.questionSetId, q.question, q.pattern, q.ordinal, q.imagePath)
 
@@ -241,20 +220,42 @@ async def update_question(request: Request, question: QuestionWithListAnswerUpda
 
 
 @router.put("/question_set/question/bulk", response_model=QuestionUpdateBulkResponse, tags=["Question"])
-@limiter.limit("2/minute")
-async def update_questions(request: Request, question: List[QuestionWithListAnswerUpdate],
+@limiter.limit("5/minute")
+async def update_questions(request: Request, questions_data: str = Form(...),
+                           images: List[UploadFile] = None,
                            db: Session = Depends(get_db)) -> QuestionUpdateBulkResponse:
+    questions = json.loads(questions_data)
+
     question_crud = QuestionCRUD(db)
-    questions_data = question_crud.fetch_question_by_list_id([q.questionId for q in question])
-
-    print(f"test: {question}")
-    if len(questions_data) != len(question):
-        raise HTTPException(status_code=404, detail=f"One or more question id not found")
-
     answer_crud = AnswerCRUD(db)
+    question_set_crud = QuestionSetCRUD(db)
 
     question_result = QuestionUpdateBulkResponse(success=[], failed=[])
-    for q in question:
+
+    for question_dict in questions:
+        try:
+            q = QuestionWithListAnswerUpdate(**question_dict)
+        except json.JSONDecodeError as e:
+            raise HTTPException(status_code=400, detail=f"JSON Decode Error: {e.msg}")
+
+        question_data = question_crud.fetch_question_by_id(q.questionId)
+
+        if not question_data:
+            question_result.failed.append(
+                QuestionUpdateFailedResponse(
+                    questionId=q.question_id,
+                    question=q.question,
+                    pattern=q.pattern,
+                    imagePath=q.imagePath,
+                    ordinal=q.ordinal,
+                    message="Question not found"
+                )
+            )
+            continue
+
+        if q.haveImage:
+            await upload_image_to_s3(question_set_crud, images, q)
+
         question_data = question_crud.update_question(q.questionId, q.question, q.pattern, q.ordinal, q.imagePath)
 
         if not question_data:
@@ -475,3 +476,30 @@ def update_answer(answer_crud: AnswerCRUD, answers: List[AnswerUpdate]) -> Answe
             )
 
     return answer_result
+
+
+async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[UploadFile],
+                             question: QuestionWithListAnswerCreate or QuestionWithListAnswerUpdate) -> Optional[str]:
+    if question is QuestionWithListAnswerCreate:
+        question_set_data = question_set_crud.fetch_question_set_info_by_id(question.questionSetId)
+    else:
+        question_set_data = question_set_crud.fetch_question_set_info_by_question_id(question.questionId)
+        
+    for image in images:
+        file_name = image.filename.split(".")[0]
+        file_extension = image.filename.split(".")[-1]
+
+        question_formatted = format_file_name(question.question)
+
+        if file_name != question_formatted:
+            continue
+        if file_extension not in ["jpg", "jpeg", "png"]:
+            images.remove(image)
+            continue
+
+        image_path = await s3.upload_file_to_s3(image, question_set_data.animal.animal_name,
+                                                question_set_data.symptom.symptom_name, question.question)
+        question.imagePath = image_path
+
+        images.remove(image)
+        return image_path

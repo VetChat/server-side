@@ -1,10 +1,11 @@
-import re
 import boto3
 import os
 
 from typing import Optional
 from fastapi import UploadFile
 from pydantic import HttpUrl
+
+from app.utils import format_file_name
 
 
 class S3Resource:
@@ -18,15 +19,9 @@ class S3Resource:
         """Uploads a file to S3 and returns the URL of the uploaded file."""
         file_extension = file.filename.split(".")[-1]
 
-        # Replace spaces with "-"
-        animal = animal.replace(" ", "-")
-        symptom = symptom.replace(" ", "-")
-        question = question.replace(" ", "-")
-
-        # Remove special characters that can't be in a file name
-        animal = re.sub(r'[\\/:*?"<>|]+', '', animal)
-        symptom = re.sub(r'[\\/:*?"<>|]+', '', symptom)
-        question = re.sub(r'[\\/:*?"<>|]+', '', question)
+        animal = format_file_name(animal)
+        symptom = format_file_name(symptom)
+        question = format_file_name(question)
 
         file_key = f"{animal}_{symptom}_{question}.{file_extension}"
 

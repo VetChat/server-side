@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
-from ..models import QuestionSet, Symptom
+from ..models import QuestionSet, Symptom, Question
 
 
 class QuestionSetCRUD:
@@ -18,6 +18,13 @@ class QuestionSetCRUD:
     def fetch_question_set_info_by_id(self, question_set_id: int):
         return (self.db.query(QuestionSet)
                 .filter(QuestionSet.question_set_id == question_set_id)
+                .options(joinedload(QuestionSet.symptom), joinedload(QuestionSet.animal))
+                .first())
+
+    def fetch_question_set_info_by_question_id(self, question_id: int):
+        return (self.db.query(QuestionSet)
+                .join(QuestionSet.questions)
+                .filter(Question.question_id == question_id)
                 .options(joinedload(QuestionSet.symptom), joinedload(QuestionSet.animal))
                 .first())
 
