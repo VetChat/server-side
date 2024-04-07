@@ -19,6 +19,7 @@ jobs:
         env:
           CODECOV_STATIC_TOKEN: ${{ secrets.CODECOV_STATIC_TOKEN }}
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          PYTHONPATH: ${{ github.workspace }}
       - name: Run tests and collect coverage
         run: |
           cat codecov_ats/tests_to_run.txt | xargs pytest --cov app
