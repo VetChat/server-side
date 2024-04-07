@@ -61,7 +61,7 @@ async def get_urgent_cases_by_animal_id(request: Request, animal_id: int, db: Se
     return urgent_cases_response
 
 
-@router.post("/animal/urgent_cases", response_model=List[UrgentCaseResponse], tags=["Urgent Cases"])
+@router.post("/animal/urgent_cases", response_model=UrgentCaseResponse, tags=["Urgent Cases"])
 @limiter.limit("5/minute")
 async def add_urgent_case(request: Request, urgent_case: UrgentCaseCreate,
                           db: Session = Depends(get_db)) -> UrgentCaseResponse:
