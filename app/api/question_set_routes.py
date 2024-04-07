@@ -2,12 +2,29 @@ from typing import List
 from fastapi import Request, APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.schemas import QuestionWithListAnswer, AnswerRead, QuestionSetCreateBody, QuestionSetResponse
+from app.schemas import QuestionWithListAnswer, AnswerRead, QuestionSetCreateBody, QuestionSetResponse, QuestionSetRead
 from app.utils import limiter
 from app.database import get_db
 from app.crud import QuestionCRUD, QuestionSetCRUD
 
 router = APIRouter()
+
+
+@router.get("/question_sets/animal/{animal_id}", response_model=List[QuestionSetRead], tags=["Question Set"])
+@limiter.limit("10/minute")
+async def get_question_set_by_animal_id(request: Request, animal_id: int, db: Session = Depends(get_db)) \
+        -> List[QuestionSetRead]:
+    question_set_crud = QuestionSetCRUD(db)
+    question_set_data = question_set_crud.fetch_questions_set_by_animal_id(animal_id)
+
+    response = [
+        QuestionSetRead(
+            questionSetId=question_set.question_set_id,
+            symptomId=question_set.symptom_id,
+            animalId=question_set.animal_id
+        ) for question_set in question_set_data
+    ]
+    return response
 
 
 @router.get("/question_set/{question_set_id}", response_model=List[QuestionWithListAnswer], tags=["Question Set"])

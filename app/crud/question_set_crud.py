@@ -9,6 +9,11 @@ class QuestionSetCRUD:
     def fetch_question_set_id_by_id(self, question_set_id: int):
         return self.db.query(QuestionSet).filter(QuestionSet.question_set_id == question_set_id).first()
 
+    def fetch_questions_set_by_animal_id(self, animal_id: int):
+        return (self.db.query(QuestionSet)
+                .filter(QuestionSet.animal_id == animal_id)
+                .all())
+
     def fetch_question_set_by_symptom_animal_id(self, symptom_id: int, animal_id: int):
         return (self.db.query(QuestionSet)
                 .filter(QuestionSet.symptom_id == symptom_id,
