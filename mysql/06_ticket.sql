@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS ticket
     rec_created_when DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     is_answered      BOOLEAN      NOT NULL DEFAULT FALSE,
     PRIMARY KEY (ticket_id)
-);
+) CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;;
 
 -- Insert mock data to the ticket table
 INSERT INTO ticket

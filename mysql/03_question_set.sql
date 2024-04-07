@@ -6,8 +6,10 @@ CREATE TABLE IF NOT EXISTS question_set
     animal_id       INT NOT NULL,
     PRIMARY KEY (question_set_id),
     CONSTRAINT FK_SymptomQuestion FOREIGN KEY (symptom_id) REFERENCES symptom (symptom_id) ON DELETE CASCADE,
-    CONSTRAINT FK_AnimalQuestion FOREIGN KEY (animal_id) REFERENCES animal (animal_id) ON DELETE CASCADE
-);
+    CONSTRAINT FK_AnimalQuestion FOREIGN KEY (animal_id) REFERENCES animal (animal_id) ON DELETE CASCADE,
+    CONSTRAINT UC_QuestionSet UNIQUE (symptom_id, animal_id)
+) CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;;
 
 -- Insert mock data into the question_set table
 INSERT INTO question_set

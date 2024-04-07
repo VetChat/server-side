@@ -21,9 +21,12 @@ async def create_answer_records_and_return_summary(
 ) -> AnswerRecordResponse:
     # Create answer records
     answer_record_crud = AnswerRecordCRUD(db)
+    answer_data = answer_record_crud.fetch_answer_data_by_ids(
+        answer_ids=[ar.answerId for ar in answer_record_data.listAnswer]
+    )
     answer_record_crud.create_answer_records(
         ticket_id=answer_record_data.ticketId,
-        answer_ids=[ar.answerId for ar in answer_record_data.listAnswer]
+        answer_data=answer_data
     )
 
     return AnswerRecordResponse(

@@ -13,10 +13,13 @@ class UrgentCaseRead(BaseModel):
         from_attributes = True
 
 
-class UrgentCaseByAnimalResponse(BaseModel):
+class UrgentCaseWithUrgency(BaseModel):
     urgentId: int
     urgentName: str
     urgencyId: int
+    urgencyDetail: str
+    duration: str
+    urgencyLevel: int
 
 
 class UrgentCaseResponse(BaseModel):
@@ -43,14 +46,10 @@ class UrgentCaseUpdate(BaseModel):
     urgentId: int
     urgentName: str
     urgencyId: int
-    message: str
-
-    class Config:
-        from_attributes = True
 
 
 class UrgentCaseUpdateFailed(BaseModel):
-    urgentId: int
+    urgentName: str
     message: str
 
 

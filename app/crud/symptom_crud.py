@@ -1,6 +1,6 @@
 from typing import List, Type, Optional
 from sqlalchemy.orm import Session
-from ..models import Symptom
+from app.models import Symptom, QuestionSet
 
 
 class SymptomCRUD:
@@ -15,6 +15,14 @@ class SymptomCRUD:
 
     def fetch_symptom_by_name(self, symptom_name: str) -> Optional[Type[Symptom]]:
         return self.db.query(Symptom).filter(Symptom.symptom_name == symptom_name).first()
+
+    def fetch_symptoms_by_animal_id(self, animal_id: int):
+        return (
+            self.db.query(Symptom.symptom_id, Symptom.symptom_name, QuestionSet.question_set_id)
+            .join(QuestionSet.symptom)
+            .filter(QuestionSet.animal_id == animal_id)
+            .all()
+        )
 
     def add_symptom(self, symptom_name: str) -> Symptom:
         new_symptom = Symptom(symptom_name=symptom_name)

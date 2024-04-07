@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS ticket_question
     ordinal            INT          NOT NULL,
     is_required        BOOLEAN      NOT NULL DEFAULT TRUE,
     PRIMARY KEY (ticket_question_id)
-);
+) CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;;
 
 -- Insert mock data into the ticket question table
 INSERT INTO ticket_question

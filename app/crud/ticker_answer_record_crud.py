@@ -14,10 +14,11 @@ class TicketAnswerRecordCRUD:
                 .filter(TicketAnswerRecord.ticket_id == ticket_id)
                 .all())
 
-    def create_ticket_answer_record(self, ticket_id: int, question_id: int, answer: str):
+    def create_ticket_answer_record(self, ticket_id: int, question: str, ordinal: int, answer: str):
         new_record = TicketAnswerRecord(
             ticket_id=ticket_id,
-            ticket_question_id=question_id,
+            ticket_question=question,
+            ordinal=ordinal,
             ticket_answer=answer
         )
         self.db.add(new_record)
