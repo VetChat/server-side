@@ -1,4 +1,3 @@
-import pytest
 from app.utils import format_file_name
 
 
