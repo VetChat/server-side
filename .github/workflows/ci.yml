@@ -23,6 +23,7 @@ jobs:
       - name: Run tests and collect coverage
         env:
           PYTHONPATH: ${{ github.workspace }}
+          TSETING: true
         run: |
           cat codecov_ats/tests_to_run.txt | xargs pytest --cov app
       - name: Upload coverage to Codecov
