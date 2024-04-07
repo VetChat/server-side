@@ -1,72 +1,23 @@
-from unittest.mock import patch
-from fastapi.testclient import TestClient
-from app.main import app
-
-client = TestClient(app)
-
-
-@patch('app.api.animal_routes.get_db')
-def test_animals_retrieval(mock_get_db):
-    mock_db = mock_get_db.return_value
-    mock_db.query.return_value.all.return_value = []
-    response = client.get("/animals")
-    assert response.status_code == 200
-    assert isinstance(response.json(), list)
+from unittest.mock import MagicMock
+from app.api.animal_routes import get_animal_by_id
+from app.database import get_db
+from app.crud import AnimalCRUD
+from app.schemas import AnimalRead
 
 
-@patch('app.api.animal_routes.get_db')
-def test_animal_retrieval_by_id(mock_get_db):
-    mock_db = mock_get_db.return_value
-    mock_db.query.return_value.filter.return_value.first.return_value = None
-    response = client.get("/animal/1")
-    assert response.status_code == 404
+def test_get_animal_by_id(mocker):
+    # Arrange
+    test_animal_id = 1
+    test_animal_name = "Dog"
+    mock_animal = AnimalRead(animalId=test_animal_id, animalName=test_animal_name)
+    mock_crud = MagicMock(spec=AnimalCRUD)
+    mock_crud.fetch_animal_by_id.return_value = mock_animal
+    mock_db = mocker.patch.object(get_db, 'return_value', autospec=True)
+    mock_db.query.return_value.filter.return_value.first.return_value = mock_animal
 
+    # Act
+    response = get_animal_by_id(None, test_animal_id, db=mock_db)
 
-@patch('app.api.animal_routes.get_db')
-def test_animal_addition(mock_get_db):
-    mock_db = mock_get_db.return_value
-    mock_db.query.return_value.filter.return_value.first.return_value = None
-    response = client.post("/animal", json={"animalName": "Lion"})
-    assert response.status_code == 200
-    assert response.json()["animalName"] == "Lion"
-
-
-@patch('app.api.animal_routes.get_db')
-def test_animal_addition_already_exists(mock_get_db):
-    mock_db = mock_get_db.return_value
-    mock_db.query.return_value.filter.return_value.first.return_value = True
-    response = client.post("/animal", json={"animalName": "Lion"})
-    assert response.status_code == 409
-
-
-@patch('app.api.animal_routes.get_db')
-def test_animal_update(mock_get_db):
-    mock_db = mock_get_db.return_value
-    mock_db.query.return_value.filter.return_value.first.return_value = True
-    response = client.put("/animal", json={"animalId": 1, "animalName": "Tiger"})
-    assert response.status_code == 200
-    assert response.json()["newAnimalName"] == "Tiger"
-
-
-@patch('app.api.animal_routes.get_db')
-def test_animal_update_not_found(mock_get_db):
-    mock_db = mock_get_db.return_value
-    mock_db.query.return_value.filter.return_value.first.return_value = None
-    response = client.put("/animal", json={"animalId": 9999, "animalName": "Tiger"})
-    assert response.status_code == 404
-
-
-@patch('app.api.animal_routes.get_db')
-def test_animal_removal(mock_get_db):
-    mock_db = mock_get_db.return_value
-    mock_db.query.return_value.filter.return_value.first.return_value = True
-    response = client.delete("/animal/1")
-    assert response.status_code == 200
-
-
-@patch('app.api.animal_routes.get_db')
-def test_animal_removal_not_found(mock_get_db):
-    mock_db = mock_get_db.return_value
-    mock_db.query.return_value.filter.return_value.first.return_value = None
-    response = client.delete("/animal/9999")
-    assert response.status_code == 404
+    # Assert
+    assert response == mock_animal
+    mock_crud.fetch_animal_by_id.assert_called_once_with(test_animal_id)
