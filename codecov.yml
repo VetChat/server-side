@@ -40,3 +40,6 @@ cli:
   plugins:
     pycoverage:
       report_type: "json"
+
+ignore:
+  - "app/aws/*"
