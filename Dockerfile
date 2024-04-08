@@ -7,8 +7,6 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-COPY ./app /app
-
 # Use ARG to get the build-args and ENV to set the environment variables
 ARG DATABASE_URL
 ARG AWS_ACCESS_KEY_ID
@@ -19,5 +17,13 @@ ENV DATABASE_URL=$DATABASE_URL
 ENV AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
 ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 ENV AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+
+# Print the environment variables
+RUN echo DATABASE_URL=$DATABASE_URL && \
+    echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID && \
+    echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY && \
+    echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+
+COPY ./app /app
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port 80"]
