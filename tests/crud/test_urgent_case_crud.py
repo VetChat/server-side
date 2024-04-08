@@ -1,21 +1,24 @@
 from unittest.mock import create_autospec
 from sqlalchemy.orm import Session
-from app.models import UrgentCase
+from app.models import UrgentCase, Urgency
 from app.crud import UrgentCaseCRUD
+from app.schemas import UrgentCaseUpdate
 
 
 def test_fetch_all_urgent_case_returns_all_cases():
     session = create_autospec(Session, instance=True)
     crud = UrgentCaseCRUD(session)
     crud.fetch_all_urgent_case()
-    session.query.assert_called_once_with(UrgentCase.urgent_id)
+    session.query.assert_called_once_with(UrgentCase.urgent_id, UrgentCase.urgent_name, UrgentCase.urgency_id,
+                                          Urgency.urgency_detail, Urgency.duration, Urgency.urgency_level)
 
 
 def test_fetch_urgent_case_by_animal_id_returns_correct_cases():
     session = create_autospec(Session, instance=True)
     crud = UrgentCaseCRUD(session)
     crud.fetch_urgent_case_by_animal_id(1)
-    session.query.assert_called_once_with(UrgentCase.urgent_id)
+    session.query.assert_called_once_with(UrgentCase.urgent_id, UrgentCase.urgent_name, UrgentCase.urgency_id,
+                                          Urgency.urgency_detail, Urgency.duration, Urgency.urgency_level)
 
 
 def test_fetch_urgent_case_by_id_returns_correct_case():
@@ -54,7 +57,8 @@ def test_fetch_urgent_case_with_urgency_detail_returns_correct_cases():
     session = create_autospec(Session, instance=True)
     crud = UrgentCaseCRUD(session)
     crud.fetch_urgent_case_with_urgency_detail()
-    session.query.assert_called_once_with(UrgentCase.urgent_id)
+    session.query.assert_called_once_with(UrgentCase.urgent_id, UrgentCase.urgent_name, Urgency.urgency_detail,
+                                          Urgency.duration)
 
 
 def test_add_urgent_case_adds_case_to_db():
@@ -79,7 +83,7 @@ def test_update_urgent_case_updates_case_in_db():
 def test_update_multiple_urgent_cases_updates_cases_in_db():
     session = create_autospec(Session, instance=True)
     crud = UrgentCaseCRUD(session)
-    crud.update_multiple_urgent_cases([{"urgent_id": 1, "urgent_name": "urgent_name", "urgency_id": 1}])
+    crud.update_multiple_urgent_cases([UrgentCaseUpdate(urgentId=1, urgentName="urgent_name", urgencyId=1)])
     session.query.assert_called_once_with(UrgentCase.urgent_id)
     session.query().filter.assert_called_once()
     session.commit.assert_called_once()

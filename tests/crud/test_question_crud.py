@@ -8,7 +8,7 @@ def test_fetch_question_by_question_and_question_set_id_returns_correct_question
     session = create_autospec(Session, instance=True)
     crud = QuestionCRUD(session)
     crud.fetch_question_by_question_and_question_set_id("question", 1)
-    session.query.assert_called_once_with(Question)
+    session.query.assert_called_once_with(Question.question_id, Question.question)
     session.query().filter.assert_called_once()
 
 
