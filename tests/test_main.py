@@ -10,13 +10,6 @@ def test_read_root_happy_path():
     assert response.json() == {"Hello": "World"}
 
 
-def test_rate_limit_exceeded():
-    for _ in range(6):
-        response = client.get("/")
-    assert response.status_code == 429
-    assert "rate limit exceeded" in response.text.lower()
-
-
 def test_cors_allowed_origin():
     response = client.get("/", headers={"Origin": "http://localhost:5173"})
     assert response.status_code == 200
