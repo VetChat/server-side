@@ -20,6 +20,7 @@ jobs:
           CODECOV_STATIC_TOKEN: ${{ secrets.CODECOV_STATIC_TOKEN }}
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           PYTHONPATH: ${{ github.workspace }}
+          TESTING: true
       - name: Run tests and collect coverage
         env:
           PYTHONPATH: ${{ github.workspace }}
