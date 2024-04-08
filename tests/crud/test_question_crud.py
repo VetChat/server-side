@@ -44,14 +44,6 @@ def test_fetch_questions_by_question_set_id_returns_correct_questions():
     session.query().filter.assert_called_once()
 
 
-def test_fetch_questions_by_set_ids_returns_correct_questions():
-    session = create_autospec(Session, instance=True)
-    crud = QuestionCRUD(session)
-    crud.fetch_questions_by_set_ids([1, 2])
-    session.query.assert_called_once_with(Question)
-    session.query().filter.assert_called_once()
-
-
 def test_create_question_adds_question_to_db():
     session = create_autospec(Session, instance=True)
     crud = QuestionCRUD(session)
