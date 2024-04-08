@@ -19,4 +19,4 @@ RUN --mount=type=secret,id=DATABASE_URL \
   export AWS_SECRET_ACCESS_KEY=$(cat /run/secrets/AWS_SECRET_ACCESS_KEY) && \
   export AWS_DEFAULT_REGION=$(cat /run/secrets/AWS_DEFAULT_REGION) && \
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port 8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port 80"]
