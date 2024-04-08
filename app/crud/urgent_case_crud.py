@@ -92,27 +92,6 @@ class UrgentCaseCRUD:
         self.db.refresh(urgent_case)
         return urgent_case
 
-    def update_multiple_urgent_cases(self, updates: List[UrgentCaseUpdate]) -> Optional[List[Type[UrgentCase]]]:
-        urgent_ids = [update.urgentId for update in updates]
-        urgent_cases = self.fetch_urgent_case_by_ids(urgent_ids)
-        if urgent_cases is None:
-            return None
-        urgent_case_mapping = {urgent_case.urgent_id: urgent_case for urgent_case in urgent_cases}
-
-        for update in updates:
-            if update.urgent_id in urgent_case_mapping:
-                urgent_case = urgent_case_mapping[update.urgent_id]
-                urgent_case.urgent_name = update.urgent_name
-                urgent_case.urgency_id = update.urgency_id
-
-        self.db.commit()
-
-        # Optionally refresh the state of each updated UrgentCase
-        for urgent_case in urgent_cases:
-            self.db.refresh(urgent_case)
-
-        return urgent_cases
-
     def remove_urgent_case(self, urgent_id: int):
         urgent_case = self.fetch_urgent_case_by_id(urgent_id)
         if not urgent_case:

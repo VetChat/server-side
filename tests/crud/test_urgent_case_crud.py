@@ -80,16 +80,6 @@ def test_update_urgent_case_updates_case_in_db():
     session.refresh.assert_called_once()
 
 
-def test_update_multiple_urgent_cases_updates_cases_in_db():
-    session = create_autospec(Session, instance=True)
-    crud = UrgentCaseCRUD(session)
-    crud.update_multiple_urgent_cases([UrgentCaseUpdate(urgentId=1, urgentName="urgent_name", urgencyId=1)])
-    session.query.assert_called_once_with(UrgentCase.urgent_id)
-    session.query().filter.assert_called_once()
-    session.commit.assert_called_once()
-    session.refresh.assert_called_once()
-
-
 def test_remove_urgent_case_removes_case_from_db():
     session = create_autospec(Session, instance=True)
     crud = UrgentCaseCRUD(session)
