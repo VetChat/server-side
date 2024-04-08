@@ -6,8 +6,7 @@ from sqlalchemy.orm import Session
 from app.utils import limiter
 from app.database import get_db
 from app.crud import UrgentCaseCRUD, AnimalCRUD
-from app.schemas import UrgentCaseWithUrgency, UrgentCaseResponse, UrgentCaseCreate, UrgentCaseUpdate, \
-    UrgentCaseBulkResponse, UrgentCaseUpdateFailed, UrgentCaseId
+from app.schemas import UrgentCaseWithUrgency, UrgentCaseResponse, UrgentCaseCreate, UrgentCaseUpdate
 
 
 def custom_generate_unique_id(route: APIRoute):
