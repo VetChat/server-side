@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS urgency
 
 -- Insert mock data into the urgency table
 INSERT INTO urgency
-VALUES (1, 'Dead', '0 min', 1),
-       (2, 'Almost Dead', '1-5 min', 2),
-       (3, 'Will Die soon', '5-10 min', 3);
+VALUES (1, 'ฉุกเฉินถึงแก่ชีวิต', 'ได้รับการตรวจทันที', 1),
+       (2, 'ฉุกเฉินเร่งด่วน', 'สามารถรอได้ 5 - 15 นาที', 2),
+       (3, 'ฉุกเฉิน (ไม่รุนแรง)', 'สามารถรอได้ 30 นาที', 3),
+       (4, 'ไม่ฉุกเฉิน', 'ได้รับการพิจารณาใหม่ทุก 1 - 2 ชั่วโมง', 4);
