@@ -26,4 +26,4 @@ RUN echo DATABASE_URL=$DATABASE_URL && \
 
 COPY ./app /app
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port 80"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port", "80"]
