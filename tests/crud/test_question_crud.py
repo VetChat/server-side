@@ -1,54 +1,81 @@
-from app.crud import QuestionCRUD
-from app.models import Question
+from unittest.mock import create_autospec
 from sqlalchemy.orm import Session
-from unittest.mock import patch, MagicMock
+from app.models import Question
+from app.crud import QuestionCRUD
 
 
-def test_question_crud_fetch_by_id_happy_path():
-    with patch.object(Session, 'query', return_value=MagicMock()) as mock_query:
-        mock_query.filter.return_value.first.return_value = Question(question_id=1)
-        crud = QuestionCRUD(Session())
-        result = crud.fetch_question_by_id(1)
-        assert result.question_id == 1
+def test_fetch_question_by_question_and_question_set_id_returns_correct_question():
+    session = create_autospec(Session, instance=True)
+    crud = QuestionCRUD(session)
+    crud.fetch_question_by_question_and_question_set_id("question", 1)
+    session.query.assert_called_once_with(Question)
+    session.query().filter.assert_called_once()
 
 
-def test_question_crud_fetch_by_id_no_result():
-    with patch.object(Session, 'query', return_value=MagicMock()) as mock_query:
-        mock_query.filter.return_value.first.return_value = None
-        crud = QuestionCRUD(Session())
-        result = crud.fetch_question_by_id(1)
-        assert result is None
+def test_fetch_questions_by_questions_and_question_set_id_returns_correct_questions():
+    session = create_autospec(Session, instance=True)
+    crud = QuestionCRUD(session)
+    crud.fetch_questions_by_questions_and_question_set_id(["question1", "question2"], 1)
+    session.query.assert_called_once_with(Question)
+    session.query().filter.assert_called_once()
 
 
-def test_question_crud_create_question_happy_path():
-    with patch.object(Session, 'add', return_value=None) as mock_add, \
-            patch.object(Session, 'commit', return_value=None) as mock_commit, \
-            patch.object(Session, 'refresh', return_value=None) as mock_refresh:
-        crud = QuestionCRUD(Session())
-        result = crud.create_question(1, 'question', 'pattern', 1)
-        assert result is not None
+def test_fetch_question_by_id_returns_correct_question():
+    session = create_autospec(Session, instance=True)
+    crud = QuestionCRUD(session)
+    crud.fetch_question_by_id(1)
+    session.query.assert_called_once_with(Question)
+    session.query().filter.assert_called_once()
 
 
-def test_question_crud_create_question_db_error():
-    with patch.object(Session, 'add', return_value=None) as mock_add, \
-            patch.object(Session, 'commit', side_effect=Exception()) as mock_commit, \
-            patch.object(Session, 'rollback', return_value=None) as mock_rollback:
-        crud = QuestionCRUD(Session())
-        result = crud.create_question(1, 'question', 'pattern', 1)
-        assert result is None
+def test_fetch_question_by_list_id_returns_correct_questions():
+    session = create_autospec(Session, instance=True)
+    crud = QuestionCRUD(session)
+    crud.fetch_question_by_list_id([1, 2])
+    session.query.assert_called_once_with(Question)
+    session.query().filter.assert_called_once()
 
 
-def test_question_crud_delete_question_happy_path():
-    with patch.object(Session, 'delete', return_value=None) as mock_delete, \
-            patch.object(Session, 'commit', return_value=None) as mock_commit:
-        crud = QuestionCRUD(Session())
-        result = crud.delete_question(1)
-        assert result is True
+def test_fetch_questions_by_question_set_id_returns_correct_questions():
+    session = create_autospec(Session, instance=True)
+    crud = QuestionCRUD(session)
+    crud.fetch_questions_by_question_set_id(1)
+    session.query.assert_called_once_with(Question)
+    session.query().filter.assert_called_once()
 
 
-def test_question_crud_delete_question_no_result():
-    with patch.object(Session, 'delete', return_value=None) as mock_delete, \
-            patch.object(Session, 'commit', return_value=None) as mock_commit:
-        crud = QuestionCRUD(Session())
-        result = crud.delete_question(1)
-        assert result is False
+def test_fetch_questions_by_set_ids_returns_correct_questions():
+    session = create_autospec(Session, instance=True)
+    crud = QuestionCRUD(session)
+    crud.fetch_questions_by_set_ids([1, 2])
+    session.query.assert_called_once_with(Question)
+    session.query().filter.assert_called_once()
+
+
+def test_create_question_adds_question_to_db():
+    session = create_autospec(Session, instance=True)
+    crud = QuestionCRUD(session)
+    crud.create_question(1, 'question', 'pattern', 1)
+    session.add.assert_called_once()
+    session.commit.assert_called_once()
+    session.refresh.assert_called_once()
+
+
+def test_update_question_updates_question_in_db():
+    session = create_autospec(Session, instance=True)
+    crud = QuestionCRUD(session)
+    crud.update_question(1, 'question', 'pattern', 1)
+    session.query.assert_called_once_with(Question)
+    session.query().filter.assert_called_once()
+    session.commit.assert_called_once()
+    session.refresh.assert_called_once()
+
+
+def test_delete_question_removes_question_from_db():
+    session = create_autospec(Session, instance=True)
+    crud = QuestionCRUD(session)
+    crud.delete_question(1)
+    session.query.assert_called_once_with(Question)
+    session.query().filter.assert_called_once()
+    session.delete.assert_called_once()
+    session.commit.assert_called_once()
