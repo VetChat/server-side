@@ -93,7 +93,7 @@ class UrgentCaseCRUD:
         return urgent_case
 
     def update_multiple_urgent_cases(self, updates: List[UrgentCaseUpdate]) -> Optional[List[Type[UrgentCase]]]:
-        urgent_ids = [update.urgent_id for update in updates]
+        urgent_ids = [update.urgentId for update in updates]
         urgent_cases = self.fetch_urgent_case_by_ids(urgent_ids)
         if urgent_cases is None:
             return None
