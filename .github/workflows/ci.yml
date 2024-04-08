@@ -1,19 +1,39 @@
 name: Codecov
-on: [ push, pull_request ]
+on: [ push ]
 jobs:
-  build:
+  run:
     runs-on: ubuntu-latest
-    name: Test python API
     steps:
-      - uses: actions/checkout@v4
-      - name: Install requirements
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Run ATS
+        uses: codecov/codecov-ats@v0
+        env:
+          CODECOV_STATIC_TOKEN: ${{ secrets.CODECOV_STATIC_TOKEN }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          PYTHONPATH: ${{ github.workspace }}
+          TESTING: true
       - name: Run tests and collect coverage
-        run: pytest --cov .
         env:
           PYTHONPATH: ${{ github.workspace }}
-      - name: Upload coverage reports to Codecov
+          TESTING: true
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION}}
         run: |
-          curl -Os https://uploader.codecov.io/latest/linux/codecov
-          chmod +x codecov
-          ./codecov -t ${{ secrets.CODECOV_TOKEN }}
+          cat codecov_ats/tests_to_run.txt | xargs pytest --cov app
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          flags: smart-tests
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

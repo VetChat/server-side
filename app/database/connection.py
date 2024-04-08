@@ -6,6 +6,10 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 # Retrieve the database URL from the environment variable
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# If in a testing environment, use an in-memory SQLite database
+if os.getenv("TESTING"):
+    DATABASE_URL = "sqlite:///:memory:"
+
 # Create an engine instance
 engine = create_engine(DATABASE_URL, echo=True, future=True)
 

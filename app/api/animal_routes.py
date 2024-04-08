@@ -2,10 +2,10 @@ from typing import List
 from fastapi import Request, APIRouter, Depends, HTTPException
 from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
-from ..utils import limiter
-from ..database import get_db
-from ..crud import AnimalCRUD
-from ..schemas import AnimalRead, AnimalCreate, AnimalResponse, AnimalUpdate
+from app.utils import limiter
+from app.database import get_db
+from app.crud import AnimalCRUD
+from app.schemas import AnimalRead, AnimalCreate, AnimalResponse, AnimalUpdate
 
 
 def custom_generate_unique_id(route: APIRoute):

@@ -15,3 +15,9 @@ class QuestionSetResponse(BaseModel):
     symptomId: int
     animalId: int
     message: str
+
+
+class QuestionSetRead(BaseModel):
+    questionSetId: int
+    symptomId: int
+    animalId: int
