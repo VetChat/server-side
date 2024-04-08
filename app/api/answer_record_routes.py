@@ -1,10 +1,10 @@
 from fastapi import Request, APIRouter, Depends
 from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
-from ..utils import limiter
-from ..database import get_db
-from ..crud import AnswerRecordCRUD
-from ..schemas import AnswerRecordCreate, AnswerRecordResponse
+from app.utils import limiter
+from app.database import get_db
+from app.crud import AnswerRecordCRUD
+from app.schemas import AnswerRecordCreate, AnswerRecordResponse
 
 
 def custom_generate_unique_id(route: APIRoute):
