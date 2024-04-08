@@ -17,7 +17,7 @@ router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 @router.post("/answer_records", response_model=AnswerRecordResponse, tags=["Answer_records"])
 @limiter.limit("5/minute")
 async def create_answer_records(
-        answer_record_data: AnswerRecordCreate, db: Session = Depends(get_db)
+        request: Request, answer_record_data: AnswerRecordCreate, db: Session = Depends(get_db)
 ) -> AnswerRecordResponse:
     answer_record_crud = AnswerRecordCRUD(db)
     try:
