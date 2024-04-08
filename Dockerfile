@@ -3,6 +3,9 @@ FROM python:3.9
 
 WORKDIR /anti-mage
 
+# Add the root directory to the PYTHONPATH
+ENV PYTHONPATH=/
+
 COPY requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
@@ -17,12 +20,6 @@ ENV DATABASE_URL=$DATABASE_URL
 ENV AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
 ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 ENV AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
-
-# Print the environment variables
-RUN echo DATABASE_URL=$DATABASE_URL && \
-    echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID && \
-    echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY && \
-    echo AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
 
 COPY ./app /app
 
