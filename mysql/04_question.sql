@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS question
     question_set_id INT          NOT NULL,
     question        VARCHAR(255) NOT NULL,
     pattern         ENUM ('choice', 'duration', 'text'),
-    image_path      VARCHAR(255),
+    image_path      VARCHAR(1000),
     ordinal         INT          NOT NULL,
     PRIMARY KEY (question_id),
     INDEX idx_question_set_id (question_set_id),
@@ -17,7 +17,9 @@ CREATE TABLE IF NOT EXISTS question
 -- Insert mock data into the question table
 INSERT INTO question
 VALUES -- ท้องเสีย สุนัข
-       (1, 1, 'อุจจาระของสัตว์ มีลักษณะคล้ายรูปไหนมากที่สุด (เรียงจาก ซ้ายไปขวา บนไปล่าง)', 'choice', 'รูปขี้', 1),
+       (1, 1, 'อุจจาระของสัตว์ มีลักษณะคล้ายรูปไหนมากที่สุด (เรียงจาก ซ้ายไปขวา บนไปล่าง)', 'choice',
+        'https://vetchat.s3.ap-southeast-1.amazonaws.com/%E0%B8%AA%E0%B8%B8%E0%B8%99%E0%B8%B1%E0%B8%82_%E0%B8%97%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B5%E0%B8%A2_%E0%B8%97%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B5%E0%B8%A2%E0%B9%80%E0%B8%9B%E0%B9%87%E0%B8%99%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B0%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2%E0%B8%81%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%99.png',
+        1),
        (2, 1, 'ท้องเสียเป็นระยะเวลากี่วัน', 'choice', NULL, 2),
        (3, 1, 'สัตว์เลี้ยง ซึมลงหรือไม่', 'choice', NULL, 3),
        (4, 1, 'ปริมาณของมูล เยอะกว่าปกติหรือไม่', 'choice', NULL, 4),
@@ -37,7 +39,7 @@ VALUES -- ท้องเสีย สุนัข
        (17, 2, 'ไอ เฉพาะ หลังจากที่ตกใจ หรือเนื่อย หรือไม่', 'choice', NULL, 5),
        (18, 2, 'ทำโปรแกรมวัคซีน ครบหรือไม่', 'choice', NULL, 6),
        (19, 2, 'ทำโปรแกรมป้องกัน พยาธิ หนอนหัวใจ หรือไม่', 'choice', NULL, 7),
-       (20, 2, 'ที่เลี้ยงมีฝุน หรือไม่', 'choice', 'https://picsum.photos/id/212/200/300', 8),
+       (20, 2, 'ที่เลี้ยงมีฝุน หรือไม่', 'choice', NULL, 8),
        (21, 2, 'สัตว์มีประวัติการแพ้ หรือไม่', 'choice', NULL, 9),
        -- เหงือกซีด สุนัข
        (22, 3, 'ทำโปรแกรมวัคซีน ครบหรือไม่', 'choice', NULL, 1),
@@ -63,7 +65,9 @@ VALUES -- ท้องเสีย สุนัข
        (40, 5, 'สัตว์สามารถเดินได้เองหรือไม่', 'choice', NULL, 6),
        (41, 5, 'มีการเปลี่ยนอาหารก่อนหน้าจะเกิด อึไม่ออก หรือไม่', 'choice', NULL, 7),
        -- ท้องเสีย แมว
-       (42, 6, 'อุจจาระของสัตว์ มีลักษณะคล้ายรูปไหนมากที่สุด (เรียงจาก ซ้ายไปขวา บนไปล่าง)', 'choice', 'รูปขี้', 1),
+       (42, 6, 'อุจจาระของสัตว์ มีลักษณะคล้ายรูปไหนมากที่สุด (เรียงจาก ซ้ายไปขวา บนไปล่าง)', 'choice',
+        'https://vetchat.s3.ap-southeast-1.amazonaws.com/%E0%B8%AA%E0%B8%B8%E0%B8%99%E0%B8%B1%E0%B8%82_%E0%B8%97%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B5%E0%B8%A2_%E0%B8%97%E0%B9%89%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%AA%E0%B8%B5%E0%B8%A2%E0%B9%80%E0%B8%9B%E0%B9%87%E0%B8%99%E0%B8%A3%E0%B8%B0%E0%B8%A2%E0%B8%B0%E0%B9%80%E0%B8%A7%E0%B8%A5%E0%B8%B2%E0%B8%81%E0%B8%B5%E0%B9%88%E0%B8%A7%E0%B8%B1%E0%B8%99.png',
+        1),
        (43, 6, 'ท้องเสียเป็นระยะเวลากี่วัน', 'choice', NULL, 2),
        (44, 6, 'สัตว์เลี้ยง ซึมลงหรือไม่', 'choice', NULL, 3),
        (45, 6, 'ปริมาณของมูล เยอะกว่าปกติหรือไม่', 'choice', NULL, 4),
