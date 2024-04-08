@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class AnswerRead(BaseModel):
     answerId: int
     answer: str
+    summary: str
     skipToQuestion: Optional[int] = None
 
     class Config:
