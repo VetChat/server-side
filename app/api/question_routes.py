@@ -222,7 +222,7 @@ async def update_question(request: Request, question: QuestionWithListAnswerUpda
 @router.put("/question_set/question/bulk", response_model=QuestionUpdateBulkResponse, tags=["Question"])
 @limiter.limit("5/minute")
 async def update_questions(request: Request, questions_data: str = Form(...),
-                           images: List[UploadFile] = None,
+                           images: Optional[List[UploadFile]] = None,
                            db: Session = Depends(get_db)) -> QuestionUpdateBulkResponse:
     questions = json.loads(questions_data)
 
