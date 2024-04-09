@@ -81,7 +81,7 @@ class QuestionUpdateFailedResponse(BaseQuestion):
 
 class QuestionCreateUpdateDelete(BaseModel):
     createUpdate: List[QuestionWithListAnswerCreateUpdate]
-    delete: Optional[List[QuestionId]]
+    delete: Optional[List[QuestionId]] = None
 
 
 class QuestionCreateUpdateDeleteSuccessResponse(BaseModel):

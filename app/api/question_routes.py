@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from collections import defaultdict
 
 from app.aws import S3Resource
-from app.schemas.question_schema import QuestionWithListAnswerCreateUpdate, QuestionCreateUpdateDelete
+from app.schemas.question_schema import QuestionWithListAnswerCreateUpdate, QuestionCreateUpdateDelete, \
+    QuestionCreateUpdateDeleteSuccessResponse, QuestionCreateUpdateDeleteFailedResponse
 from app.utils import limiter, format_file_name
 from app.database import get_db
 from app.crud import QuestionCRUD, AnswerCRUD, QuestionSetCRUD
@@ -15,7 +16,8 @@ from app.schemas import QuestionSetRequest, QuestionResponse, AnswerRead, Questi
     QuestionWithListAnswerUpdate, QuestionWithListAnswerDeleteResponse, \
     QuestionCreateFailedResponse, QuestionUpdateFailedResponse, AnswerUpdateFailed, AnswerCreateUpdate, \
     AnswerCreateUpdateDeleteBulkResponse, AnswerCreateUpdateDelete, AnswerDeleteResponse, QuestionDeleteResponse, \
-    QuestionCreateUpdateDeleteBulkResponse
+    QuestionCreateUpdateDeleteBulkResponse, AnswerCreateUpdateDeleteSuccessResponse, \
+    AnswerCreateUpdateDeleteFailedResponse
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -77,8 +79,7 @@ async def get_questions_by_set_ids(request: Request, question: List[QuestionSetR
 @limiter.limit("5/minute")
 async def update_questions(request: Request, questions_data: str = Form(...),
                            images: Optional[List[UploadFile]] = None,
-                           db: Session = Depends(get_db)) -> Coroutine[
-    Any, Any, QuestionCreateUpdateDeleteBulkResponse]:
+                           db: Session = Depends(get_db)) -> QuestionCreateUpdateDeleteBulkResponse:
     questions = json.loads(questions_data)
 
     question_crud = QuestionCRUD(db)
@@ -90,14 +91,17 @@ async def update_questions(request: Request, questions_data: str = Form(...),
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=400, detail=f"JSON Decode Error: {e.msg}")
 
-    return create_update_delete_question(question_crud, question_set_crud, answer_crud, question_data, images)
+    return await create_update_delete_question(question_crud, question_set_crud, answer_crud, question_data, images)
 
 
 async def create_update_delete_question(question_crud: QuestionCRUD, question_set_crud: QuestionSetCRUD,
                                         answer_crud: AnswerCRUD, question: QuestionCreateUpdateDelete,
                                         images: List[Optional[UploadFile]] = None) -> (
         QuestionCreateUpdateDeleteBulkResponse):
-    question_result = QuestionCreateUpdateDeleteBulkResponse(success=[], failed=[])
+    success_model = QuestionCreateUpdateDeleteSuccessResponse(create=[], update=[], delete=[])
+    failed_model = QuestionCreateUpdateDeleteFailedResponse(create=[], update=[], delete=[])
+
+    question_result = QuestionCreateUpdateDeleteBulkResponse(success=success_model, failed=failed_model)
 
     for q in question.createUpdate:
         if q.questionId:
@@ -274,10 +278,13 @@ async def delete_question(question_crud: QuestionCRUD, answer_crud: AnswerCRUD,
 
 def create_update_delete_answer(answer_crud: AnswerCRUD, question_id: int,
                                 answers: AnswerCreateUpdateDelete) -> AnswerCreateUpdateDeleteBulkResponse:
-    answer_result = AnswerCreateUpdateDeleteBulkResponse(success=[], failed=[])
+    success_model = AnswerCreateUpdateDeleteSuccessResponse(create=[], update=[], delete=[])
+    failed_model = AnswerCreateUpdateDeleteFailedResponse(create=[], update=[], delete=[])
+
+    answer_result = AnswerCreateUpdateDeleteBulkResponse(success=success_model, failed=failed_model)
 
     for answer in answers.createUpdate:
-        if answer.answerId:
+        if not answer.answerId:
             result = create_answer(answer_crud, question_id, answer)
             if isinstance(result, AnswerResponse):
                 answer_result.success.create.append(result)
@@ -339,6 +346,7 @@ def create_answer(answer_crud: AnswerCRUD, question_id: int,
 def update_answer(answer_crud: AnswerCRUD, answer: AnswerCreateUpdate) -> AnswerUpdateFailed or AnswerResponse:
     existed_answers = answer_crud.fetch_answer_by_id(answer.answerId)
     if not existed_answers:
+        print(answer)
         return AnswerUpdateFailed(
             answerId=answer.answerId,
             answer=answer.answer,
@@ -396,3 +404,8 @@ async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[Up
 
         images.remove(image)
         return image_path
+
+
+@router.get("/test", response_model=QuestionCreateUpdateDelete, tags=["Question"])
+async def test():
+    return "Hello World"
