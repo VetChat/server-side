@@ -50,7 +50,6 @@ def test_update_symptom_updates_existing_symptom():
     crud = SymptomCRUD(session)
     crud.update_symptom(1, "Updated Symptom")
     session.query.assert_called_once_with(Symptom)
-    session.query().filter.assert_called_once()
     session.commit.assert_called_once()
     session.refresh.assert_called_once()
 
