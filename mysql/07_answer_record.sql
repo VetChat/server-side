@@ -1,3 +1,4 @@
+SET NAMES 'utf8mb4';
 -- CREATE the answer record table
 CREATE TABLE IF NOT EXISTS answer_record
 (
@@ -14,7 +15,7 @@ CREATE TABLE IF NOT EXISTS answer_record
     CONSTRAINT FK_AnswerRecordTicket FOREIGN KEY (ticket_id) REFERENCES ticket (ticket_id) ON DELETE CASCADE,
     CONSTRAINT UC_AnswerTicket UNIQUE (ticket_id, question)
 ) CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;;
+  COLLATE utf8mb4_unicode_ci;
 
 -- Insert mock data to the answer record table
 INSERT INTO answer_record

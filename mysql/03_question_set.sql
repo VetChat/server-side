@@ -1,3 +1,4 @@
+SET NAMES 'utf8mb4';
 -- CREATE the question set table
 CREATE TABLE IF NOT EXISTS question_set
 (
@@ -9,7 +10,7 @@ CREATE TABLE IF NOT EXISTS question_set
     CONSTRAINT FK_AnimalQuestion FOREIGN KEY (animal_id) REFERENCES animal (animal_id) ON DELETE CASCADE,
     CONSTRAINT UC_QuestionSet UNIQUE (symptom_id, animal_id)
 ) CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;;
+  COLLATE utf8mb4_unicode_ci;
 
 -- Insert mock data into the question_set table
 INSERT INTO question_set

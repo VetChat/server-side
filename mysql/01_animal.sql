@@ -1,3 +1,4 @@
+SET NAMES 'utf8mb4';
 -- Create the animal table
 CREATE TABLE IF NOT EXISTS animal
 (
@@ -7,7 +8,7 @@ CREATE TABLE IF NOT EXISTS animal
     CONSTRAINT UC_Animal UNIQUE (animal_name),
     INDEX idx_animal_name (animal_name)
 ) CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;;
+  COLLATE utf8mb4_unicode_ci;
 
 -- Insert mock data into the animal table
 INSERT INTO animal

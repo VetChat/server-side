@@ -1,3 +1,4 @@
+SET NAMES 'utf8mb4';
 -- Create the ticket question table
 CREATE TABLE IF NOT EXISTS ticket_question
 (
@@ -8,7 +9,7 @@ CREATE TABLE IF NOT EXISTS ticket_question
     is_required        BOOLEAN      NOT NULL DEFAULT TRUE,
     PRIMARY KEY (ticket_question_id)
 ) CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;;
+  COLLATE utf8mb4_unicode_ci;
 
 -- Insert mock data into the ticket question table
 INSERT INTO ticket_question
