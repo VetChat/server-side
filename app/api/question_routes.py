@@ -55,7 +55,7 @@ async def get_questions_by_set_ids(request: Request, question: List[QuestionSetR
                     pattern=question.Question.pattern,
                     imagePath=question.Question.image_path,
                     ordinal=question.Question.ordinal,
-                    listAnswer=[
+                    listAnswer=[] if question.Question.pattern == 'text' else [
                         AnswerRead(
                             answerId=answer.answer_id,
                             answer=answer.answer,
@@ -334,7 +334,7 @@ async def delete_questions(request: Request, question_ids: List[QuestionId],
                     )
                 )
                 continue
-                
+
         is_success = question_crud.delete_question(question_data.question_id)
 
         if not is_success:

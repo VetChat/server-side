@@ -18,7 +18,7 @@ class QuestionId(BaseModel):
 
 
 class QuestionWithListAnswer(BaseQuestion):
-    listAnswer: List[AnswerRead]
+    listAnswer: List[Optional[AnswerRead]]
 
 
 class QuestionResponse(BaseModel):
