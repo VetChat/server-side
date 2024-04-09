@@ -346,7 +346,6 @@ def create_answer(answer_crud: AnswerCRUD, question_id: int,
 def update_answer(answer_crud: AnswerCRUD, answer: AnswerCreateUpdate) -> AnswerUpdateFailed or AnswerResponse:
     existed_answers = answer_crud.fetch_answer_by_id(answer.answerId)
     if not existed_answers:
-        print(answer)
         return AnswerUpdateFailed(
             answerId=answer.answerId,
             answer=answer.answer,
