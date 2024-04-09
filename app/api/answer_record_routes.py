@@ -21,9 +21,15 @@ async def create_answer_records(
 ) -> AnswerRecordResponse:
     answer_record_crud = AnswerRecordCRUD(db)
     try:
-        answer_data = [answer_record_crud.fetch_answer_data_by_question_id_and_answer(
-            question_id=answer.questionId, answer=answer.answer
-        ) for answer in answer_record_data.listAnswer]
+        answer_data = []
+        for answer in answer_record_data.listAnswer:
+            data = answer_record_crud.fetch_answer_data_by_question_id_and_answer(
+                question_id=answer.questionId, answer=answer.answer
+            )
+            if data.pattern == "text":
+                data.answer = answer.answer
+
+            answer_data.append(data)
 
         answer_record_crud.create_answer_records(
             ticket_id=answer_record_data.ticketId,
