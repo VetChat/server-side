@@ -255,6 +255,20 @@ async def update_questions(request: Request, questions_data: str = Form(...),
 
         if q.haveImage:
             await upload_image_to_s3(question_set_crud, images, q)
+        elif not q.haveImage and question_data.image_path:
+            is_success = await s3.remove_file_from_s3(question_data.image_path)
+            if not is_success:
+                question_result.failed.append(
+                    QuestionUpdateFailedResponse(
+                        questionId=question_data.question_id,
+                        question=question_data.question,
+                        pattern=question_data.pattern,
+                        imagePath=question_data.image_path,
+                        ordinal=question_data.ordinal,
+                        message="Failed to delete the image"
+                    )
+                )
+                continue
 
         question_data = question_crud.update_question(q.questionId, q.question, q.pattern, q.ordinal, q.imagePath)
 
