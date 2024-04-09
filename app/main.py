@@ -6,7 +6,7 @@ from slowapi.errors import RateLimitExceeded
 from .utils import limiter
 from .api import routers
 
-app = FastAPI()
+app = FastAPI(docs_url=None)
 
 # Add the rate limit exceeded error handler
 app.state.limiter = limiter
