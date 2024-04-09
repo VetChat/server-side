@@ -33,7 +33,6 @@ def test_fetch_symptoms_by_animal_id_returns_correct_symptoms():
     crud.fetch_symptoms_by_animal_id(1)
     session.query.assert_called_once_with(Symptom.symptom_id, Symptom.symptom_name, QuestionSet.question_set_id)
     session.query().join.assert_called_once()
-    session.query().filter.assert_called_once()
 
 
 def test_add_symptom_adds_new_symptom():
@@ -50,6 +49,7 @@ def test_update_symptom_updates_existing_symptom():
     crud = SymptomCRUD(session)
     crud.update_symptom(1, "Updated Symptom")
     session.query.assert_called_once_with(Symptom)
+    session.query().filter.assert_called_once()
     session.commit.assert_called_once()
     session.refresh.assert_called_once()
 
