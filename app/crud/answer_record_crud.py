@@ -35,7 +35,6 @@ class AnswerRecordCRUD:
         try:
             # Create answer records
             for answer in answer_data:
-                print(len(answer.image_path))
                 answer_record = AnswerRecord(
                     ticket_id=ticket_id,
                     symptom_id=answer.symptom_id,
