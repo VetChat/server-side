@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS question
     question_set_id INT          NOT NULL,
     question        VARCHAR(255) NOT NULL,
     pattern         ENUM ('choice', 'duration', 'text'),
-    image_path      VARCHAR(1000),
+    image_path      TEXT,
     ordinal         INT          NOT NULL,
     PRIMARY KEY (question_id),
     INDEX idx_question_set_id (question_set_id),

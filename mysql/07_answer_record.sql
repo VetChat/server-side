@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS answer_record
     symptom_id       INT          NOT NULL,
     symptom_name     VARCHAR(255) NOT NULL,
     question         VARCHAR(255) NOT NULL,
-    image_path       VARCHAR(255),
+    image_path       TEXT,
     ordinal          INT          NOT NULL,
     answer           VARCHAR(255) NOT NULL,
     summary          VARCHAR(255),

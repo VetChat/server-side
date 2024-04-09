@@ -1,20 +1,14 @@
-from .animal_schema import AnimalRead, AnimalCreate, AnimalResponse, AnimalUpdate
-from .urgent_case_schema import UrgentCaseWithUrgency, UrgentCaseRead, UrgentCaseResponse, UrgentCaseCreate, \
-    UrgentCaseUpdate, UrgentCaseBulkResponse, UrgentCaseUpdateFailed, UrgentCaseId
-from .urgency_schema import UrgencyRead, UrgencyResponse, UrgencyMostRequest
-from .ticket_schema import TicketCreate, TicketAnswer, TicketId
-from .symptom_schema import SymptomRead, SymptomCreateBody, SymptomResponse, SymptomUpdate, SymptomWithQuestions
-from .question_set_schema import QuestionSetRequest, QuestionSetCreateBody, QuestionSetResponse, QuestionSetRead
-from .question_schema import QuestionResponse, QuestionWithListAnswer, QuestionWithListAnswerCreate, \
-    QuestionWithListAnswerUpdate, QuestionCreateBulkResponse, QuestionWithListAnswerDeleteResponse, \
-    QuestionWithListAnswerCreateResponse, QuestionCreateFailedResponse, QuestionUpdateFailedResponse, \
-    QuestionUpdateBulkResponse, QuestionId, QuestionDeleteBulkResponse
-from .answer_schema import AnswerRead, AnswerCreate, AnswerResponse, AnswerCreateBulkResponse, AnswerCreateFailed, \
-    AnswerUpdate, AnswerUpdateBulkResponse, AnswerUpdateFailed
-from .answer_record_schema import AnswerRecordCreate, AnswerRecordResponse
-from .summary_schema import TicketSummaryResponse, TicketInfo, SymptomSummary, AnswerSummary, TicketLabel, \
-    TicketEachSummaryResponse, TicketDataResponse
-from .ticket_question_schema import TicketQuestionRead, TicketAnswerRead
+from .animal_schema import *
+from .urgent_case_schema import *
+from .urgency_schema import *
+from .ticket_schema import *
+from .symptom_schema import *
+from .question_set_schema import *
+from .question_schema import *
+from .answer_schema import *
+from .answer_record_schema import *
+from .summary_schema import *
+from .ticket_question_schema import *
 
 __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseWithUrgency", "UrgentCaseRead",
            "UrgencyRead", "UrgentCaseResponse", "UrgentCaseCreate", "UrgentCaseUpdate", "UrgentCaseBulkResponse",
@@ -23,9 +17,14 @@ __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseWithUrgenc
            "AnswerRecordResponse", "TicketSummaryResponse", "TicketQuestionRead", "TicketAnswerRead",
            "SymptomCreateBody", "SymptomResponse", "AnimalUpdate", "SymptomUpdate", "TicketInfo", "SymptomSummary",
            "AnswerSummary", "QuestionWithListAnswer", "UrgentCaseUpdateFailed", "UrgentCaseId", "QuestionSetCreateBody",
-           "QuestionSetResponse", "TicketLabel", "TicketEachSummaryResponse", "TicketDataResponse", "AnswerCreate",
-           "QuestionWithListAnswerCreate", "AnswerResponse", "AnswerCreateBulkResponse", "AnswerCreateFailed",
-           "AnswerUpdate", "AnswerUpdateBulkResponse", "AnswerUpdateFailed", "QuestionId",
-           "QuestionWithListAnswerUpdate", "QuestionCreateBulkResponse", "QuestionWithListAnswerDeleteResponse",
-           "QuestionWithListAnswerCreateResponse", "QuestionCreateFailedResponse", "QuestionUpdateFailedResponse",
-           "QuestionUpdateBulkResponse", "QuestionDeleteBulkResponse", "QuestionSetRead"]
+           "QuestionSetResponse", "TicketLabel", "TicketEachSummaryResponse", "TicketDataResponse",
+           "QuestionWithListAnswerCreate", "AnswerResponse", "AnswerCreateFailed",
+           "AnswerUpdate", "AnswerUpdateFailed", "QuestionId", "AnswerCreateUpdate",
+           "QuestionWithListAnswerUpdate", "QuestionWithListAnswerDeleteResponse",
+           "QuestionWithListAnswerResponse", "QuestionCreateFailedResponse", "QuestionUpdateFailedResponse",
+           "QuestionSetRead",
+           "QuestionWithListAnswerCreateUpdate", "QuestionDeleteResponse",
+           "AnswerCreateUpdateDeleteBulkResponse", "AnswerDelete", "AnswerCreateUpdateDelete", "AnswerDeleteResponse",
+           "AnswerCreateUpdateDeleteSuccessResponse", "AnswerCreateUpdateDeleteFailedResponse",
+           "QuestionCreateUpdateDeleteSuccessResponse", "QuestionCreateUpdateDelete",
+           "QuestionCreateUpdateDeleteFailedResponse", "QuestionCreateUpdateDeleteBulkResponse"]

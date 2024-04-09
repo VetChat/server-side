@@ -28,13 +28,14 @@ class AnswerRecordCRUD:
             .filter(Question.question_id == question_id,
                     (Answer.answer == answer) | (Question.pattern == 'text'))
             .order_by(Symptom.symptom_id, Question.ordinal)
-            .all()
+            .first()
         )
 
     def create_answer_records(self, ticket_id: int, answer_data: List[dict]):
         try:
             # Create answer records
             for answer in answer_data:
+                print(len(answer.image_path))
                 answer_record = AnswerRecord(
                     ticket_id=ticket_id,
                     symptom_id=answer.symptom_id,
