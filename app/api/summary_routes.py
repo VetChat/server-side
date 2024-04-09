@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Optional, List
+from typing import Optional
 
 from fastapi import Request, APIRouter, Depends
 from fastapi.routing import APIRoute

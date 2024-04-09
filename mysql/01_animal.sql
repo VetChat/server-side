@@ -11,6 +11,5 @@ CREATE TABLE IF NOT EXISTS animal
 
 -- Insert mock data into the animal table
 INSERT INTO animal
-VALUES (1, 'Dog'),
-       (2, 'Cat'),
-       (3, 'Rabbit');
+VALUES (1, 'หมา'),
+       (2, 'แมว');

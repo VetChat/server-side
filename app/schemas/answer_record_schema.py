@@ -3,7 +3,8 @@ from typing import List
 
 
 class AnswerRecordId(BaseModel):
-    answerId: int
+    questionId: int
+    answer: str
 
 
 class AnswerRecordCreate(BaseModel):

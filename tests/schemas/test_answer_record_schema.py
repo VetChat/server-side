@@ -4,8 +4,9 @@ from app.schemas import answer_record_schema
 
 
 def test_should_create_answer_record_id_model_successfully():
-    answer_record_id = answer_record_schema.AnswerRecordId(answerId=1)
-    assert answer_record_id.answerId == 1
+    answer_record_id = answer_record_schema.AnswerRecordId(questionId=1, answer="Yes")
+    assert answer_record_id.questionId == 1
+    assert answer_record_id.answer == "Yes"
 
 
 def test_should_raise_error_when_missing_required_fields_in_answer_record_id_model():
@@ -15,9 +16,10 @@ def test_should_raise_error_when_missing_required_fields_in_answer_record_id_mod
 
 def test_should_create_answer_record_create_model_successfully():
     answer_record_create = answer_record_schema.AnswerRecordCreate(ticketId=1, listAnswer=[
-        answer_record_schema.AnswerRecordId(answerId=1)])
+        answer_record_schema.AnswerRecordId(questionId=1, answer="Yes")])
     assert answer_record_create.ticketId == 1
-    assert answer_record_create.listAnswer[0].answerId == 1
+    assert answer_record_create.listAnswer[0].questionId == 1
+    assert answer_record_create.listAnswer[0].answer == "Yes"
 
 
 def test_should_raise_error_when_missing_required_fields_in_answer_record_create_model():

@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS ticket_answer
 
 -- Insert mock data to the ticket answer table
 INSERT INTO ticket_answer
-VALUES (1, 2, 'Male'),
-       (2, 2, 'Female'),
-       (3, 3, 'Sterile'),
-       (4, 3, 'Non-Sterile')
+VALUES (1, 2, 'ผู้'),
+       (2, 2, 'เมีย'),
+       (3, 3, 'ทำหมัน'),
+       (4, 3, 'ไม่ทำหมัน');

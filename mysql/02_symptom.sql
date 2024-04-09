@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS symptom
 
 -- Insert mock data into the symptom table
 INSERT INTO symptom
-VALUES (1, 'Diarrhea'),
-       (2, 'Vomit'),
-       (3, 'Loss of appetite');
+VALUES (1, 'ท้องเสีย'),
+       (2, 'ไอ'),
+       (3, 'เหงือกซีด'),
+       (4, 'ขนร่วง'),
+       (5, 'อึไม่ออก');

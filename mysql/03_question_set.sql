@@ -13,9 +13,15 @@ CREATE TABLE IF NOT EXISTS question_set
 
 -- Insert mock data into the question_set table
 INSERT INTO question_set
-VALUES (1, 1, 1),
+VALUES -- สุนัข
+       (1, 1, 1),
        (2, 2, 1),
        (3, 3, 1),
-       (4, 1, 2),
-       (5, 3, 2),
-       (6, 2, 3);
+       (4, 4, 1),
+       (5, 5, 1),
+       -- แมว
+       (6, 1, 2),
+       (7, 2, 2),
+       (8, 3, 2),
+       (9, 4, 2),
+       (10, 5, 2);

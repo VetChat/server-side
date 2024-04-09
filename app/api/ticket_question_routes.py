@@ -2,10 +2,10 @@ from typing import List
 from fastapi import Request, APIRouter, Depends
 from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
-from ..utils import limiter
-from ..database import get_db
-from ..crud import TicketQuestionCRUD
-from ..schemas import TicketQuestionRead, TicketAnswerRead
+from app.utils import limiter
+from app.database import get_db
+from app.crud import TicketQuestionCRUD
+from app.schemas import TicketQuestionRead, TicketAnswerRead
 
 
 def custom_generate_unique_id(route: APIRoute):

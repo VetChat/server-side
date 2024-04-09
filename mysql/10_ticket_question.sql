@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS ticket_question
 
 -- Insert mock data into the ticket question table
 INSERT INTO ticket_question
-VALUES (1, 'Pet ID', 'text', 1, TRUE),
-       (2, 'Sex', 'choice', 2, TRUE),
-       (3, 'Neutered or not neutered', 'choice', 3, TRUE),
-       (4, 'Breed', 'text', 4, FALSE),
-       (5, 'Birthdate', 'birthDate', 5, TRUE)
+VALUES (1, 'รหัสประจำสัตว์เลี้ยง', 'text', 1, FALSE),
+       (2, 'เพศ', 'choice', 2, TRUE),
+       (3, 'ทำหมัน หรือไม่ทำหมัน', 'choice', 3, TRUE),
+       (4, 'พันธุ์', 'text', 4, TRUE),
+       (5, 'วันเกิด', 'birthDate', 5, TRUE);
