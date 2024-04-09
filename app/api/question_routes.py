@@ -403,8 +403,3 @@ async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[Up
 
         images.remove(image)
         return image_path
-
-
-@router.get("/test", response_model=QuestionCreateUpdateDelete, tags=["Question"])
-async def test():
-    return "Hello World"
