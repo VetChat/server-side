@@ -11,7 +11,7 @@ class AnswerRecordCRUD:
         self.db = db
 
     def fetch_answer_data_by_question_id_and_answer(self, question_id: id, answer: str):
-        return (
+        result = (
             self.db.query(Question.question_id,
                           Question.question,
                           Question.pattern,
@@ -30,6 +30,11 @@ class AnswerRecordCRUD:
             .order_by(Symptom.symptom_id, Question.ordinal)
             .first()
         )
+
+        if result and result.pattern == 'text':
+            result.answer = answer
+
+        return result
 
     def create_answer_records(self, ticket_id: int, answer_data: List[dict]):
         try:
