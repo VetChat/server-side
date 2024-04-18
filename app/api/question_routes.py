@@ -384,7 +384,8 @@ def delete_answer(answer_crud: AnswerCRUD, answer_id: int) -> bool:
 
 async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[UploadFile],
                              question: QuestionWithListAnswerCreate or QuestionWithListAnswerUpdate) -> Optional[str]:
-    if question is QuestionWithListAnswerCreate:
+    print(f"Question: {question}")
+    if question.questionId is None:
         question_set_data = question_set_crud.fetch_question_set_info_by_id(question.questionSetId)
     else:
         question_set_data = question_set_crud.fetch_question_set_info_by_question_id(question.questionId)
