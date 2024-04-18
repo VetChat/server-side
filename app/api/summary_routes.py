@@ -24,7 +24,8 @@ router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Optional[int] = 0,
                       db: Session = Depends(get_db)) -> TicketSummaryResponse:
     ticket_crud = TicketCRUD(db)
-    tickets_id = [ticket_id[0] for ticket_id in ticket_crud.fetch_tickets_id(limit, start_at)]
+    tickets_id = {ticket_id.ticket_id: ticket_id.rec_created_when for ticket_id in
+                  ticket_crud.fetch_tickets_id(limit, start_at)}
 
     summary_crud = SummaryCRUD(db)
 
@@ -51,6 +52,7 @@ async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Opt
         listTicket=[
             TicketDataResponse(
                 ticketId=ticket_id,
+                recCreatedWhen=tickets_id[ticket_id],
                 info=[
                     TicketInfo(
                         ticketAnswerRecordId=info.ticket_answer_record_id,

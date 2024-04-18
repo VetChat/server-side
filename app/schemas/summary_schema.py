@@ -1,5 +1,5 @@
 from typing import Optional, List
-
+from datetime import datetime
 from pydantic import BaseModel
 
 
@@ -40,6 +40,7 @@ class TicketDataResponse(BaseModel):
     ticketId: int
     info: List[TicketInfo]
     summary: List[SymptomSummary]
+    recCreatedWhen: datetime
 
 
 class TicketSummaryResponse(BaseModel):
