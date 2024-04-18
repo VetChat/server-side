@@ -1,6 +1,8 @@
 import json
-from typing import List, Optional, Any, Coroutine
-from fastapi import Request, APIRouter, Depends, HTTPException, UploadFile, Form
+from typing import List, Optional, IO
+
+import filetype
+from fastapi import Request, APIRouter, Depends, HTTPException, UploadFile, Form, status
 from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from collections import defaultdict
@@ -389,14 +391,14 @@ async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[Up
         question_set_data = question_set_crud.fetch_question_set_info_by_question_id(question.questionId)
 
     for image in images:
+        print(f"Image: {image}")
         file_name = image.filename.split(".")[0]
-        file_extension = image.filename.split(".")[-1]
 
         question_formatted = format_file_name(question.question)
 
         if file_name != question_formatted:
             continue
-        if file_extension not in ["jpg", "jpeg", "png"]:
+        if not validate_file_size_type(image):
             images.remove(image)
             continue
 
@@ -407,3 +409,21 @@ async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[Up
         images.remove(image)
         return image_path
     return "https://vetchat.s3.ap-southeast-1.amazonaws.com/failed-image.jpg"
+
+
+async def validate_file_size_type(file: IO):
+    accepted_file_types = ["image/png", "image/jpeg", "image/jpg", "image/heic", "image/heif", "image/heics", "png",
+                           "jpeg", "jpg", "heic", "heif", "heics"]
+    file_info = filetype.guess(file.file)
+    if file_info is None:
+        return False
+
+    detected_content_type = file_info.extension.lower()
+
+    if (
+            file.content_type not in accepted_file_types
+            or detected_content_type not in accepted_file_types
+    ):
+        return False
+
+    return True
