@@ -25,6 +25,9 @@ async def update_pet_id(request: Request, ticket: TicketAnswerRecordUpdate,
         raise HTTPException(status_code=404,
                             detail=f"Ticket question with ticket id {ticket.ticketAnswerRecordId} not found")
 
+    if not question.is_editable:
+        raise HTTPException(status_code=400,
+                            detail=f"Ticket question with ticket id {ticket.ticketAnswerRecordId} is not editable")
     ticket_question_crud.update_ticket_answer_record(ticket.ticketAnswerRecordId, ticket.answer)
 
     return TicketAnswerRecordUpdateResponse(
