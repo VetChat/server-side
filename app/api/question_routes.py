@@ -1,8 +1,7 @@
 import json
-from typing import List, Optional, IO
+from typing import List, Optional
 
-import filetype
-from fastapi import Request, APIRouter, Depends, HTTPException, UploadFile, Form, status
+from fastapi import Request, APIRouter, Depends, HTTPException, UploadFile, Form
 from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from collections import defaultdict
@@ -392,38 +391,25 @@ async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[Up
 
     for image in images:
         print(f"Image: {image}")
-        file_name = image.filename.split(".")[0]
+        file_name = image.filename
+        file_extension = image.content_type
+
+        accepted_file_types = ["image/png", "image/jpeg", "image/jpg", "image/heic", "image/heif", "image/heics", "png",
+                               "jpeg", "jpg", "heic", "heif", "heics"]
 
         question_formatted = format_file_name(question.question)
 
         if file_name != question_formatted:
             continue
-        if not validate_file_size_type(image):
+        if file_extension not in accepted_file_types:
             images.remove(image)
             continue
 
         image_path = await s3.upload_file_to_s3(image, question_set_data.animal.animal_name,
                                                 question_set_data.symptom.symptom_name, question.question)
         question.imagePath = image_path
+        print(f"Question Set Data: {question_set_data.animal.animal_name}, {question_set_data.symptom.symptom_name}")
 
         images.remove(image)
         return image_path
     return "https://vetchat.s3.ap-southeast-1.amazonaws.com/failed-image.jpg"
-
-
-async def validate_file_size_type(file: IO):
-    accepted_file_types = ["image/png", "image/jpeg", "image/jpg", "image/heic", "image/heif", "image/heics", "png",
-                           "jpeg", "jpg", "heic", "heif", "heics"]
-    file_info = filetype.guess(file.file)
-    if file_info is None:
-        return False
-
-    detected_content_type = file_info.extension.lower()
-
-    if (
-            file.content_type not in accepted_file_types
-            or detected_content_type not in accepted_file_types
-    ):
-        return False
-
-    return True

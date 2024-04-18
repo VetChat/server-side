@@ -10,8 +10,8 @@ class QuestionSetCRUD:
         return self.db.query(QuestionSet).filter(QuestionSet.question_set_id == question_set_id).first()
 
     def fetch_questions_set_by_animal_id(self, animal_id: int):
-        return (self.db.query(QuestionSet.question_set_id, QuestionSet.symptom_id, Symptom.symptom_name,
-                              QuestionSet.animal_id, QuestionSet.question_count)
+        return (self.db.query(QuestionSet, Symptom)
+                .join(QuestionSet.symptom)
                 .filter(QuestionSet.animal_id == animal_id)
                 .all())
 
