@@ -11,7 +11,9 @@ class AnimalCRUD:
         return self.db.query(Animal).all()
 
     def fetch_animal_by_id(self, animal_id: int) -> Optional[Type[Animal]]:
-        return self.db.query(Animal).filter(Animal.animal_id == animal_id).first()
+        return (self.db.query(Animal)
+                .filter(Animal.animal_id == animal_id)
+                .first())
 
     def fetch_animal_by_name(self, animal_name: str) -> Optional[Type[Animal]]:
         return self.db.query(Animal).filter(Animal.animal_name == animal_name).first()
