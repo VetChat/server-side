@@ -14,7 +14,8 @@ def custom_generate_unique_id(route: APIRoute):
 router = APIRouter(generate_unique_id_function=custom_generate_unique_id)
 
 
-@router.put("/ticket_answer_record/update", response_model=TicketAnswerRecordUpdateResponse, tags=["Ticket Questions"])
+@router.put("/ticket_answer_record/update", response_model=TicketAnswerRecordUpdateResponse,
+            tags=["Ticket Answer Record"])
 @limiter.limit("10/minute")
 async def update_pet_id(request: Request, ticket: TicketAnswerRecordUpdate,
                         db: Session = Depends(get_db)) -> TicketAnswerRecordUpdateResponse:
