@@ -9,9 +9,10 @@ class TicketQuestion(Base):
 
     ticket_question_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     ticket_question = Column(String(255), nullable=False)
-    pattern = Column(Enum('text', 'choice', 'birthDate'), nullable=False)
+    pattern = Column(Enum('text', 'choice', 'birthDate', 'breed'), nullable=False)
     ordinal = Column(Integer, nullable=False)
     is_required = Column(Boolean, nullable=False, default=True)
+    is_default = Column(Boolean, nullable=False, default=False)
 
     # Relationship to TicketAnswer
     ticket_answers = relationship("TicketAnswer", back_populates="ticket_question")

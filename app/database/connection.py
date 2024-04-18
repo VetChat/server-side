@@ -22,6 +22,8 @@ ScopedSession = scoped_session(SessionLocal)
 # Base class for declarative class definitions
 Base = declarative_base()
 
+Base.query = ScopedSession.query_property()
+
 
 # Dependency to use in FastAPI route to get a database session
 def get_db():

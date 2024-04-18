@@ -7,7 +7,7 @@ class AnswerRecord(Base):
     __tablename__ = 'answer_record'
 
     answer_record_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    ticket_id = Column(Integer, ForeignKey('ticket.ticket_id'), nullable=False)
+    ticket_id = Column(Integer, ForeignKey('ticket.ticket_id', ondelete='CASCADE'), nullable=False)
     symptom_id = Column(Integer, nullable=False)
     symptom_name = Column(String(255), nullable=False)
     question = Column(String(255), nullable=False)

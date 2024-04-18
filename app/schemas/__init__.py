@@ -9,6 +9,7 @@ from .answer_schema import *
 from .answer_record_schema import *
 from .summary_schema import *
 from .ticket_question_schema import *
+from .breed_schema import *
 
 __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseWithUrgency", "UrgentCaseRead",
            "UrgencyRead", "UrgentCaseResponse", "UrgentCaseCreate", "UrgentCaseUpdate", "UrgentCaseBulkResponse",
@@ -22,7 +23,7 @@ __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseWithUrgenc
            "AnswerUpdate", "AnswerUpdateFailed", "QuestionId", "AnswerCreateUpdate",
            "QuestionWithListAnswerUpdate", "QuestionWithListAnswerDeleteResponse",
            "QuestionWithListAnswerResponse", "QuestionCreateFailedResponse", "QuestionUpdateFailedResponse",
-           "QuestionSetRead",
+           "QuestionSetRead", "BreedRead", "BreedCreate", "BreedUpdate", "BreedCreateUpdateResponse",
            "QuestionWithListAnswerCreateUpdate", "QuestionDeleteResponse",
            "AnswerCreateUpdateDeleteBulkResponse", "AnswerDelete", "AnswerCreateUpdateDelete", "AnswerDeleteResponse",
            "AnswerCreateUpdateDeleteSuccessResponse", "AnswerCreateUpdateDeleteFailedResponse",

@@ -1,6 +1,6 @@
 from typing import Type, List, Optional
 from sqlalchemy.orm import Session
-from ..models import Animal
+from app.models import Animal
 
 
 class AnimalCRUD:

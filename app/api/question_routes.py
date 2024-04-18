@@ -78,7 +78,7 @@ async def get_questions_by_set_ids(request: Request, question: List[QuestionSetR
 @router.put("/question_set/question/bulk", response_model=QuestionCreateUpdateDeleteBulkResponse, tags=["Question"])
 @limiter.limit("5/minute")
 async def update_questions(request: Request, questions_data: str = Form(...),
-                           images: Optional[List[UploadFile]] = None,
+                           images: List[Optional[UploadFile]] = None,
                            db: Session = Depends(get_db)) -> QuestionCreateUpdateDeleteBulkResponse:
     questions = json.loads(questions_data)
 
@@ -175,7 +175,7 @@ async def update_question(question_crud: QuestionCRUD, question_set_crud: Questi
 
     if not question_data:
         return QuestionUpdateFailedResponse(
-            questionId=question.question_id,
+            questionId=question.questionId,
             question=question.question,
             pattern=question.pattern,
             imagePath=question.imagePath,
@@ -406,3 +406,4 @@ async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[Up
 
         images.remove(image)
         return image_path
+    return "Failed to upload the image"

@@ -7,7 +7,7 @@ class Question(Base):
     __tablename__ = 'question'
 
     question_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    question_set_id = Column(Integer, ForeignKey('question_set.question_set_id'), nullable=False)
+    question_set_id = Column(Integer, ForeignKey('question_set.question_set_id', ondelete='CASCADE'), nullable=False)
     question = Column(String(255), nullable=False)
     pattern = Column(Enum('choice', 'duration', 'text'), nullable=False)
     image_path = Column(String(255))
