@@ -18,5 +18,5 @@ INSERT INTO ticket_question
 VALUES (1, 'รหัสประจำสัตว์เลี้ยง', 'text', 1, FALSE, TRUE, TRUE),
        (2, 'เพศ', 'choice', 2, TRUE, TRUE, FALSE),
        (3, 'ทำหมัน หรือไม่ทำหมัน', 'choice', 3, TRUE, TRUE, FALSE),
-       (4, 'พันธุ์', 'breed', 4, TRUE, TRUE, FALSE),
+       (4, 'พันธุ์', 'text', 4, TRUE, TRUE, FALSE),
        (5, 'วันเกิด', 'birthDate', 5, TRUE, TRUE, FALSE);
