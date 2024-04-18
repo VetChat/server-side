@@ -139,7 +139,7 @@ async def create_question(question_crud: QuestionCRUD, question_set_crud: Questi
             message="Question already exists"
         )
 
-    if question.have_image:
+    if question.haveImage:
         await upload_image_to_s3(question_set_crud, images, question)
 
     question_data = question_crud.create_question(question.questionSetId, question.question, question.pattern,
@@ -154,7 +154,8 @@ async def create_question(question_crud: QuestionCRUD, question_set_crud: Questi
             message="Failed to add the question"
         )
 
-    answer_result = create_update_delete_answer(answer_crud, question_data.question_id, question.listAnswer)
+    if question.pattern != 'text':
+        answer_result = create_update_delete_answer(answer_crud, question_data.question_id, question.listAnswer)
 
     return QuestionWithListAnswerResponse(
         questionId=question_data.question_id,
@@ -162,7 +163,7 @@ async def create_question(question_crud: QuestionCRUD, question_set_crud: Questi
         pattern=question_data.pattern,
         imagePath=question_data.image_path,
         ordinal=question_data.ordinal,
-        listAnswer=answer_result,
+        listAnswer=answer_result if question.pattern != 'text' else None,
         message="Question added successfully"
     )
 
@@ -196,8 +197,9 @@ async def update_question(question_crud: QuestionCRUD, question_set_crud: Questi
                 message="Failed to delete the image"
             )
 
-    question_data = question_crud.update_question(question.questionId, question.question, question.pattern,
-                                                  question.ordinal, question.imagePath)
+    if question.pattern != 'text':
+        question_data = question_crud.update_question(question.questionId, question.question, question.pattern,
+                                                      question.ordinal, question.imagePath)
 
     if not question_data:
         return QuestionUpdateFailedResponse(
@@ -209,7 +211,8 @@ async def update_question(question_crud: QuestionCRUD, question_set_crud: Questi
             message="Failed to update the question"
         )
 
-    answer_result = create_update_delete_answer(answer_crud, question.questionId, question.listAnswer)
+    if question.pattern != 'text':
+        answer_result = create_update_delete_answer(answer_crud, question.questionId, question.listAnswer)
 
     return QuestionWithListAnswerResponse(
         questionId=question_data.question_id,
@@ -217,7 +220,7 @@ async def update_question(question_crud: QuestionCRUD, question_set_crud: Questi
         pattern=question_data.pattern,
         imagePath=question_data.image_path,
         ordinal=question_data.ordinal,
-        listAnswer=answer_result,
+        listAnswer=answer_result if question.pattern != 'text' else None,
         message="Question updated successfully"
     )
 

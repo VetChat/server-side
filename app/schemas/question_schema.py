@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, HttpUrl
 from .answer_schema import AnswerRead, AnswerCreateUpdateDelete, AnswerCreateUpdateDeleteBulkResponse
@@ -33,7 +33,7 @@ class QuestionWithListAnswerCreate(BaseModel):
     ordinal: int
     imagePath: Optional[HttpUrl] = None
     haveImage: bool
-    listAnswer: Optional[AnswerCreateUpdateDelete] = None
+    listAnswer: Optional[Union[AnswerCreateUpdateDelete, List]] = None
 
 
 class QuestionWithListAnswerResponse(BaseQuestion):
@@ -43,7 +43,7 @@ class QuestionWithListAnswerResponse(BaseQuestion):
 
 class QuestionWithListAnswerUpdate(BaseQuestion):
     haveImage: bool
-    listAnswer: Optional[AnswerCreateUpdateDelete] = None
+    listAnswer: Optional[Union[AnswerCreateUpdateDelete, List]] = None
 
 
 class QuestionWithListAnswerCreateUpdate(BaseModel):
@@ -54,7 +54,7 @@ class QuestionWithListAnswerCreateUpdate(BaseModel):
     ordinal: int
     imagePath: Optional[HttpUrl] = None
     haveImage: bool
-    listAnswer: Optional[AnswerCreateUpdateDelete] = None
+    listAnswer: Optional[Union[AnswerCreateUpdateDelete, List]] = None
 
 
 class QuestionDeleteResponse(BaseModel):
