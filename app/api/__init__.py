@@ -9,8 +9,10 @@ from .ticket_question_routes import router as ticket_question_router
 from .symptom_routes import router as symptom_router
 from .question_set_routes import router as question_set_router
 from .breed_routes import router as breed_router
+from .ticket_answer_record_routes import router as ticket_answer_record_router
 
 routers = [animal_router, urgent_router, urgency_router, ticket_router, question_router, answer_record_router,
-           ticket_question_router, symptom_router, summary_router, question_set_router, breed_router]
+           ticket_question_router, symptom_router, summary_router, question_set_router, breed_router,
+           ticket_answer_record_router]
 
 __all__ = ["routers"]

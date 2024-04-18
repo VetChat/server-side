@@ -10,6 +10,7 @@ from .answer_record_schema import *
 from .summary_schema import *
 from .ticket_question_schema import *
 from .breed_schema import *
+from .ticket_answer_record_schema import *
 
 __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseWithUrgency", "UrgentCaseRead",
            "UrgencyRead", "UrgentCaseResponse", "UrgentCaseCreate", "UrgentCaseUpdate", "UrgentCaseBulkResponse",
@@ -19,8 +20,8 @@ __all__ = ["AnimalRead", "AnimalCreate", "AnimalResponse", "UrgentCaseWithUrgenc
            "SymptomCreateBody", "SymptomResponse", "AnimalUpdate", "SymptomUpdate", "TicketInfo", "SymptomSummary",
            "AnswerSummary", "QuestionWithListAnswer", "UrgentCaseUpdateFailed", "UrgentCaseId", "QuestionSetCreateBody",
            "QuestionSetResponse", "TicketLabel", "TicketEachSummaryResponse", "TicketDataResponse",
-           "QuestionWithListAnswerCreate", "AnswerResponse", "AnswerCreateFailed",
-           "AnswerUpdate", "AnswerUpdateFailed", "QuestionId", "AnswerCreateUpdate",
+           "QuestionWithListAnswerCreate", "AnswerResponse", "AnswerCreateFailed", "TicketAnswerRecordUpdate",
+           "AnswerUpdate", "AnswerUpdateFailed", "QuestionId", "AnswerCreateUpdate", "TicketAnswerRecordUpdateResponse",
            "QuestionWithListAnswerUpdate", "QuestionWithListAnswerDeleteResponse",
            "QuestionWithListAnswerResponse", "QuestionCreateFailedResponse", "QuestionUpdateFailedResponse",
            "QuestionSetRead", "BreedRead", "BreedCreate", "BreedUpdate", "BreedCreateUpdateResponse",

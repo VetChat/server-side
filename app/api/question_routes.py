@@ -140,7 +140,7 @@ async def create_question(question_crud: QuestionCRUD, question_set_crud: Questi
         )
 
     if question.haveImage:
-        await upload_image_to_s3(question_set_crud, images, question)
+        question.imagePath = await upload_image_to_s3(question_set_crud, images, question)
 
     question_data = question_crud.create_question(question.questionSetId, question.question, question.pattern,
                                                   question.ordinal, question.imagePath)
@@ -184,7 +184,7 @@ async def update_question(question_crud: QuestionCRUD, question_set_crud: Questi
         )
 
     if question.haveImage:
-        await upload_image_to_s3(question_set_crud, images, question)
+        question.imagePath = await upload_image_to_s3(question_set_crud, images, question)
     elif not question.haveImage and question_data.image_path:
         is_success = await s3.remove_file_from_s3(question_data.image_path)
         if not is_success:
@@ -406,4 +406,4 @@ async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[Up
 
         images.remove(image)
         return image_path
-    return "Failed to upload the image"
+    return "https://vetchat.s3.ap-southeast-1.amazonaws.com/failed-image.jpg"

@@ -11,7 +11,7 @@ class Breed(Base):
     breed_name = Column(String(255), nullable=False)
     animal_id = Column(Integer, ForeignKey('animal.animal_id', ondelete='CASCADE'), nullable=False)
 
-    animal = relationship('Animal', back_populates='breeds')
+    animal = relationship('Animal')
 
     __table_args__ = (UniqueConstraint('breed_name', name='UC_Animal'),)
 
