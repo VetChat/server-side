@@ -17,7 +17,7 @@ class S3Resource:
 
     async def upload_file_to_s3(self, file: UploadFile, animal: str, symptom: str, question: str) -> Optional[HttpUrl]:
         """Uploads a file to S3 and returns the URL of the uploaded file."""
-        file_extension = file.filename.split(".")[-1]
+        file_extension = file.content_type.split('/')[-1]
 
         animal = format_file_name(animal)
         symptom = format_file_name(symptom)
