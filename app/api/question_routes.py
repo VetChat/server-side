@@ -384,14 +384,12 @@ def delete_answer(answer_crud: AnswerCRUD, answer_id: int) -> bool:
 
 async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[UploadFile],
                              question: QuestionWithListAnswerCreate or QuestionWithListAnswerUpdate) -> Optional[str]:
-    print(f"Question: {question}")
     if question.questionId is None:
         question_set_data = question_set_crud.fetch_question_set_info_by_id(question.questionSetId)
     else:
         question_set_data = question_set_crud.fetch_question_set_info_by_question_id(question.questionId)
 
     for image in images:
-        print(f"Image: {image}")
         file_name = image.filename
         file_extension = image.content_type
 
@@ -409,7 +407,6 @@ async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[Up
         image_path = await s3.upload_file_to_s3(image, question_set_data.animal.animal_name,
                                                 question_set_data.symptom.symptom_name, question.question)
         question.imagePath = image_path
-        print(f"Question Set Data: {question_set_data.animal.animal_name}, {question_set_data.symptom.symptom_name}")
 
         images.remove(image)
         return image_path
