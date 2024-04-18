@@ -186,7 +186,7 @@ async def update_question(question_crud: QuestionCRUD, question_set_crud: Questi
 
     if question.haveImage:
         question.imagePath = await upload_image_to_s3(question_set_crud, images, question)
-    elif not question.haveImage and not question_data.imagePath:
+    elif not question.haveImage and not question.imagePath:
         is_success = await s3.remove_file_from_s3(question_data.image_path)
         if not is_success:
             return QuestionUpdateFailedResponse(
