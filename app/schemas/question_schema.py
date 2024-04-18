@@ -33,17 +33,17 @@ class QuestionWithListAnswerCreate(BaseModel):
     ordinal: int
     imagePath: Optional[HttpUrl] = None
     haveImage: bool
-    listAnswer: AnswerCreateUpdateDelete
+    listAnswer: Optional[AnswerCreateUpdateDelete]
 
 
 class QuestionWithListAnswerResponse(BaseQuestion):
-    listAnswer: AnswerCreateUpdateDeleteBulkResponse
+    listAnswer: Optional[AnswerCreateUpdateDeleteBulkResponse]
     message: str
 
 
 class QuestionWithListAnswerUpdate(BaseQuestion):
     haveImage: bool
-    listAnswer: AnswerCreateUpdateDelete
+    listAnswer: Optional[AnswerCreateUpdateDelete]
 
 
 class QuestionWithListAnswerCreateUpdate(BaseModel):
@@ -54,7 +54,7 @@ class QuestionWithListAnswerCreateUpdate(BaseModel):
     ordinal: int
     imagePath: Optional[HttpUrl] = None
     haveImage: bool
-    listAnswer: AnswerCreateUpdateDelete
+    listAnswer: Optional[AnswerCreateUpdateDelete]
 
 
 class QuestionDeleteResponse(BaseModel):
