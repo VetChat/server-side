@@ -58,7 +58,8 @@ async def get_summary(request: Request, limit: Optional[int] = 50, start_at: Opt
                         ticketAnswerRecordId=info.ticket_answer_record_id,
                         ticketAnswer=info.ticket_answer,
                         ticketQuestion=info.ticket_question,
-                        ordinal=info.ordinal
+                        ordinal=info.ordinal,
+                        isEditable=info.is_editable
                     ) for info in dict_ticket_info[ticket_id]
                 ],
                 summary=[
@@ -104,7 +105,8 @@ async def get_summary_by_ticket_id(request: Request, ticket_id: int,
                 ticketAnswerRecordId=info.ticket_answer_record_id,
                 ticketAnswer=info.ticket_answer,
                 ticketQuestion=info.ticket_question,
-                ordinal=info.ordinal
+                ordinal=info.ordinal,
+                isEditable=info.is_editable
             ) for info in ticket_info
         ],
         summary=[

@@ -23,6 +23,7 @@ class TicketInfo(BaseModel):
     ticketQuestion: str
     ticketAnswer: str
     ordinal: int
+    isEditable: bool = False
 
 
 class TicketLabel(BaseModel):
