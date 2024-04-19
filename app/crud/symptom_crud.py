@@ -21,7 +21,7 @@ class SymptomCRUD:
             self.db.query(Symptom.symptom_id, Symptom.symptom_name, QuestionSet.question_set_id)
             .join(QuestionSet.symptom)
             .filter(QuestionSet.animal_id == animal_id)
-            .order_by(Symptom.symptom_name)
+            .order_by(Symptom.symptom_id)
             .all()
         )
 
