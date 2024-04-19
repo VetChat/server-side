@@ -10,7 +10,7 @@ class SymptomCRUD:
         self.db = db
 
     def fetch_symptoms(self) -> List[Type[Symptom]]:
-        return self.db.query(Symptom).all()
+        return self.db.query(Symptom).order_by(desc(Symptom.symptom_id)).all()
 
     def fetch_symptom_by_id(self, symptom_id: int) -> Optional[Type[Symptom]]:
         return self.db.query(Symptom).filter(Symptom.symptom_id == symptom_id).first()

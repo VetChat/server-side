@@ -1,4 +1,6 @@
 from typing import Type, List, Optional
+
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from app.models import Animal
 
@@ -8,7 +10,7 @@ class AnimalCRUD:
         self.db = db
 
     def fetch_all_animal(self) -> List[Type[Animal]]:
-        return self.db.query(Animal).all()
+        return self.db.query(Animal).order_by(desc(Animal.animal_id)).all()
 
     def fetch_animal_by_id(self, animal_id: int) -> Optional[Type[Animal]]:
         return (self.db.query(Animal)
