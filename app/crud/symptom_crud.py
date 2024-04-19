@@ -1,4 +1,6 @@
 from typing import List, Type, Optional
+
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from app.models import Symptom, QuestionSet
 
@@ -21,7 +23,7 @@ class SymptomCRUD:
             self.db.query(Symptom.symptom_id, Symptom.symptom_name, QuestionSet.question_set_id)
             .join(QuestionSet.symptom)
             .filter(QuestionSet.animal_id == animal_id)
-            .order_by(Symptom.symptom_id)
+            .order_by(desc(Symptom.symptom_id))
             .all()
         )
 
