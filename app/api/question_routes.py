@@ -187,17 +187,17 @@ async def update_question(question_crud: QuestionCRUD, question_set_crud: Questi
     if question.haveImage:
         question.imagePath = await upload_image_to_s3(question_set_crud, images, question)
         # TODO: Handle image deletion
-    # elif not question.haveImage and not question.imagePath:
-    #     is_success = await s3.remove_file_from_s3(question_data.image_path)
-    #     if not is_success:
-    #         return QuestionUpdateFailedResponse(
-    #             questionId=question_data.question_id,
-    #             question=question_data.question,
-    #             pattern=question_data.pattern,
-    #             imagePath=question_data.image_path,
-    #             ordinal=question_data.ordinal,
-    #             message="Failed to delete the image"
-    #         )
+    elif not question.imagePath:
+        is_success = await s3.remove_file_from_s3(question_data.image_path)
+        if not is_success:
+            return QuestionUpdateFailedResponse(
+                questionId=question_data.question_id,
+                question=question_data.question,
+                pattern=question_data.pattern,
+                imagePath=question_data.image_path,
+                ordinal=question_data.ordinal,
+                message="Failed to delete the image"
+            )
 
     if question.pattern != 'text':
         question_data = question_crud.update_question(question.questionId, question.question, question.pattern,
@@ -397,16 +397,14 @@ async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[Up
         accepted_file_types = ["image/png", "image/jpeg", "image/jpg", "image/heic", "image/heif", "image/heics", "png",
                                "jpeg", "jpg", "heic", "heif", "heics"]
 
-        question_formatted = format_file_name(question.question)
-
-        if file_name != question_formatted:
+        if file_name != question.questionId:
             continue
         if file_extension not in accepted_file_types:
             images.remove(image)
             continue
 
         image_path = await s3.upload_file_to_s3(image, question_set_data.animal.animal_name,
-                                                question_set_data.symptom.symptom_name, question.question)
+                                                question_set_data.symptom.symptom_name, question.questionId)
         question.imagePath = image_path
 
         images.remove(image)
