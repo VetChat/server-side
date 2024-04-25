@@ -1,3 +1,4 @@
+SET NAMES 'utf8mb4';
 -- Create the question table
 CREATE TABLE IF NOT EXISTS question
 (
@@ -5,14 +6,15 @@ CREATE TABLE IF NOT EXISTS question
     question_set_id INT          NOT NULL,
     question        VARCHAR(255) NOT NULL,
     pattern         ENUM ('choice', 'duration', 'text'),
-    image_path      VARCHAR(1000),
+    image_path      TEXT,
     ordinal         INT          NOT NULL,
     PRIMARY KEY (question_id),
     INDEX idx_question_set_id (question_set_id),
+    INDEX idx_pattern (pattern),
     CONSTRAINT FK_QuestionSet FOREIGN KEY (question_set_id) REFERENCES question_set (question_set_id) ON DELETE CASCADE,
     CONSTRAINT UC_Question UNIQUE (question_set_id, question)
 ) CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;;
+  COLLATE utf8mb4_unicode_ci;
 
 -- Insert mock data into the question table
 INSERT INTO question

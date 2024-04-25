@@ -1,3 +1,4 @@
+SET NAMES 'utf8mb4';
 -- CREATE the urgent case table
 CREATE TABLE IF NOT EXISTS urgent_case
 (
@@ -11,7 +12,7 @@ CREATE TABLE IF NOT EXISTS urgent_case
     CONSTRAINT FK_AnimalUrgent FOREIGN KEY (animal_id) REFERENCES animal (animal_id) ON DELETE CASCADE,
     INDEX idx_urgent_name (urgent_name)
 ) CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;;
+  COLLATE utf8mb4_unicode_ci;
 
 -- Insert mock data into the urgent_case table
 INSERT INTO urgent_case (urgent_name, urgency_id, animal_id)

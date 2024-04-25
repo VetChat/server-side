@@ -27,7 +27,8 @@ async def create_answer_records(
 
         answer_record_crud.create_answer_records(
             ticket_id=answer_record_data.ticketId,
-            answer_data=answer_data
+            answer_data=answer_data,
+            answer_record_data=answer_record_data
         )
         return AnswerRecordResponse(
             ticketId=answer_record_data.ticketId,

@@ -1,8 +1,7 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from fastapi import UploadFile
 from pydantic import BaseModel, HttpUrl
-from .answer_schema import AnswerRead, AnswerCreate, AnswerCreateBulkResponse, AnswerUpdate, AnswerUpdateBulkResponse
+from .answer_schema import AnswerRead, AnswerCreateUpdateDelete, AnswerCreateUpdateDeleteBulkResponse
 
 
 class BaseQuestion(BaseModel):
@@ -18,7 +17,7 @@ class QuestionId(BaseModel):
 
 
 class QuestionWithListAnswer(BaseQuestion):
-    listAnswer: List[AnswerRead]
+    listAnswer: Optional[List[AnswerRead]] = None
 
 
 class QuestionResponse(BaseModel):
@@ -34,22 +33,33 @@ class QuestionWithListAnswerCreate(BaseModel):
     ordinal: int
     imagePath: Optional[HttpUrl] = None
     haveImage: bool
-    listAnswer: List[AnswerCreate]
+    listAnswer: Optional[Union[AnswerCreateUpdateDelete, List]] = None
 
 
-class QuestionWithListAnswerCreateResponse(BaseQuestion):
-    listAnswer: AnswerCreateBulkResponse
-    message: str
-
-
-class QuestionWithListAnswerUpdateResponse(BaseQuestion):
-    listAnswer: AnswerUpdateBulkResponse
+class QuestionWithListAnswerResponse(BaseQuestion):
+    listAnswer: Optional[AnswerCreateUpdateDeleteBulkResponse] = None
     message: str
 
 
 class QuestionWithListAnswerUpdate(BaseQuestion):
     haveImage: bool
-    listAnswer: List[AnswerUpdate]
+    listAnswer: Optional[Union[AnswerCreateUpdateDelete, List]] = None
+
+
+class QuestionWithListAnswerCreateUpdate(BaseModel):
+    questionId: Optional[int] = None
+    questionSetId: int
+    question: str
+    pattern: str
+    ordinal: int
+    imagePath: Optional[HttpUrl] = None
+    haveImage: bool
+    listAnswer: Optional[Union[AnswerCreateUpdateDelete, List]] = None
+
+
+class QuestionDeleteResponse(BaseModel):
+    questionId: int
+    message: str
 
 
 class QuestionWithListAnswerDeleteResponse(BaseQuestion):
@@ -69,16 +79,23 @@ class QuestionUpdateFailedResponse(BaseQuestion):
     message: str
 
 
-class QuestionCreateBulkResponse(BaseModel):
-    success: Optional[List[QuestionWithListAnswerCreateResponse]] = None
-    failed: Optional[List[QuestionCreateFailedResponse]] = None
+class QuestionCreateUpdateDelete(BaseModel):
+    createUpdate: List[QuestionWithListAnswerCreateUpdate]
+    delete: Optional[List[QuestionId]] = None
 
 
-class QuestionUpdateBulkResponse(BaseModel):
-    success: Optional[List[QuestionWithListAnswerUpdateResponse]] = None
-    failed: Optional[List[QuestionUpdateFailedResponse]] = None
+class QuestionCreateUpdateDeleteSuccessResponse(BaseModel):
+    create: Optional[List[QuestionWithListAnswerResponse]] = None
+    update: Optional[List[QuestionWithListAnswerResponse]] = None
+    delete: Optional[List[QuestionWithListAnswerDeleteResponse]] = None
 
 
-class QuestionDeleteBulkResponse(BaseModel):
-    success: Optional[List[QuestionWithListAnswerDeleteResponse]] = None
-    failed: Optional[List[QuestionUpdateFailedResponse]] = None
+class QuestionCreateUpdateDeleteFailedResponse(BaseModel):
+    create: Optional[List[QuestionCreateFailedResponse]] = None
+    update: Optional[List[QuestionUpdateFailedResponse]] = None
+    delete: Optional[List[QuestionDeleteResponse]] = None
+
+
+class QuestionCreateUpdateDeleteBulkResponse(BaseModel):
+    success: Optional[QuestionCreateUpdateDeleteSuccessResponse] = None
+    failed: Optional[QuestionCreateUpdateDeleteFailedResponse] = None

@@ -9,7 +9,7 @@ class UrgentCase(Base):
     urgent_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     urgent_name = Column(String(255), nullable=False)
     urgency_id = Column(Integer, ForeignKey('urgency.urgency_id'), nullable=False)
-    animal_id = Column(Integer, ForeignKey('animal.animal_id'), nullable=False)
+    animal_id = Column(Integer, ForeignKey('animal.animal_id', ondelete='CASCADE'), nullable=False)
 
     # Relationships to Urgency and Animal
     urgency = relationship("Urgency", back_populates="urgent_cases")

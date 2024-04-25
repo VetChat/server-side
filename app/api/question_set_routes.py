@@ -19,9 +19,11 @@ async def get_question_set_by_animal_id(request: Request, animal_id: int, db: Se
 
     response = [
         QuestionSetRead(
-            questionSetId=question_set.question_set_id,
-            symptomId=question_set.symptom_id,
-            animalId=question_set.animal_id
+            questionSetId=question_set.QuestionSet.question_set_id,
+            symptomId=question_set.QuestionSet.symptom_id,
+            symptomName=question_set.Symptom.symptom_name,
+            animalId=question_set.QuestionSet.animal_id,
+            questionCount=len(question_set.QuestionSet.questions)
         ) for question_set in question_set_data
     ]
     return response

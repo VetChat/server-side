@@ -2,8 +2,7 @@ from typing import List
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
-from ..models import Question, Symptom, QuestionSet
-from ..schemas import QuestionWithListAnswer
+from app.models import Question, Symptom, QuestionSet
 
 
 class QuestionCRUD:

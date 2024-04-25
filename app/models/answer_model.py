@@ -7,7 +7,7 @@ class Answer(Base):
     __tablename__ = 'answer'
 
     answer_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    question_id = Column(Integer, ForeignKey('question.question_id'), nullable=False)
+    question_id = Column(Integer, ForeignKey('question.question_id', ondelete='CASCADE'), nullable=False)
     answer = Column(String(255), nullable=False)
     summary = Column(String(255))
     skip_to_question = Column(Integer)

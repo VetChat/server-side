@@ -1,4 +1,6 @@
 from typing import List, Type, Optional
+
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 from app.models import Symptom, QuestionSet
 
@@ -8,7 +10,7 @@ class SymptomCRUD:
         self.db = db
 
     def fetch_symptoms(self) -> List[Type[Symptom]]:
-        return self.db.query(Symptom).all()
+        return self.db.query(Symptom).order_by(desc(Symptom.symptom_id)).all()
 
     def fetch_symptom_by_id(self, symptom_id: int) -> Optional[Type[Symptom]]:
         return self.db.query(Symptom).filter(Symptom.symptom_id == symptom_id).first()
@@ -21,6 +23,16 @@ class SymptomCRUD:
             self.db.query(Symptom.symptom_id, Symptom.symptom_name, QuestionSet.question_set_id)
             .join(QuestionSet.symptom)
             .filter(QuestionSet.animal_id == animal_id)
+            .order_by(desc(Symptom.symptom_id))
+            .all()
+        )
+
+    def fetch_symptoms_not_in_list_by_animal_id(self, animal_id: int):
+        return (
+            self.db.query(Symptom)
+            .filter(~Symptom.symptom_id.in_(self.db.query(QuestionSet.symptom_id)
+                                            .filter(QuestionSet.animal_id == animal_id)))
+            .order_by(desc(Symptom.symptom_id))
             .all()
         )
 

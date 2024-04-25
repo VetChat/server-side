@@ -15,15 +15,15 @@ class S3Resource:
         self.aws_region = os.getenv('AWS_DEFAULT_REGION')
         self.s3 = self.resource.Bucket(self.bucket_name)
 
-    async def upload_file_to_s3(self, file: UploadFile, animal: str, symptom: str, question: str) -> Optional[HttpUrl]:
+    async def upload_file_to_s3(self, file: UploadFile, animal: str, symptom: str, question_id: int) -> (
+            Optional)[HttpUrl]:
         """Uploads a file to S3 and returns the URL of the uploaded file."""
-        file_extension = file.filename.split(".")[-1]
+        file_extension = file.content_type.split('/')[-1]
 
         animal = format_file_name(animal)
         symptom = format_file_name(symptom)
-        question = format_file_name(question)
 
-        file_key = f"{animal}_{symptom}_{question}.{file_extension}"
+        file_key = f"{animal}_{symptom}_{question_id}.{file_extension}"
 
         try:
             response = self.s3.upload_fileobj(

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, Boolean
 from sqlalchemy.orm import relationship
 from ..database import Base
 
@@ -7,10 +7,11 @@ class TicketAnswerRecord(Base):
     __tablename__ = 'ticket_answer_record'
 
     ticket_answer_record_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    ticket_id = Column(Integer, ForeignKey('ticket.ticket_id'), nullable=False)
+    ticket_id = Column(Integer, ForeignKey('ticket.ticket_id', ondelete='CASCADE'), nullable=False)
     ticket_question = Column(String(255), nullable=False)
     ordinal = Column(Integer, nullable=False)
     ticket_answer = Column(String(255), nullable=False)
+    is_editable = Column(Boolean, nullable=False, default=True)
 
     # Relationships to Ticket
     ticket = relationship("Ticket", back_populates="ticket_answer_records")

@@ -12,7 +12,7 @@ class TicketCRUD:
         return self.db.query(Ticket).all()
 
     def fetch_tickets_id(self, limit: Optional[int] = None, start_at: Optional[int] = None):
-        query = (self.db.query(Ticket.ticket_id)
+        query = (self.db.query(Ticket.ticket_id, Ticket.rec_created_when)
                  .order_by(Ticket.ticket_id.desc()))
         if limit:
             query = query.limit(limit)

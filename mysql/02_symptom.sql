@@ -1,3 +1,4 @@
+SET NAMES 'utf8mb4';
 -- Create the symptom table
 CREATE TABLE IF NOT EXISTS symptom
 (
@@ -6,7 +7,7 @@ CREATE TABLE IF NOT EXISTS symptom
     PRIMARY KEY (symptom_id),
     CONSTRAINT UC_Symptom UNIQUE (symptom_name)
 ) CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;;
+  COLLATE utf8mb4_unicode_ci;
 
 -- Insert mock data into the symptom table
 INSERT INTO symptom

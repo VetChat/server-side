@@ -1,21 +1,24 @@
 import json
 from typing import List, Optional
+
 from fastapi import Request, APIRouter, Depends, HTTPException, UploadFile, Form
 from fastapi.routing import APIRoute
 from sqlalchemy.orm import Session
 from collections import defaultdict
 
 from app.aws import S3Resource
-from app.schemas.question_schema import QuestionWithListAnswerUpdateResponse, QuestionId, QuestionDeleteBulkResponse
+from app.schemas.question_schema import QuestionWithListAnswerCreateUpdate, QuestionCreateUpdateDelete, \
+    QuestionCreateUpdateDeleteSuccessResponse, QuestionCreateUpdateDeleteFailedResponse
 from app.utils import limiter, format_file_name
 from app.database import get_db
 from app.crud import QuestionCRUD, AnswerCRUD, QuestionSetCRUD
 from app.schemas import QuestionSetRequest, QuestionResponse, AnswerRead, QuestionWithListAnswer, \
-    QuestionWithListAnswerCreate, AnswerCreateBulkResponse, AnswerResponse, AnswerCreateFailed, \
-    QuestionCreateBulkResponse, \
-    QuestionWithListAnswerCreateResponse, QuestionWithListAnswerUpdate, QuestionWithListAnswerDeleteResponse, \
-    QuestionCreateFailedResponse, AnswerCreate, AnswerUpdate, QuestionUpdateBulkResponse, QuestionUpdateFailedResponse, \
-    AnswerUpdateFailed, AnswerUpdateBulkResponse
+    QuestionWithListAnswerCreate, AnswerResponse, AnswerCreateFailed, QuestionWithListAnswerResponse, \
+    QuestionWithListAnswerUpdate, QuestionWithListAnswerDeleteResponse, \
+    QuestionCreateFailedResponse, QuestionUpdateFailedResponse, AnswerUpdateFailed, AnswerCreateUpdate, \
+    AnswerCreateUpdateDeleteBulkResponse, AnswerCreateUpdateDelete, AnswerDeleteResponse, QuestionDeleteResponse, \
+    QuestionCreateUpdateDeleteBulkResponse, AnswerCreateUpdateDeleteSuccessResponse, \
+    AnswerCreateUpdateDeleteFailedResponse
 
 
 def custom_generate_unique_id(route: APIRoute):
@@ -61,7 +64,7 @@ async def get_questions_by_set_ids(request: Request, question: List[QuestionSetR
                             answer=answer.answer,
                             summary=answer.summary,
                             skipToQuestion=answer.skip_to_question
-                        ) for answer in question.Question.answers
+                        ) for answer in question.Question.answers if question.Question.pattern != 'text'
                     ]
                 )
                 for question in questions
@@ -73,328 +76,192 @@ async def get_questions_by_set_ids(request: Request, question: List[QuestionSetR
     return questions_response
 
 
-@router.post("/question_set/question", response_model=QuestionWithListAnswerCreateResponse, tags=["Question"])
-@limiter.limit("10/minute")
-async def create_question(request: Request, question_str: str = Form(...),
-                          image: Optional[UploadFile] = None,
-                          db: Session = Depends(get_db)) -> QuestionWithListAnswerCreateResponse:
-    # Manually parse the question JSON string
+@router.put("/question_set/question/bulk", response_model=QuestionCreateUpdateDeleteBulkResponse, tags=["Question"])
+@limiter.limit("5/minute")
+async def update_questions(request: Request, questions_data: str = Form(...),
+                           images: List[Optional[UploadFile]] = None,
+                           db: Session = Depends(get_db)) -> QuestionCreateUpdateDeleteBulkResponse:
+    questions = json.loads(questions_data)
+
+    question_crud = QuestionCRUD(db)
+    answer_crud = AnswerCRUD(db)
+    question_set_crud = QuestionSetCRUD(db)
+
     try:
-        question_dict = json.loads(question_str)
-        question = QuestionWithListAnswerCreate(**question_dict)
+        question_data = QuestionCreateUpdateDelete(**questions)
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=400, detail=f"JSON Decode Error: {e.msg}")
 
-    question_crud = QuestionCRUD(db)
+    return await create_update_delete_question(question_crud, question_set_crud, answer_crud, question_data, images)
+
+
+async def create_update_delete_question(question_crud: QuestionCRUD, question_set_crud: QuestionSetCRUD,
+                                        answer_crud: AnswerCRUD, question: QuestionCreateUpdateDelete,
+                                        images: List[Optional[UploadFile]] = None) -> (
+        QuestionCreateUpdateDeleteBulkResponse):
+    success_model = QuestionCreateUpdateDeleteSuccessResponse(create=[], update=[], delete=[])
+    failed_model = QuestionCreateUpdateDeleteFailedResponse(create=[], update=[], delete=[])
+
+    question_result = QuestionCreateUpdateDeleteBulkResponse(success=success_model, failed=failed_model)
+
+    for q in question.createUpdate:
+        if q.questionId:
+            result = await update_question(question_crud, question_set_crud, answer_crud, q, images)
+        else:
+            result = await create_question(question_crud, question_set_crud, answer_crud, q, images)
+
+        if isinstance(result, QuestionWithListAnswerResponse):
+            question_result.success.update.append(result)
+        else:
+            question_result.failed.update.append(result)
+
+    for q in question.delete:
+        result = await delete_question(question_crud, answer_crud, q.questionId)
+        if isinstance(result, QuestionWithListAnswerDeleteResponse):
+            question_result.success.delete.append(result)
+        else:
+            question_result.failed.delete.append(result)
+
+    return question_result
+
+
+async def create_question(question_crud: QuestionCRUD, question_set_crud: QuestionSetCRUD, answer_crud: AnswerCRUD,
+                          question: QuestionWithListAnswerCreateUpdate, images: List[Optional[UploadFile]] = None) -> (
+        QuestionCreateFailedResponse or QuestionWithListAnswerResponse):
     questions_data = question_crud.fetch_question_by_question_and_question_set_id(question.question,
                                                                                   question.questionSetId)
 
-    question_set_crud = QuestionSetCRUD(db)
-    question_set_data = question_set_crud.fetch_question_set_info_by_id(question.questionSetId)
-
     if questions_data:
-        raise HTTPException(status_code=409,
-                            detail=f"Question with ID {question.question} in this question set already exists")
+        return QuestionCreateFailedResponse(
+            question=question.question,
+            pattern=question.pattern,
+            imagePath=question.imagePath,
+            ordinal=question.ordinal,
+            message="Question already exists"
+        )
 
-    if question.haveImage and image is not None:
-        image_path = await s3.upload_file_to_s3(image, question_set_data.animal.animal_name,
-                                                question_set_data.symptom.symptom_name, question.question)
-        question.imagePath = image_path
+    if question.haveImage:
+        question.imagePath = await upload_image_to_s3(question_set_crud, images, question)
 
     question_data = question_crud.create_question(question.questionSetId, question.question, question.pattern,
                                                   question.ordinal, question.imagePath)
 
     if not question_data:
-        raise HTTPException(status_code=500, detail="Failed to add the question")
+        return QuestionCreateFailedResponse(
+            question=question.question,
+            pattern=question.pattern,
+            imagePath=question.imagePath,
+            ordinal=question.ordinal,
+            message="Failed to add the question"
+        )
 
-    answer_crud = AnswerCRUD(db)
+    if question.pattern != 'text':
+        answer_result = create_update_delete_answer(answer_crud, question_data.question_id, question.listAnswer)
 
-    answer_result = create_answer(answer_crud, question_data.question_id, question.listAnswer)
-
-    return QuestionWithListAnswerCreateResponse(
+    return QuestionWithListAnswerResponse(
         questionId=question_data.question_id,
         question=question_data.question,
         pattern=question_data.pattern,
         imagePath=question_data.image_path,
         ordinal=question_data.ordinal,
-        listAnswer=answer_result,
+        listAnswer=answer_result if question.pattern != 'text' else None,
         message="Question added successfully"
     )
 
 
-@router.post("/question_set/question/bulk", response_model=QuestionCreateBulkResponse, tags=["Question"])
-@limiter.limit("2/minute")
-async def create_questions(request: Request, questions_data: str = Form(...),
-                           images: List[Optional[UploadFile]] = None,
-                           db: Session = Depends(get_db)) -> QuestionCreateBulkResponse:
-    questions = json.loads(questions_data)
+async def update_question(question_crud: QuestionCRUD, question_set_crud: QuestionSetCRUD, answer_crud: AnswerCRUD,
+                          question: QuestionWithListAnswerCreateUpdate, images: List[Optional[UploadFile]] = None) -> (
+        QuestionUpdateFailedResponse or QuestionWithListAnswerResponse):
+    question_data = question_crud.fetch_question_by_id(question.questionId)
 
-    question_crud = QuestionCRUD(db)
-    answer_crud = AnswerCRUD(db)
-    question_set_crud = QuestionSetCRUD(db)
+    if not question_data:
+        return QuestionUpdateFailedResponse(
+            questionId=question.questionId,
+            question=question.question,
+            pattern=question.pattern,
+            imagePath=question.imagePath,
+            ordinal=question.ordinal,
+            message="Question not found"
+        )
 
-    question_result = QuestionCreateBulkResponse(success=[], failed=[])
-    for question_dict in questions:
-        try:
-            q = QuestionWithListAnswerCreate(**question_dict)
-        except json.JSONDecodeError as e:
-            raise HTTPException(status_code=400, detail=f"JSON Decode Error: {e.msg}")
-
-        questions_data = question_crud.fetch_question_by_question_and_question_set_id(q.question, q.questionSetId)
-
-        if questions_data:
-            question_result.failed.append(
-                QuestionCreateFailedResponse(
-                    question=q.question,
-                    pattern=q.pattern,
-                    imagePath=q.imagePath,
-                    ordinal=q.ordinal,
-                    message="Question already exists"
-                )
-            )
-            continue
-
-        if q.haveImage:
-            await upload_image_to_s3(question_set_crud, images, q)
-
-        question_data = question_crud.create_question(q.questionSetId, q.question, q.pattern, q.ordinal, q.imagePath)
-
-        if not question_data:
-            question_result.failed.append(
-                QuestionCreateFailedResponse(
-                    question=q.question,
-                    pattern=q.pattern,
-                    imagePath=q.imagePath,
-                    ordinal=q.ordinal,
-                    message="Failed to add the question"
-                )
-            )
-            continue
-
-        answer_result = create_answer(answer_crud, question_data.question_id, q.listAnswer)
-
-        question_result.success.append(
-            QuestionWithListAnswerCreateResponse(
+    if question.haveImage:
+        question.imagePath = await upload_image_to_s3(question_set_crud, images, question)
+        # TODO: Handle image deletion
+    elif not question.imagePath:
+        is_success = await s3.remove_file_from_s3(question_data.image_path)
+        if not is_success:
+            return QuestionUpdateFailedResponse(
                 questionId=question_data.question_id,
                 question=question_data.question,
                 pattern=question_data.pattern,
                 imagePath=question_data.image_path,
                 ordinal=question_data.ordinal,
-                listAnswer=answer_result,
-                message="Question added successfully"
+                message="Failed to delete the image"
             )
-        )
 
-    return question_result
-
-
-@router.put("/question_set/question", response_model=QuestionWithListAnswerCreateResponse, tags=["Question"])
-@limiter.limit("20/minute")
-async def update_question(request: Request, question: QuestionWithListAnswerUpdate,
-                          db: Session = Depends(get_db)) -> QuestionWithListAnswerCreateResponse:
-    question_crud = QuestionCRUD(db)
-    questions_data = question_crud.fetch_question_by_id(question.questionId)
-
-    if not questions_data:
-        raise HTTPException(status_code=404,
-                            detail=f"Question with ID {question.question} in this question set not found")
-
-    question_data = question_crud.update_question(questions_data.question_id, question.question, question.pattern,
-                                                  question.ordinal, question.imagePath)
+    if question.pattern != 'text':
+        question_data = question_crud.update_question(question.questionId, question.question, question.pattern,
+                                                      question.ordinal, question.imagePath)
 
     if not question_data:
-        raise HTTPException(status_code=500, detail="Failed to update the question")
+        return QuestionUpdateFailedResponse(
+            questionId=question.question_id,
+            question=question.question,
+            pattern=question.pattern,
+            imagePath=question.imagePath,
+            ordinal=question.ordinal,
+            message="Failed to update the question"
+        )
 
-    answer_crud = AnswerCRUD(db)
-    answer_result = update_answer(answer_crud, question.listAnswer)
+    if question.pattern != 'text':
+        answer_result = create_update_delete_answer(answer_crud, question.questionId, question.listAnswer)
 
-    return QuestionWithListAnswerCreateResponse(
+    return QuestionWithListAnswerResponse(
         questionId=question_data.question_id,
         question=question_data.question,
         pattern=question_data.pattern,
         imagePath=question_data.image_path,
         ordinal=question_data.ordinal,
-        listAnswer=answer_result,
+        listAnswer=answer_result if question.pattern != 'text' else None,
         message="Question updated successfully"
     )
 
 
-@router.put("/question_set/question/bulk", response_model=QuestionUpdateBulkResponse, tags=["Question"])
-@limiter.limit("5/minute")
-async def update_questions(request: Request, questions_data: str = Form(...),
-                           images: List[UploadFile] = None,
-                           db: Session = Depends(get_db)) -> QuestionUpdateBulkResponse:
-    questions = json.loads(questions_data)
-
-    question_crud = QuestionCRUD(db)
-    answer_crud = AnswerCRUD(db)
-    question_set_crud = QuestionSetCRUD(db)
-
-    question_result = QuestionUpdateBulkResponse(success=[], failed=[])
-
-    for question_dict in questions:
-        try:
-            q = QuestionWithListAnswerUpdate(**question_dict)
-        except json.JSONDecodeError as e:
-            raise HTTPException(status_code=400, detail=f"JSON Decode Error: {e.msg}")
-
-        question_data = question_crud.fetch_question_by_id(q.questionId)
-
-        if not question_data:
-            question_result.failed.append(
-                QuestionUpdateFailedResponse(
-                    questionId=q.question_id,
-                    question=q.question,
-                    pattern=q.pattern,
-                    imagePath=q.imagePath,
-                    ordinal=q.ordinal,
-                    message="Question not found"
-                )
-            )
-            continue
-
-        if q.haveImage:
-            await upload_image_to_s3(question_set_crud, images, q)
-
-        question_data = question_crud.update_question(q.questionId, q.question, q.pattern, q.ordinal, q.imagePath)
-
-        if not question_data:
-            question_result.failed.append(
-                QuestionUpdateFailedResponse(
-                    questionId=q.question_id,
-                    question=q.question,
-                    pattern=q.pattern,
-                    imagePath=q.imagePath,
-                    ordinal=q.ordinal,
-                    message="Failed to update the question"
-                )
-            )
-            continue
-
-        answer_result = update_answer(answer_crud, q.listAnswer)
-
-        question_result.success.append(
-            QuestionWithListAnswerUpdateResponse(
-                questionId=question_data.question_id,
-                question=question_data.question,
-                pattern=question_data.pattern,
-                imagePath=question_data.image_path,
-                ordinal=question_data.ordinal,
-                listAnswer=answer_result,
-                message="Question updated successfully"
-            )
-        )
-
-    return question_result
-
-
-@router.delete("/question_set/question/bulk", response_model=QuestionDeleteBulkResponse, tags=["Question"])
-@limiter.limit("2/minute")
-async def delete_questions(request: Request, question_ids: List[QuestionId],
-                           db: Session = Depends(get_db)) -> QuestionDeleteBulkResponse:
-    question_crud = QuestionCRUD(db)
-    questions_data = question_crud.fetch_question_by_list_id([q.questionId for q in question_ids])
-
-    if len(questions_data) != len(question_ids):
-        raise HTTPException(status_code=404, detail=f"One or more question id not found")
-
-    answer_crud = AnswerCRUD(db)
-
-    question_result = QuestionDeleteBulkResponse(success=[], failed=[])
-    for q in question_ids:
-        question_data = question_crud.fetch_question_by_id(q.questionId)
-        answers = question_data.answers
-
-        for answer in answers:
-            is_success = answer_crud.delete_answer(answer.answer_id)
-            if not is_success:
-                question_result.failed.append(
-                    QuestionUpdateFailedResponse(
-                        questionId=question_data.question_id,
-                        question=question_data.question,
-                        pattern=question_data.pattern,
-                        imagePath=question_data.image_path,
-                        ordinal=question_data.ordinal,
-                        message=f"Failed to delete the answer with ID {answer.answer_id}"
-                    )
-                )
-                continue
-
-        if question_data.image_path:
-            is_success = await s3.remove_file_from_s3(question_data.image_path)
-            if not is_success:
-                question_result.failed.append(
-                    QuestionUpdateFailedResponse(
-                        questionId=question_data.question_id,
-                        question=question_data.question,
-                        pattern=question_data.pattern,
-                        imagePath=question_data.image_path,
-                        ordinal=question_data.ordinal,
-                        message="Failed to delete the image"
-                    )
-                )
-                continue
-                
-        is_success = question_crud.delete_question(question_data.question_id)
-
-        if not is_success:
-            question_result.failed.append(
-                QuestionUpdateFailedResponse(
-                    questionId=question_data.question_id,
-                    question=question_data.question,
-                    pattern=question_data.pattern,
-                    imagePath=question_data.image_path,
-                    ordinal=question_data.ordinal,
-                    message="Failed to delete the question"
-                )
-            )
-            continue
-
-        question_result.success.append(
-            QuestionWithListAnswerDeleteResponse(
-                questionId=question_data.question_id,
-                question=question_data.question,
-                pattern=question_data.pattern,
-                imagePath=question_data.image_path,
-                ordinal=question_data.ordinal,
-                listAnswer=[
-                    AnswerRead(
-                        answerId=answer.answer_id,
-                        answer=answer.answer,
-                        summary=answer.summary,
-                        skipToQuestion=answer.skip_to_question
-                    ) for answer in answers
-                ],
-                message="Question deleted successfully"
-            )
-        )
-
-    return question_result
-
-
-@router.delete("/question_set/question/{question_id}", response_model=QuestionWithListAnswerDeleteResponse,
-               tags=["Question"])
-@limiter.limit("10/minute")
-async def delete_question(request: Request, question_id: int,
-                          db: Session = Depends(get_db)) -> QuestionWithListAnswerDeleteResponse:
-    question_crud = QuestionCRUD(db)
+async def delete_question(question_crud: QuestionCRUD, answer_crud: AnswerCRUD,
+                          question_id: int) -> QuestionDeleteResponse or QuestionWithListAnswerDeleteResponse:
     question_data = question_crud.fetch_question_by_id(question_id)
 
     if not question_data:
-        raise HTTPException(status_code=404, detail=f"Question with ID {question_id} not found")
+        return QuestionDeleteResponse(
+            questionId=question_id,
+            message=f"Question with ID {question_id} not found"
+        )
 
-    answers = question_data.answers
+    answers = answer_crud.fetch_answer_by_question_id(question_id)
 
-    answer_crud = AnswerCRUD(db)
     for answer in answers:
         is_success = answer_crud.delete_answer(answer.answer_id)
         if not is_success:
-            raise HTTPException(status_code=500, detail=f"Failed to delete the answer with ID {answer.answer_id}")
+            return QuestionDeleteResponse(
+                questionId=question_id,
+                message=f"Failed to delete the answer with ID {answer.answer_id}"
+            )
+
+    if question_data.image_path:
+        is_success = await s3.remove_file_from_s3(question_data.image_path)
+        if not is_success:
+            return QuestionDeleteResponse(
+                questionId=question_id,
+                message="Failed to delete the image"
+            )
 
     is_success = question_crud.delete_question(question_data.question_id)
 
     if not is_success:
-        raise HTTPException(status_code=500, detail="Failed to delete the question")
+        return QuestionDeleteResponse(
+            questionId=question_id,
+            message="Failed to delete the question"
+        )
 
     return QuestionWithListAnswerDeleteResponse(
         questionId=question_data.question_id,
@@ -414,106 +281,132 @@ async def delete_question(request: Request, question_id: int,
     )
 
 
-def create_answer(answer_crud: AnswerCRUD, question_id: int, answers: List[AnswerCreate]) -> AnswerCreateBulkResponse:
-    answer_result = AnswerCreateBulkResponse(success=[], failed=[])
+def create_update_delete_answer(answer_crud: AnswerCRUD, question_id: int,
+                                answers: AnswerCreateUpdateDelete) -> AnswerCreateUpdateDeleteBulkResponse:
+    success_model = AnswerCreateUpdateDeleteSuccessResponse(create=[], update=[], delete=[])
+    failed_model = AnswerCreateUpdateDeleteFailedResponse(create=[], update=[], delete=[])
 
-    for answer in answers:
-        existed_answers = answer_crud.fetch_answer_by_question_id_and_answer(question_id, answer.answer)
-        if existed_answers:
-            answer_result.failed.append(
-                AnswerCreateFailed(
-                    answer=answer.answer,
-                    message="Answer already exists"
-                )
-            )
-            continue
+    answer_result = AnswerCreateUpdateDeleteBulkResponse(success=success_model, failed=failed_model)
 
-        answer_data = answer_crud.create_answer(question_id, answer.answer, answer.summary, answer.skipToQuestion)
-        if answer_data:
-            answer_result.success.append(
-                AnswerResponse(
-                    answerId=answer_data.answer_id,
-                    answer=answer_data.answer,
-                    summary=answer_data.summary,
-                    skipToQuestion=answer_data.skip_to_question,
-                    message="Answer added successfully"
+    for answer in answers.createUpdate:
+        if not answer.answerId:
+            result = create_answer(answer_crud, question_id, answer)
+            if isinstance(result, AnswerResponse):
+                answer_result.success.create.append(result)
+            else:
+                answer_result.failed.create.append(result)
+        else:
+            result = update_answer(answer_crud, answer)
+            if isinstance(result, AnswerResponse):
+                answer_result.success.update.append(result)
+            else:
+                answer_result.failed.update.append(result)
+
+    for answer in answers.delete:
+        is_success = delete_answer(answer_crud, answer.answerId)
+        if is_success:
+            answer_result.success.delete.append(
+                AnswerDeleteResponse(
+                    answerId=answer.answerId,
+                    message="Answer deleted successfully"
                 )
             )
         else:
-            answer_result.failed.append(
-                AnswerCreateFailed(
-                    answer=answer.answer,
-                    message="Failed to add the answer"
-                )
-            )
-    return answer_result
-
-
-def update_answer(answer_crud: AnswerCRUD, answers: List[AnswerUpdate]) -> AnswerUpdateBulkResponse:
-    answer_result = AnswerUpdateBulkResponse(success=[], failed=[])
-
-    for answer in answers:
-        existed_answers = answer_crud.fetch_answer_by_id(answer.answerId)
-        if not existed_answers:
-            answer_result.failed.append(
-                AnswerUpdateFailed(
+            answer_result.success.delete.append(
+                AnswerDeleteResponse(
                     answerId=answer.answerId,
-                    answer=answer.answer,
-                    summary=answer.summary,
-                    skipToQuestion=answer.skipToQuestion,
-                    message="Answer not found"
-                )
-            )
-            continue
-
-        answer_data = answer_crud.update_answer(answer.answerId, answer.answer, answer.summary, answer.skipToQuestion)
-
-        if answer_data:
-            answer_result.success.append(
-                AnswerResponse(
-                    answerId=answer_data.answer_id,
-                    answer=answer_data.answer,
-                    summary=answer_data.summary,
-                    skipToQuestion=answer_data.skip_to_question,
-                    message="Answer updated successfully"
-                )
-            )
-        else:
-            answer_result.failed.append(
-                AnswerUpdateFailed(
-                    answerId=answer.answerId,
-                    answer=answer.answer,
-                    summary=answer.summary,
-                    skipToQuestion=answer.skipToQuestion,
-                    message="Failed to update the answer"
+                    message="Failed to delete the answer"
                 )
             )
 
     return answer_result
+
+
+def create_answer(answer_crud: AnswerCRUD, question_id: int,
+                  answer: AnswerCreateUpdate) -> AnswerCreateFailed or AnswerResponse:
+    existed_answers = answer_crud.fetch_answer_by_question_id_and_answer(question_id, answer.answer)
+    if existed_answers:
+        return AnswerCreateFailed(
+            answer=answer.answer,
+            message="Answer already exists"
+        )
+
+    answer_data = answer_crud.create_answer(question_id, answer.answer, answer.summary, answer.skipToQuestion)
+
+    if answer_data:
+        return AnswerResponse(
+            answerId=answer_data.answer_id,
+            answer=answer_data.answer,
+            summary=answer_data.summary,
+            skipToQuestion=answer_data.skip_to_question,
+            message="Answer added successfully"
+        )
+    else:
+        return AnswerCreateFailed(
+            answer=answer.answer,
+            message="Failed to add the answer"
+        )
+
+
+def update_answer(answer_crud: AnswerCRUD, answer: AnswerCreateUpdate) -> AnswerUpdateFailed or AnswerResponse:
+    existed_answers = answer_crud.fetch_answer_by_id(answer.answerId)
+    if not existed_answers:
+        return AnswerUpdateFailed(
+            answerId=answer.answerId,
+            answer=answer.answer,
+            summary=answer.summary,
+            skipToQuestion=answer.skipToQuestion,
+            message="Answer not found"
+        )
+
+    answer_data = answer_crud.update_answer(answer.answerId, answer.answer, answer.summary, answer.skipToQuestion)
+
+    if answer_data:
+        return AnswerResponse(
+            answerId=answer_data.answer_id,
+            answer=answer_data.answer,
+            summary=answer_data.summary,
+            skipToQuestion=answer_data.skip_to_question,
+            message="Answer updated successfully"
+        )
+    else:
+        return AnswerUpdateFailed(
+            answerId=answer.answerId,
+            answer=answer.answer,
+            summary=answer.summary,
+            skipToQuestion=answer.skipToQuestion,
+            message="Failed to update the answer"
+        )
+
+
+def delete_answer(answer_crud: AnswerCRUD, answer_id: int) -> bool:
+    return answer_crud.delete_answer(answer_id)
 
 
 async def upload_image_to_s3(question_set_crud: QuestionSetCRUD, images: List[UploadFile],
                              question: QuestionWithListAnswerCreate or QuestionWithListAnswerUpdate) -> Optional[str]:
-    if question is QuestionWithListAnswerCreate:
+    if question.questionId is None:
         question_set_data = question_set_crud.fetch_question_set_info_by_id(question.questionSetId)
     else:
         question_set_data = question_set_crud.fetch_question_set_info_by_question_id(question.questionId)
 
     for image in images:
-        file_name = image.filename.split(".")[0]
-        file_extension = image.filename.split(".")[-1]
+        file_name = image.filename
+        file_extension = image.content_type
 
-        question_formatted = format_file_name(question.question)
+        accepted_file_types = ["image/png", "image/jpeg", "image/jpg", "image/heic", "image/heif", "image/heics", "png",
+                               "jpeg", "jpg", "heic", "heif", "heics"]
 
-        if file_name != question_formatted:
+        if file_name != question.questionId:
             continue
-        if file_extension not in ["jpg", "jpeg", "png"]:
+        if file_extension not in accepted_file_types:
             images.remove(image)
             continue
 
         image_path = await s3.upload_file_to_s3(image, question_set_data.animal.animal_name,
-                                                question_set_data.symptom.symptom_name, question.question)
+                                                question_set_data.symptom.symptom_name, question.questionId)
         question.imagePath = image_path
 
         images.remove(image)
         return image_path
+    return "https://vetchat.s3.ap-southeast-1.amazonaws.com/failed-image.jpg"

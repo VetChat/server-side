@@ -1,5 +1,5 @@
 from typing import List, Type, Optional
-from sqlalchemy import and_
+from sqlalchemy import and_, desc
 from sqlalchemy.orm import Session
 
 from app.models import UrgentCase, Urgency
@@ -32,7 +32,7 @@ class UrgentCaseCRUD:
                           Urgency.urgency_level)
             .join(UrgentCase.urgency)
             .filter(UrgentCase.animal_id == animal_id)
-            .order_by(Urgency.urgency_level)
+            .order_by(desc(UrgentCase.urgent_id))
             .all()
         )
 

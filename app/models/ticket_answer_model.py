@@ -7,7 +7,8 @@ class TicketAnswer(Base):
     __tablename__ = 'ticket_answer'
 
     ticket_answer_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    ticket_question_id = Column(Integer, ForeignKey('ticket_question.ticket_question_id'), nullable=False)
+    ticket_question_id = Column(Integer, ForeignKey('ticket_question.ticket_question_id', ondelete='CASCADE'),
+                                nullable=False)
     ticket_answer = Column(String(255), nullable=False)
 
     # Relationship to TicketQuestion

@@ -1,5 +1,5 @@
 from typing import Optional, List
-
+from datetime import datetime
 from pydantic import BaseModel
 
 
@@ -23,6 +23,7 @@ class TicketInfo(BaseModel):
     ticketQuestion: str
     ticketAnswer: str
     ordinal: int
+    isEditable: bool = False
 
 
 class TicketLabel(BaseModel):
@@ -40,6 +41,7 @@ class TicketDataResponse(BaseModel):
     ticketId: int
     info: List[TicketInfo]
     summary: List[SymptomSummary]
+    recCreatedWhen: datetime
 
 
 class TicketSummaryResponse(BaseModel):

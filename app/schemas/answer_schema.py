@@ -6,15 +6,6 @@ from pydantic import BaseModel
 class AnswerRead(BaseModel):
     answerId: int
     answer: str
-    summary: str
-    skipToQuestion: Optional[int] = None
-
-    class Config:
-        from_attributes = True
-
-
-class AnswerCreate(BaseModel):
-    answer: str
     summary: Optional[str] = None
     skipToQuestion: Optional[int] = None
 
@@ -32,15 +23,28 @@ class AnswerUpdate(BaseModel):
         from_attributes = True
 
 
+class AnswerCreateUpdate(BaseModel):
+    answerId: Optional[int] = None
+    answer: str
+    summary: Optional[str] = None
+    skipToQuestion: Optional[int] = None
+
+
+class AnswerDelete(BaseModel):
+    answerId: int
+
+
+class AnswerCreateUpdateDelete(BaseModel):
+    createUpdate: List[AnswerCreateUpdate]
+    delete: Optional[List[AnswerDelete]]
+
+
 class AnswerResponse(BaseModel):
     answerId: int
     answer: str
     summary: Optional[str] = None
     skipToQuestion: Optional[int] = None
     message: str
-
-    class Config:
-        from_attributes = True
 
 
 class AnswerCreateFailed(BaseModel):
@@ -52,11 +56,23 @@ class AnswerUpdateFailed(AnswerUpdate):
     message: str
 
 
-class AnswerCreateBulkResponse(BaseModel):
-    success: Optional[List[AnswerResponse]] = None
-    failed: Optional[List[AnswerCreateFailed]] = None
+class AnswerDeleteResponse(BaseModel):
+    answerId: int
+    message: str
 
 
-class AnswerUpdateBulkResponse(BaseModel):
-    success: Optional[List[AnswerResponse]] = None
-    failed: Optional[List[AnswerUpdateFailed]] = None
+class AnswerCreateUpdateDeleteSuccessResponse(BaseModel):
+    create: Optional[List[AnswerResponse]] = None
+    update: Optional[List[AnswerResponse]] = None
+    delete: Optional[List[AnswerDeleteResponse]] = None
+
+
+class AnswerCreateUpdateDeleteFailedResponse(BaseModel):
+    create: Optional[List[AnswerCreateFailed]] = None
+    update: Optional[List[AnswerUpdateFailed]] = None
+    delete: Optional[List[AnswerDeleteResponse]] = None
+
+
+class AnswerCreateUpdateDeleteBulkResponse(BaseModel):
+    success: Optional[AnswerCreateUpdateDeleteSuccessResponse] = None
+    failed: Optional[AnswerCreateUpdateDeleteFailedResponse] = None

@@ -33,7 +33,8 @@ async def create_ticket(request: Request, ticket_data: TicketCreate, db: Session
             ticket_id=ticket.ticket_id,
             question=question_data.ticket_question,
             ordinal=question_data.ordinal,
-            answer=answer_data.answer
+            answer=answer_data.answer,
+            is_editable=question_data.is_editable
         )
 
     return TicketId(ticketId=ticket.ticket_id)

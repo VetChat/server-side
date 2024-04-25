@@ -1,3 +1,4 @@
+SET NAMES 'utf8mb4';
 -- CREATE the answer table
 CREATE TABLE IF NOT EXISTS answer
 (
@@ -9,7 +10,7 @@ CREATE TABLE IF NOT EXISTS answer
     PRIMARY KEY (answer_id),
     CONSTRAINT FK_QuestionAnswer FOREIGN KEY (question_id) REFERENCES question (question_id) ON DELETE CASCADE,
     CONSTRAINT UC_Answer UNIQUE (question_id, answer),
-    INDEX idx_question_id (question_id)
+    INDEX idx_answer (answer)
 ) CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 ;
@@ -57,7 +58,7 @@ VALUES -- ท้องเสีย สุนัข
        -- ไอ สุนัข
        -- Question No. 1
        (28, 13, 'มี', NULL, NULL),
-       (29, 13, 'ไม่มี', NULL, 15),
+       (29, 13, 'ไม่มี', NULL, 3),
        -- Question No. 2
        (30, 15, 'ตลอดเวลา', NULL, NULL),
        (31, 15, 'มากกว่า 1 ชม./วัน', NULL, NULL),
@@ -185,7 +186,7 @@ VALUES -- ท้องเสีย สุนัข
        -- ไอ แมว
        -- Question No. 1
        (113, 54, 'มี', NULL, NULL),
-       (114, 54, 'ไม่มี', NULL, 60),
+       (114, 54, 'ไม่มี', NULL, 3),
        -- Question No. 2
        (115, 56, 'ตลอดเวลา', NULL, NULL),
        (116, 56, 'มากกว่า 1 ชม./วัน', NULL, NULL),

@@ -1,0 +1,29 @@
+SET NAMES 'utf8mb4';
+-- CREATE the breed table
+CREATE TABLE IF NOT EXISTS breed
+(
+    breed_id   INT          NOT NULL AUTO_INCREMENT,
+    breed_name VARCHAR(255) NOT NULL,
+    animal_id  INT          NOT NULL,
+    PRIMARY KEY (breed_id),
+    CONSTRAINT FK_BreedAnimal FOREIGN KEY (animal_id) REFERENCES animal (animal_id) ON DELETE CASCADE,
+    CONSTRAINT UC_Breed UNIQUE (breed_name),
+    INDEX idx_breed_name (breed_name)
+) CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+-- Insert mock data into the breed table
+INSERT INTO breed
+VALUES (1, 'โกลเด้นรีทรีฟเวอร์', 1),
+       (2, 'บูลด็อก', 1),
+       (3, 'ซามอยด์', 1),
+       (4, 'บีเกิ้ล', 1),
+       (5, 'สุนัขชิบะ', 1),
+       (6, 'ดัชชุน', 1),
+       (7, 'เกรย์ฮาวด์', 1),
+       (8, 'พุดเดิ้ลทอย', 1),
+       (9, 'ชิวาว่า', 1),
+       (10, 'เชทแลนด์ ชีพด็อก', 1),
+       (11, 'ร็อตไวเลอร์', 1),
+       (12, 'เซนต์เบอร์นาร์ด', 1),
+       (13, 'คอร์กี้', 1);

@@ -10,6 +10,7 @@ from .answer_record_model import AnswerRecord
 from .ticket_question_model import TicketQuestion
 from .ticket_answer_model import TicketAnswer
 from .ticket_answer_record_model import TicketAnswerRecord
+from .breed_model import Breed
 
 __all__ = ["Animal", "Urgency", "UrgentCase", "Ticket", "Symptom", "QuestionSet", "Question", "Answer", "AnswerRecord",
-           "TicketQuestion", "TicketAnswer", "TicketAnswerRecord"]
+           "TicketQuestion", "TicketAnswer", "TicketAnswerRecord", "Breed"]
