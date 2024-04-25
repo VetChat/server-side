@@ -27,6 +27,15 @@ class SymptomCRUD:
             .all()
         )
 
+    def fetch_symptoms_not_in_list_by_animal_id(self, animal_id: int):
+        return (
+            self.db.query(Symptom)
+            .filter(~Symptom.symptom_id.in_(self.db.query(QuestionSet.symptom_id)
+                                            .filter(QuestionSet.animal_id == animal_id)))
+            .order_by(desc(Symptom.symptom_id))
+            .all()
+        )
+
     def add_symptom(self, symptom_name: str) -> Symptom:
         new_symptom = Symptom(symptom_name=symptom_name)
         self.db.add(new_symptom)

@@ -10,7 +10,7 @@ COPY requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
- Use ARG to get the build-args and ENV to set the environment variables
+#Use ARG to get the build-args and ENV to set the environment variables
 ARG DATABASE_URL
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
